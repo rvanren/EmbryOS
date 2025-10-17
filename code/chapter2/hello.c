@@ -16,7 +16,7 @@ void putchar(char c) {
 
 /* crude busy-wait delay; adjust for speed */
 static void delay(void) {
-    for (volatile int i = 0; i < 800000; i++)
+    for (volatile int i = 0; i < 10000000; i++)
         ;
 }
 
