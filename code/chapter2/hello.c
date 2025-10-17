@@ -26,10 +26,9 @@ void move_cursor(int row, int col) {
 }
 
 void set_color(int color) {
-    printf(ESC "[3%dm", color);  // 0=black … 7=white
+    printf(ESC "[3%dm", color);  // 0=black ... 7=white
 }
 
-int main() {
 int main(void) {
     clear_screen();
     for (int i = 0; i < 6; i++) {

@@ -1,113 +1,123 @@
 \chapter{Writing to the Screen (Text Mode)}
-\label{chap:textscreen}
 
-In the previous chapter, we learned how to send characters through the UART.
-In this one, we will use the very same device to \emph{draw} on a screen—our
-terminal window—by taking advantage of ANSI escape codes.  No new hardware
-drivers are required, and everything works even when running inside Docker.
+In Chapter~1 we printed ``Hello~World'' to the UART.  That was enough to verify
+that EmbryOS could talk to the outside world.  In this chapter we will build a
+tiny \texttt{stdio} library so that we can write more expressive output---clear
+the screen, move the cursor, and even print numbers and colors.
 
-\section{The Terminal as a Screen}
+\section{A Minimal Standard I/O Library}
 
-Although our current output device is just a UART, the terminal emulator on the
-host interprets special sequences of characters that start with the \texttt{ESC}
-(``\textbackslash033'') character.  These \emph{escape sequences} tell the
-terminal to move the cursor, clear parts of the screen, or change text color.
+For convenience, we place all screen and output routines in three files:
+\texttt{stdio.h}, \texttt{stdio.c}, and \texttt{hello.c}.  The header
+\texttt{stdio.h} declares two functions, shown in
+Listing~\ref{lst:stdio_h}.
 
-We can think of this as a very simple display: each position on the screen
-corresponds to a character cell, and the terminal remembers what was printed
-there.  Instead of manipulating pixels, we manipulate characters.
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.7\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Header file \texttt{stdio.h}},
+  label={lst:stdio_h}
+]{../code/chapter2/stdio.h}
+\end{minipage}
+\end{figure}
 
-\section{Useful Escape Sequences}
+The implementation, shown in Listing~\ref{lst:stdio_c}, provides a
+\texttt{printf()} that understands four format specifiers:
+\texttt{\%d}, \texttt{\%x}, \texttt{\%s}, and \texttt{\%c}.  It depends on
+\texttt{putchar()}, which writes a single character to the UART.
 
-\begin{table}[h]
-  \centering
-  \begin{tabular}{ll}
-    \toprule
-    Sequence & Effect \\
-    \midrule
-    \texttt{\textbackslash033[2J} & Clear the entire screen \\
-    \texttt{\textbackslash033[H}  & Move cursor to top--left corner \\
-    \texttt{\textbackslash033[row;colH} & Move cursor to position \texttt{(row,col)} \\
-    \texttt{\textbackslash033[3\emph{n}m} & Set text color (\emph{n}=0..7) \\
-    \texttt{\textbackslash033[0m} & Reset attributes \\
-    \bottomrule
-  \end{tabular}
-  \caption{A few common ANSI escape sequences.}
-\end{table}
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Implementation of \texttt{printf()} in \texttt{stdio.c}},
+  label={lst:stdio_c}
+]{../code/chapter2/stdio.c}
+\end{minipage}
+\end{figure}
 
-\section{Our First Text-Mode Library}
+This version of \texttt{printf()} is small---less than fifty lines---but it is
+already powerful enough to print numbers, strings, and characters.  The
+\texttt{<stdarg.h>} header allows variable argument lists using the macros
+\texttt{va\_start()}, \texttt{va\_arg()}, and \texttt{va\_end()}.  The helper
+function \texttt{print\_unsigned()} converts integers into text in base~10 or
+base~16.
 
-Create a file \texttt{screen.c} with the following helper functions:
+\section{Text-Mode Graphics}
 
-\begin{lstlisting}[style=oscode,language=C,caption={Minimal text-mode screen library},label={lst:screen_c}]
-#define ESC "\033"
+With a proper \texttt{printf()} available, we can use ANSI escape sequences to
+control the terminal as if it were a screen.  The UART sends characters, but
+the terminal emulator interprets certain special sequences beginning with the
+escape character (\texttt{\textbackslash033}) as commands such as ``move the
+cursor'' or ``set color.''
 
-void clear_screen(void) {
-    printf(ESC "[2J");       // clear screen
-    printf(ESC "[H");        // move cursor home
-}
+Listing~\ref{lst:ch2_hello_c} shows the complete program.
 
-void move_cursor(int row, int col) {
-    printf(ESC "[%d;%dH", row, col);
-}
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Text-mode screen demo in \texttt{hello.c}},
+  label={lst:ch2_hello_c}
+]{../code/chapter2/hello.c}
+\end{minipage}
+\end{figure}
 
-void set_color(int color) {
-    printf(ESC "[3%dm", color);  // 0=black ... 7=white
-}
-\end{lstlisting}
+The functions:
 
-\noindent
-These simply print special character sequences.  The terminal interprets them
-as commands rather than text.
+\begin{itemize}
+  \item \texttt{clear\_screen()} sends the escape codes
+        \texttt{[2J[H]} to erase the display and return the cursor to the
+        top-left corner.
+  \item \texttt{move\_cursor(row,col)} positions the cursor at a chosen location.
+  \item \texttt{set\_color(color)} changes the text color
+        (\texttt{0=black}, \texttt{1=red}, …, \texttt{7=white}).
+\end{itemize}
 
-\section{A Simple Demo}
+The \texttt{main()} function clears the screen, then prints
+``EmbryOS~says~hello!'' in six different colors at different positions.
 
-Let us use these helpers in \texttt{hello.c}:
+\section{Running the Program}
 
-\begin{lstlisting}[style=oscode,language=C,caption={Colored "Hello" in text mode},label={lst:hello_text}]
-int main(void) {
-    clear_screen();
-    for (int i = 0; i < 6; i++) {
-        set_color(i + 1);
-        move_cursor(2 + i, 10);
-        printf("EmbryOS says hello!\n");
-    }
-    set_color(7);
-    move_cursor(10, 0);
-    printf("\n");
-    return 0;
-}
-\end{lstlisting}
+Build and run the program as before:
 
-Recompile and run:
-\begin{verbatim}
+\begin{lstlisting}[style=oscode,language=bash]
 $ make qemu
-\end{verbatim}
+\end{lstlisting}
 
-If your terminal supports color (most do), you should see the message appear in
-a rainbow pattern down the left side of the screen.
+or equivalently,
 
-\section{Toolbox: ANSI Escape Codes}
+\begin{lstlisting}[style=oscode,language=bash]
+$ qemu-system-riscv32 -machine sifive_u -nographic -bios hello.bin
+\end{lstlisting}
 
-Escape codes date back to the early 1970s.  They were designed for the DEC
-VT100 terminal and remain a universal standard today.  Modern Linux, macOS,
-and Windows terminals all recognize them.
+The terminal will clear and display a vertical rainbow of messages.  Even
+though we are using the same UART device, the terminal emulator interprets the
+escape sequences as screen-control commands.
 
-They provide a convenient, device-independent way to control the layout of
-text.  For embedded or bare-metal systems, they are invaluable because they
-require no additional hardware—only a serial output.
-
-\section*{Projects}
+\section{Projects}
 
 \begin{enumerate}
-  \item \textbf{Screen clear animation.}
-  Write a program that fills the screen with `*` characters one row at a time,
-  pausing briefly between rows.  Hint: you will need a delay loop.
   \item \textbf{Progress bar.}
-  Print a single line of text that gradually fills with `#` characters to
-  simulate progress.  Use \texttt{move\_cursor()} to update in place.
+        Print a single line that gradually fills with `\#' characters to
+        simulate progress.  Use \texttt{move\_cursor()} to update it in place.
   \item \textbf{Color cycling.}
-  Print “Hello World” repeatedly, changing colors every iteration.
-  \item \textbf{Bonus:}
-  Combine all of the above into a short “boot animation” for EmbryOS.
+        Print the same message repeatedly, changing colors each time.
+  \item \textbf{Boot animation.}
+        Combine the above effects into a short animation for EmbryOS startup.
 \end{enumerate}
+
+\section*{Summary}
+
+In this chapter we moved from simple character output to full control over a
+text-mode ``screen.''  We also built a minimal but real implementation of
+\texttt{printf()}, giving EmbryOS the ability to print formatted output without
+any external libraries.  In the next chapter we will make the system reactive
+by introducing timer interrupts.

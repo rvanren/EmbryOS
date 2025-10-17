@@ -1,5 +1,5 @@
 #include <stdarg.h>
-#include "uart.h"   // or wherever putchar() is declared
+#include "stdio.h"
 
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
