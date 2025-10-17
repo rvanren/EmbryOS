@@ -31,8 +31,7 @@ void screen_put(char ch, int fg, int bg) {
     }
 }
 
-void screen_clear(int x, int y, int w, int h, int fg, int bg) {
-    // constrain rectangle to screen
+void screen_clear(int x, int y, int w, int h, int color) {
     if (x < 0) { w += x; x = 0; }
     if (y < 0) { h += y; y = 0; }
     if (x + w > SCREEN_COLS) w = SCREEN_COLS - x;
@@ -42,7 +41,7 @@ void screen_clear(int x, int y, int w, int h, int fg, int bg) {
     for (int r = y; r < y + h; r++) {
         screen_move(r, x);
         for (int c = 0; c < w; c++) {
-            screen_put(' ', fg, bg);
+            screen_put(' ', 7, bg);
         }
     }
     screen_move(0, 0);

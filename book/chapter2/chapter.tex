@@ -11,9 +11,9 @@ The \texttt{screen} library provides three functions:
 \begin{itemize}
   \item \texttt{screen\_move(row, col)} --- move the cursor to a specific
         position on the logical screen;
-  \item \texttt{screen\_put(ch, color)} --- draw one printable character in the
-        given color and advance the cursor;
-  \item \texttt{screen\_clear(x, y, w, h)} --- fill rectangle with spaces.
+  \item \texttt{screen\_put(ch, fg, bg)} --- draw one printable character in the
+        given foreground and background colors and advance the cursor;
+  \item \texttt{screen\_clear(x, y, w, h, color)} --- fill rectangle with colored spaces.
 \end{itemize}
 The header \texttt{screen.h} defines these prototypes together with constants
 for the screen size.
