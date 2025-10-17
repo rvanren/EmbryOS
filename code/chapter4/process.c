@@ -29,14 +29,14 @@ void proc_init(){
     proc_current = pid;
 }
 
-void proc_create(entry_t fn, int x, int y, int w, int h) {
+void proc_create(entry_t fn, struct rect area) {
     if (proc_count >= MAX_PROCESSES) {
     printf("NO MORE PROCESSES\n");
         return;
     }
     int pid = proc_count++, prev = proc_current;
     union proc_page *p = &procs[pid];
-    p->pcb.area = (struct rect){ .x = x, .y = y, .w = w, .h = h };
+    p->pcb.area = area;
     proc_current = pid;
     ctx_start(&procs[prev].pcb.sp, p->page + PAGE_SIZE, fn);
 }

@@ -13,5 +13,5 @@ struct pcb {
 void proc_init();
 struct pcb *proc_self();
 void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg);
-void proc_create(entry_t fn, int x, int y, int w, int h);
+void proc_create(entry_t fn, struct rect area);
 void proc_yield(void);
