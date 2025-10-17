@@ -9,8 +9,7 @@ static void print_unsigned(unsigned int x, unsigned int base) {
         buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
         x /= base;
     } while (x != 0);
-    while (--i >= 0)
-        putchar(buf[i]);
+    while (--i >= 0) putchar(buf[i]);
 }
 
 void printf(const char *fmt, ...) {
