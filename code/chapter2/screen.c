@@ -18,9 +18,10 @@ void screen_move(int row, int col) {
     term_move(cur_row, cur_col);
 }
 
-void screen_put(char ch, int color) {
+void screen_put(char ch, int fg, int bg) {
     if (ch < 32 || ch > 126) return;  // ignore non-printable
-    printf("\033[3%dm%c", color % 8, ch);
+    printf("\033[3%dm\033[4%dm", fg % 8, bg % 8);
+    putchar(ch);
     cur_col++;
     if (cur_col >= SCREEN_COLS) {
         cur_col = 0;
@@ -30,17 +31,19 @@ void screen_put(char ch, int color) {
     }
 }
 
-void screen_clear(int x, int y, int w, int h) {
+void screen_clear(int x, int y, int w, int h, int fg, int bg) {
+    // constrain rectangle to screen
     if (x < 0) { w += x; x = 0; }
     if (y < 0) { h += y; y = 0; }
-    if (x + w > SCREEN_COLS)  w = SCREEN_COLS  - x;
-    if (y + h > SCREEN_ROWS)  h = SCREEN_ROWS  - y;
+    if (x + w > SCREEN_COLS) w = SCREEN_COLS - x;
+    if (y + h > SCREEN_ROWS) h = SCREEN_ROWS - y;
     if (w <= 0 || h <= 0) return;
 
     for (int r = y; r < y + h; r++) {
         screen_move(r, x);
         for (int c = 0; c < w; c++) {
-            screen_put(' ', 7);   // 7 = white
+            screen_put(' ', fg, bg);
         }
     }
+    screen_move(0, 0);
 }

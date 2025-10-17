@@ -4,5 +4,5 @@
 #define SCREEN_COLS 80
 
 void screen_move(int row, int col);
-void screen_put(char ch, int color);
-void screen_clear(int row, int col, int w, int h);
+void screen_put(char ch, int fg, int bg);
+void screen_clear(int x, int y, int w, int h, int fg, int bg);

@@ -28,14 +28,14 @@ int main(void) {
     int color = 1;
     int offset = 0;
 
-    screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS);
+    screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 7, 0);
 
     while (1) {
         // draw one frame of the scrolling banner
         for (int i = 0; i < width; i++) {
             char c = banner[(i + offset) % len];
             screen_move(row, i);
-            screen_put(c, color);
+            screen_put(c, color, 0);
         }
 
         // cycle color & offset for next frame
