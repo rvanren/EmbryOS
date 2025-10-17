@@ -1,4 +1,3 @@
-#include <stdint.h>
 #include "screen.h"   // declare screen_* API
 
 /* crude busy-wait delay; adjust for speed */

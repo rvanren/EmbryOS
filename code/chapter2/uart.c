@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "stdio.h"
 
 struct uart { uint32_t txdata; };
