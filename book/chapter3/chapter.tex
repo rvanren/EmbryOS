@@ -1,0 +1,161 @@
+\chapter{Processes}
+\label{chap:contexts}
+
+In Chapter~\ref{chap:textscreen} we gave EmbryOS a logical screen and learned
+to animate text.  But a single thread of control limits what the system can do
+at once.  This chapter introduces \emph{contexts}: independent stacks and
+register sets that can share the CPU cooperatively.  Each context represents a
+separate \emph{process}.  The kernel saves one process's state and restores
+another's, giving the illusion of concurrent activity.
+
+\section{What Is a Context?}
+
+A context is the minimal information needed to resume a computation later:
+registers and the stack pointer.  On RISC-V, this includes the program counter
+(\texttt{ra}) and all callee-saved registers.  EmbryOS performs a context
+switch entirely in assembly to ensure nothing is lost.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.75\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language={[x86masm]Assembler},
+  caption={Context switch code in \texttt{ctx.s}},
+  label={lst:ctx_s}
+]{../code/chapter3/ctx_short.s}
+\end{minipage}
+\end{figure}
+
+The functions exported by this module, declared in
+Listing~\ref{lst:ctx_h}, are:
+
+\begin{itemize}
+  \item \texttt{ctx\_switch(\&old\_sp, new\_sp)} ---
+        save the current context (its callee-saved registers and stack
+        pointer) and restore another.
+  \item \texttt{ctx\_start(\&save\_sp, new\_sp, entry)} ---
+        create a brand-new context whose first instruction will call
+        \texttt{entry()}.
+\end{itemize}
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.6\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Context-switch interface in \texttt{ctx.h}},
+  label={lst:ctx_h}
+]{../code/chapter3/ctx.h}
+\end{minipage}
+\end{figure}
+
+\section{Processes and the Process Table}
+
+EmbryOS keeps track of active processes in a small table.  Each entry combines
+a \emph{process control block} (PCB) and its stack in a single 4~KiB page, as
+shown in Figure~\ref{fig:pcb_layout}.  The top of the page serves as the stack
+and the base holds metadata.
+
+\begin{figure}[H]
+\centering
+\begin{verbatim}
++---------------------------+  <--- high memory
+|        process stack       |
+|             ...             |
+|-----------------------------|
+| struct pcb {                |
+|     void *sp;               |
+|     int pid, state;         |
+|     struct rect area;       |
+| };                          |
++-----------------------------+  <--- low memory
+\end{verbatim}
+\caption{Layout of one process page.}
+\label{fig:pcb_layout}
+\end{figure}
+
+\noindent
+The PCB records not only scheduling state but also a \texttt{rect}
+describing the region of the screen that the process ``owns.''
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Process management in \texttt{process.c}},
+  label={lst:process_c}
+]{../code/chapter3/process.c}
+\end{minipage}
+\end{figure}
+
+Each process has local coordinates within its rectangle.
+The function \texttt{process\_put()} translates these local coordinates into
+global screen positions before calling \texttt{screen\_move()} and
+\texttt{screen\_put()}.  This ensures that processes remain confined to their
+own regions, much as modern operating systems isolate processes in their own
+address spaces.
+
+\section{Cooperative Scheduling}
+
+All processes share a single CPU.  They take turns voluntarily by calling
+\texttt{proc\_yield()}, which performs a \texttt{ctx\_switch()} from the
+current stack to the next process's stack.  The scheduler follows a simple
+round-robin policy.
+
+Because there are no interrupts yet, EmbryOS implements
+\emph{cooperative multitasking}: a process keeps the CPU until it explicitly
+yields.  The next chapter will introduce timer interrupts to make this
+preemptive.
+
+\section{Demonstration: Four Windows}
+
+The demonstration program in Listing~\ref{lst:hello_c} creates four processes,
+each with its own window on the 80$\times$24 screen.  Each process runs a small
+animation that prints a moving letter in its region.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Multitasking demo in \texttt{hello.c}},
+  label={lst:hello_c}
+]{../code/chapter3/hello.c}
+\end{minipage}
+\end{figure}
+
+When run under QEMU with \texttt{-nographic}, the display looks something like:
+
+\begin{verbatim}
+AAAAA                      BBBBB
+AAAAA                      BBBBB
+AAAAA                      BBBBB
+                 CCCCC
+                 CCCCC
+                 CCCCC
+DDDDD
+DDDDD
+DDDDD
+\end{verbatim}
+
+Each process draws independently, yet the system cycles between them,
+preserving their stacks and registers between switches.
+
+\section*{Projects}
+
+\begin{enumerate}
+  \item \textbf{More processes.}
+        Increase \texttt{MAX\_PROCESSES} and experiment with six or eight
+        windows.  How does the system behave?
+  \item \textbf{Process termination.}
+        Add a new state to the PCB for ``terminated'' and modify the scheduler
+        to skip finished processes.
+  \item \textbf{Dynamic regions.}
+        Let each process move its rectangle periodically to simulate window
+        management.
+\end{enumerate}
