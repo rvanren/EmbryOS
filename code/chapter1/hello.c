@@ -1,8 +1,6 @@
 typedef unsigned int uint32_t;
 
-struct uart {
-    uint32_t txdata;
-};
+struct uart { uint32_t txdata; };
 
 // Memory mapped IO:
 #define UART ((struct uart *) 0x10010000)
@@ -15,9 +13,8 @@ void putchar(char c) {
 }
 
 void printf(char *str) {
-    while (*str != 0) {
+    while (*str != 0)
         putchar(*str++);
-    }
 }
 
 int main() {
