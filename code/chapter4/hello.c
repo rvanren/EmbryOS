@@ -7,7 +7,7 @@
 #define MTIME 0x0200bff8
 #define MTIMECMP 0x02004008
 
-#define QUANTUM 1000000
+#define QUANTUM 10000       // 10 milliseconds
 
 long long mtime_get() {
     // read the current time in microseconds
@@ -15,7 +15,7 @@ long long mtime_get() {
 }
 
 void mtime_reset() {
-    // signal the CPU after 1 second after the current time
+    // signal the CPU QUANTUM after the current time
     *((long long *)MTIMECMP) = mtime_get() + QUANTUM;
 }
 
