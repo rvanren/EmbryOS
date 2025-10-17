@@ -1,4 +1,5 @@
 \chapter{Seeing Is Believing: The Screen Abstraction}
+\label{chap:textscreen}
 
 In Chapter~1 we learned to send characters to the UART.  In this chapter we
 build a small \texttt{screen} library that treats the terminal as a logical
@@ -74,7 +75,7 @@ libraries.
 
 \section{The Animated Banner}
 
-The program in Listing~\ref{lst:hello_c} displays a continuously scrolling,
+The program in Listing~\ref{lst:ch2_hello_c} displays a continuously scrolling,
 colored banner using the new screen abstraction.  Each frame rewrites only the
 row that contains the banner, giving the impression of smooth motion.
 
@@ -85,7 +86,7 @@ row that contains the banner, giving the impression of smooth motion.
   style=oscode,
   language=C,
   caption={Animated banner using the logical screen},
-  label={lst:hello_c}
+  label={lst:ch2_hello_c}
 ]{../code/chapter2/hello.c}
 \end{minipage}
 \end{figure}
