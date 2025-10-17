@@ -1,11 +1,11 @@
     .section .text
     .global ctx_switch, ctx_start
 
-// void ctx_switch(void **old_sp, void *new_sp)
-// ------------------------------------------------------------
-// Saves current context into *old_sp, switches to new_sp, and
-// restores that context. Returns into the restored context.
-// old_sp = a0; new_sp = a1
+# void ctx_switch(void **old_sp, void *new_sp)
+# ------------------------------------------------------------
+# Saves current context into *old_sp, switches to new_sp, and
+# restores that context. Returns into the restored context.
+# old_sp = a0; new_sp = a1
 ctx_switch:
     addi sp, sp, -64
     sw s0, 4(sp)
@@ -39,12 +39,12 @@ ctx_switch:
     addi sp, sp, 64
     ret
 
-// void ctx_start(void **save_sp, void *new_sp, void (*entry)(void))
-// ------------------------------------------------------------
-// Saves current stack pointer, switches to new stack, and calls
-// the entry function.
-// old_sp = a0; new_sp = a1; entry = a2
-_ctx_start:
+# void ctx_start(void **save_sp, void *new_sp, void (*entry)(void))
+# ------------------------------------------------------------
+# Saves current stack pointer, switches to new stack, and calls
+# the entry function.
+# old_sp = a0; new_sp = a1; entry = a2
+ctx_start:
     addi sp, sp, -64
     sw s0, 4(sp)
     sw s1, 8(sp)
