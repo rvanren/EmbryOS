@@ -5,4 +5,4 @@
 
 void screen_move(int row, int col);
 void screen_put(char ch, int color);
-void screen_clear(void);
+void screen_clear(int row, int col, int w, int h);

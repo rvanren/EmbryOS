@@ -28,7 +28,7 @@ int main(void) {
     int color = 1;
     int offset = 0;
 
-    screen_clear();
+    screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS);
 
     while (1) {
         // draw one frame of the scrolling banner

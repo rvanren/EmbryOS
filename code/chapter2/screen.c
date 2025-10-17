@@ -30,12 +30,17 @@ void screen_put(char ch, int color) {
     }
 }
 
-void screen_clear(void) {
-    for (int r = 0; r < SCREEN_ROWS; r++) {
-        screen_move(r, 0);
-        for (int c = 0; c < SCREEN_COLS; c++) {
-            screen_put(' ', 7);   // 7 = white (default background)
+void screen_clear(int x, int y, int w, int h) {
+    if (x < 0) { w += x; x = 0; }
+    if (y < 0) { h += y; y = 0; }
+    if (x + w > SCREEN_COLS)  w = SCREEN_COLS  - x;
+    if (y + h > SCREEN_ROWS)  h = SCREEN_ROWS  - y;
+    if (w <= 0 || h <= 0) return;
+
+    for (int r = y; r < y + h; r++) {
+        screen_move(r, x);
+        for (int c = 0; c < w; c++) {
+            screen_put(' ', 7);   // 7 = white
         }
     }
-    screen_move(0, 0);
 }
