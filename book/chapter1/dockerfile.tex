@@ -59,7 +59,7 @@ CMD ["/bin/bash"]
 To build the container, run:
 
 \begin{lstlisting}[style=oscode,language=bash]
-$ docker build -t embryos-riscv .
+$ docker build --no-cache -t embryos-riscv .
 \end{lstlisting}
 
 The \texttt{-t} flag names the image \texttt{embryos-riscv}.  
