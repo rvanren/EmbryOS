@@ -1,0 +1,73 @@
+\section{The Makefile}
+
+The next step is to tell the build system how to compile and run our first
+program.  The \texttt{Makefile} below automates the process of compiling our
+assembly and C code, linking it into a RISC\textendash V executable, and running
+it in QEMU.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.95\textwidth}
+\begin{lstlisting}[style=oscode,language=make,caption={Makefile for building and running the ``Hello World'' kernel},label={lst:makefile}]
+QEMU        = qemu-system-riscv32
+RISCV_CC    = riscv-none-elf-gcc
+OBJDUMP     = riscv-none-elf-objdump
+OBJCOPY     = riscv-none-elf-objcopy
+YELLOW      = \033[1;33m
+END         = \033[0m
+
+LDFLAGS     = -nostdlib -lc -lgcc
+CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections \
+              -ffunction-sections -fdata-sections -fdiagnostics-show-option \
+              -fno-builtin
+DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
+
+all:
+	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
+	$(RISCV_CC) $(CFLAGS) hello.s hello.c -Thello.lds $(LDFLAGS) -o hello.elf
+	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
+	$(OBJCOPY) -O binary hello.elf hello.bin
+
+qemu: all
+	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
+	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
+
+clean:
+	rm -f hello.bin hello.lst hello.elf
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+The default \texttt{make} target (\texttt{all}) compiles both
+\texttt{hello.s} (assembly) and \texttt{hello.c} (C code), then links them
+using \texttt{hello.lds} (a linker script you’ll see shortly).  The result is an
+executable file called \texttt{hello.elf}, along with a listing
+(\texttt{hello.lst}) and a raw binary image (\texttt{hello.bin}) suitable for
+booting on QEMU.
+
+To run the system, type:
+
+\begin{lstlisting}[style=oscode,language=bash]
+$ make qemu
+\end{lstlisting}
+
+QEMU will start, emulate a RISC\textendash V processor, and execute
+\texttt{hello.bin}.  You’ll see a simple console that prints your
+``Hello World'' message.
+
+\medskip
+\noindent
+\textbf{Exiting QEMU:}  
+QEMU does not respond to \texttt{Ctrl+C}.  
+To exit, press \texttt{Ctrl+A} followed by \texttt{x}.
+
+\medskip
+The \texttt{clean} target removes all generated files and lets you start fresh:
+
+\begin{lstlisting}[style=oscode,language=bash]
+$ make clean
+\end{lstlisting}
+
+In later chapters we will expand this Makefile to build a complete kernel and
+user environment, but for now it provides a clear view of each step in the
+toolchain—from C and assembly to executable and emulated hardware.

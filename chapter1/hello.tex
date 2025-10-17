@@ -1,0 +1,109 @@
+\section{The Code: Assembly and C}
+
+Our ``Hello World'' kernel consists of two tiny source files: one in assembly
+that sets up the machine and calls into C, and one in C that writes characters
+to the UART device.  Together they form the simplest possible operating system.
+
+\subsection{Assembly: Starting Up the Machine}
+
+The RISC\textendash V processor begins execution at address zero in machine
+mode.  The short assembly program in Listing~\ref{lst:hello_s} defines the entry
+point \texttt{\_start}.  It disables the first core, initializes the stack
+pointer, and then calls \texttt{main()} written in C.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\begin{lstlisting}[style=oscode,language={[x86masm]Assembler},caption={Startup assembly for EmbryOS},label={lst:hello_s}]
+    .section .text.enter
+    .global _start
+
+_start:
+    csrr a0, mhartid
+    beq a0, x0, _end        /* disable core zero */
+    li sp, 0x80400000       /* set stack pointer */
+    call main
+_end:
+    j _end                  /* loop forever */
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+A few details:
+
+\begin{itemize}
+  \item \texttt{csrr a0, mhartid} reads the hardware thread ID (``hart ID'') of
+        the running core.
+  \item Core~0 is disabled so that only the second core executes the program;
+        this simplifies early testing.
+  \item The instruction \texttt{li sp, 0x80400000} initializes the stack
+        pointer to an arbitrary address in memory.
+  \item Finally, \texttt{call main} jumps into the C function
+        \texttt{main()}, after which control will not return.
+\end{itemize}
+
+This short sequence is all that’s needed to transition from the CPU’s reset
+state into C code.
+
+\subsection{C: Talking to the UART}
+
+Once the processor is running C code, we can access hardware devices directly
+using \emph{memory-mapped I/O}.  The UART (serial port) is available at address
+\texttt{0x10010000} on QEMU’s \texttt{sifive\_u} machine.  Writing a character
+to this address sends it to the terminal.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.95\textwidth}
+\begin{lstlisting}[style=oscode,language=C,caption={C code for printing ``Hello World'' through the UART},label={lst:hello_c}]
+typedef unsigned int uint32_t;
+
+struct uart {
+    uint32_t txdata;
+};
+
+// Memory mapped IO:
+#define UART ((struct uart *) 0x10010000)
+#define TXFULL (1 << 31)
+
+void putchar(char c) {
+    while (UART->txdata & TXFULL)
+        ;                   // wait until transmitter is ready
+    UART->txdata = c;       // send one character
+}
+
+void printf(char *str) {
+    while (*str != 0) {
+        putchar(*str++);
+    }
+}
+
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+Here, the compiler treats the \texttt{UART} pointer as a direct reference to a
+hardware device.  The \texttt{putchar()} function busy-waits until the UART is
+ready, then writes a single character.  \texttt{printf()} loops through a string
+and sends each character one at a time.
+
+\medskip
+\noindent
+When QEMU runs this program, each call to \texttt{putchar()} writes to the UART
+register, which appears on your terminal.  The result is the familiar output:
+
+\begin{lstlisting}
+Hello World
+\end{lstlisting}
+
+\medskip
+\noindent
+This is a complete operating system in fewer than thirty lines of code: it
+boots, runs C, communicates with hardware, and never returns.
+
+In the next chapter, we will introduce timer interrupts so the system can react
+to events instead of just spinning forever.

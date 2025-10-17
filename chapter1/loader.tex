@@ -1,0 +1,111 @@
+\section{The Linker Script}
+
+The last piece of our ``Hello World'' system is the linker script,
+\texttt{hello.lds}.  A linker script tells the linker how to arrange the
+different sections of code and data in memory.  Without it, the compiler would
+produce object files but not know where to place them in physical memory.
+
+Listing~\ref{lst:hello_lds} shows the script we use for EmbryOS.  It declares a
+single region of memory, starting at \texttt{0x80000000}, and places all code
+and data there.  The \texttt{\_start} symbol defined in the assembly file is set
+as the program’s entry point.
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.95\textwidth}
+\begin{lstlisting}[style=oscode,language={},caption={Linker script \texttt{hello.lds} for EmbryOS},label={lst:hello_lds}]
+OUTPUT_ARCH("riscv")
+
+ENTRY(_start)
+
+MEMORY
+{
+    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000
+}
+
+PHDRS
+{
+    ram PT_LOAD;
+}
+
+SECTIONS
+{
+    .init : ALIGN(8) {
+        *(.text.enter)
+    } >ram :ram
+
+    .text : ALIGN(8) {
+        *(.text .text.*)
+    } >ram :ram
+
+    .rodata : ALIGN(8) {
+        *(.rdata)
+        *(.rodata .rodata.*)
+        . = ALIGN(8);
+        *(.srodata .srodata.*)
+    } >ram :ram
+
+    .data : ALIGN(8) {
+        *(.data .data.*)
+        . = ALIGN(8);
+        *(.sdata .sdata.* .sdata2.*)
+    } >ram :ram
+
+    .bss (NOLOAD): ALIGN(8) {
+        *(.sbss*)
+        *(.bss .bss.*)
+        *(COMMON)
+    } >ram :ram
+
+    .heap (NOLOAD) : ALIGN(8) {
+        PROVIDE( __heap_start = . );
+    } >ram :ram
+
+    PROVIDE( __heap_end = 0x80200000 );
+}
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+Here is what the main parts mean:
+
+\begin{itemize}
+  \item \textbf{\texttt{MEMORY}} defines a single block of RAM starting at
+        \texttt{0x80000000}.  This matches the QEMU \texttt{sifive\_u} machine’s
+        default memory map.
+  \item \textbf{\texttt{ENTRY(\_start)}} tells the linker that the program should
+        begin at the symbol \texttt{\_start}, which we defined in the assembly
+        file.
+  \item Each \textbf{section} (\texttt{.text}, \texttt{.rodata},
+        \texttt{.data}, \texttt{.bss}) gathers code and data from all compiled
+        object files and places them sequentially in RAM.
+  \item \textbf{Alignment directives} (\texttt{ALIGN(8)}) ensure proper
+        alignment for 64-bit accesses, even though we are running a 32-bit CPU.
+  \item The \textbf{heap symbols} \texttt{\_\_heap\_start} and
+        \texttt{\_\_heap\_end} reserve a small area for dynamic allocation later.
+\end{itemize}
+
+At this point, the entire system layout is defined:
+\begin{center}
+\begin{tabular}{ll}
+\texttt{0x80000000} & --- code (\texttt{.text}, \texttt{.rodata}) \\
+\texttt{0x80200000} & --- heap end (\texttt{\_\_heap\_end}) \\
+\texttt{0x80400000} & --- stack top (set in assembly)
+\end{tabular}
+\end{center}
+
+\medskip
+\noindent
+When the linker combines all object files according to this script, the result
+is a single binary image (\texttt{hello.bin}) that QEMU can load directly into
+RAM and start executing from \texttt{0x80000000}.
+
+\bigskip
+\noindent
+This completes Chapter~1.  You now have:
+\begin{itemize}
+  \item A Docker environment that builds EmbryOS reproducibly;
+  \item A Makefile that compiles, links, and runs the system;
+  \item Minimal assembly and C code that boot the machine and print text;
+  \item A linker script that defines how the program fits into memory.
+\end{itemize}

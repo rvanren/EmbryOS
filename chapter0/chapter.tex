@@ -1,0 +1,56 @@
+\chapter{What This Book Is About}
+
+This book is about building an operating system entirely from scratch for the
+RISC\textendash V architecture.  Not by linking in large existing frameworks,
+not by copying Linux, and not by running in a simulator with hidden support
+code—but by writing code that truly starts at address zero and brings a
+bare-metal RISC\textendash V processor to life.
+
+Our goal is educational, not industrial.  Each chapter introduces one small
+concept, shows how to implement it, and builds on previous chapters.  By the end
+you will understand how the key components of an operating system—device
+drivers, timers, interrupts, memory management, processes, and file systems—fit
+together and interact with hardware.
+
+The philosophy of this book is incremental construction.  In each chapter we
+will:
+\begin{enumerate}
+  \item Introduce a new concept.
+  \item Describe the relevant hardware interface.
+  \item Show minimal working code that exercises it.
+  \item Explain the reasoning and design trade-offs.
+\end{enumerate}
+
+We start with the simplest possible goal: make the machine say
+``Hello~World''.  To do this we will write directly to a UART register.
+Then, step by step, we will add timer interrupts, handle exceptions, switch
+between tasks, and eventually build an environment capable of running user
+programs.
+
+To keep things transparent, we avoid black boxes.  The operating system will be
+written in C (with occasional assembly), and the code will run on both
+emulators such as QEMU and real RISC\textendash V boards.
+
+Each chapter is designed to be self-contained: by the end of it, you should
+have a working system that boots, runs the example, and can be tested and
+modified.  The chapters are cumulative but modular—you can start at any point
+if you already know the prerequisites.
+
+\bigskip
+\noindent
+\textbf{Who this book is for:} Students, hobbyists, and systems programmers who
+want to learn what happens below the compiler, the kernel, and the libraries.
+
+\bigskip
+\noindent
+\textbf{What you need:}
+\begin{itemize}
+  \item A basic understanding of C and assembly.
+  \item A RISC\textendash V toolchain and QEMU (we will show how to install them).
+  \item Curiosity and patience.
+\end{itemize}
+
+\bigskip
+By the time we are done, you will not only have built a small but complete
+operating system—you will have demystified how computers actually start,
+communicate, and manage themselves.

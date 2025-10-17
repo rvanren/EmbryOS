@@ -1,0 +1,39 @@
+\chapter{Hello World}
+
+Before we dive into kernel code, let's set up a clean, reproducible environment.
+This chapter will guide you through creating a Docker container that can build
+and run our operating system, \textbf{EmbryOS}, on a RISC\textendash V
+emulator.  By the end, we will make the machine print ``Hello~World'' using a
+single UART register.
+
+\section{Why Docker?}
+
+Different computers have different toolchains and library versions.  Using a
+container guarantees that everyone---on macOS, Windows, or Linux---is building
+the same thing.  We will use Docker to install the RISC\textendash V compiler
+and QEMU emulator inside a self-contained Ubuntu environment.
+
+\section{Project Layout}
+
+Each chapter comes with its own directory under \texttt{code/}:
+
+\begin{verbatim}
+code/
+ +- chapter0/
+ +- chapter1/
+ |   +- Dockerfile
+ |   +- Makefile
+ |   +- main.c
+ |   +- start.S
+ |   \- linker.ld
+ \- ...
+\end{verbatim}
+
+You can open these files in a simple text editor such as \texttt{nano} (already
+included in the container) or your favorite local editor if you mount the
+directory into Docker.
+
+\input{chapter1/dockerfile}
+\input{chapter1/makefile}
+\input{chapter1/hello}
+\input{chapter1/loader}

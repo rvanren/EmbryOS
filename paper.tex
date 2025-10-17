@@ -1,0 +1,68 @@
+\documentclass[11pt]{book}
+
+% =====================
+% Packages
+% =====================
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{amsmath,amssymb}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{caption}
+
+% =====================
+% Listings configuration
+% =====================
+\lstdefinestyle{oscode}{
+  basicstyle=\ttfamily\small,
+  backgroundcolor=\color{gray!5},
+  frame=single,
+  breaklines=true,
+  columns=fullflexible,
+  keepspaces=true,
+  numbers=left,
+  numbersep=5pt,
+  xleftmargin=1em,
+  captionpos=b
+}
+
+% =====================
+% Metadata
+% =====================
+\title{\Huge Building an Operating System from Scratch\\[0.5em]
+\Large A RISC\textendash V Journey}
+\author{
+  Yacqub Mohamed \and
+  Robbert van Renesse \and
+  ChatGPT
+}
+\date{\today}
+
+% =====================
+% Document
+% =====================
+\begin{document}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+% Start chapter numbering at 0
+\setcounter{chapter}{-1}
+
+\input{chapter0/chapter.tex}
+\input{chapter1/chapter.tex}
+\input{chapter2/chapter.tex}
+
+\backmatter
+\chapter*{Acknowledgments}
+This book was written as a collaborative project between humans and an AI
+system, combining deep systems knowledge with new ways of explaining complex
+material.  We hope it inspires you to explore, tinker, and build.
+
+\end{document}
