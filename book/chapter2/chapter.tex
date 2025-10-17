@@ -76,13 +76,12 @@ The functions:
   \item \texttt{clear\_screen()} sends the escape codes
         \texttt{[2J[H]} to erase the display and return the cursor to the
         top-left corner.
-  \item \texttt{move\_cursor(row,col)} positions the cursor at a chosen location.
-  \item \texttt{set\_color(color)} changes the text color
-        (\texttt{0=black}, \texttt{1=red}, …, \texttt{7=white}).
+  \item \texttt{set\_cursor(row,col,color)} positions the cursor at a chosen location and sets the ANSI standard color (\texttt{0=black}, \texttt{1=red}, $...$, \texttt{7=white}).
 \end{itemize}
 
 The \texttt{main()} function clears the screen, then prints
-``EmbryOS~says~hello!'' in six different colors at different positions.
+``EmbryOS~says~Hello World!'' in six different ANSI colors,
+like a rotating banner across the screen.
 
 \section{Running the Program}
 
@@ -113,11 +112,3 @@ escape sequences as screen-control commands.
   \item \textbf{Boot animation.}
         Combine the above effects into a short animation for EmbryOS startup.
 \end{enumerate}
-
-\section*{Summary}
-
-In this chapter we moved from simple character output to full control over a
-text-mode ``screen.''  We also built a minimal but real implementation of
-\texttt{printf()}, giving EmbryOS the ability to print formatted output without
-any external libraries.  In the next chapter we will make the system reactive
-by introducing timer interrupts.
