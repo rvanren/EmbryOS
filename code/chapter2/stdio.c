@@ -17,19 +17,13 @@ void printf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     for (; *fmt; fmt++) {
-        if (*fmt != '%') {
-            putchar(*fmt);
-            continue;
-        }
+        if (*fmt != '%') { putchar(*fmt); continue; }
         fmt++;
         switch (*fmt) {
         case 'd': {
             int x = va_arg(ap, int);
-            if (x < 0) {
-                putchar('-');
-                x = -x;
-            }
-            print_unsigned((unsigned int)x, 10);
+            if (x < 0) { putchar('-'); x = -x; }
+            print_unsigned((unsigned int) x, 10);
             break;
         }
         case 'x': {
@@ -51,8 +45,7 @@ void printf(const char *fmt, ...) {
             putchar('%');
             break;
         default:
-            putchar('%');
-            putchar(*fmt);
+            putchar('%'); putchar(*fmt);
         }
     }
     va_end(ap);
