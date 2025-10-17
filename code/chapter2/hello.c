@@ -1,51 +1,35 @@
-#include "stdio.h"
+#include "screen.h"   // declare screen_* API
 
-typedef unsigned int uint32_t;
-struct uart { uint32_t txdata; };
-
-// Memory-mapped UART
-#define UART    ((struct uart *) 0x10010000)
-#define TXFULL  (1 << 31)
-
-void putchar(char c) {
-    while (UART->txdata & TXFULL)
-        ;
-    UART->txdata = c;
-}
-
-void clear_screen(void) {
-    printf("\033[2J\033[H");
-}
-
-void set_cursor(int row, int col, int color) {
-    printf("\033[%d;%dH\033[3%dm", row, col, color);
-}
-
-/* crude busy-wait delay; tune this constant for speed */
+/* crude busy-wait delay; adjust for speed */
 static void delay(void) {
-    for (volatile int i = 0; i < 10000000; i++)
+    for (volatile int i = 0; i < 800000; i++)
         ;
 }
 
 int main(void) {
     const char *banner = "==== EmbryOS says Hello World ====   ";
-    const int width = 80, row = 12;   // assume 80x24 terminal
+    const int len   = 38;                 // length of banner string (include spaces)
+    const int row   = 12;                 // vertical position (middle of 24-line screen)
+    const int width = SCREEN_COLS;        // logical screen width
     int color = 1;
+    int offset = 0;
 
-    int len = 0;	 // compute banner length
-    while (banner[len] != '\0') len++;
+    screen_clear();
 
-    clear_screen();
-    for (int offset = 0;;) {
-        clear_screen();
-        set_cursor(row, 1, color++);
-        if (color > 7) color = 1;
+    while (1) {
+        // draw one frame of the scrolling banner
         for (int i = 0; i < width; i++) {
             char c = banner[(i + offset) % len];
-            putchar(c);
+            screen_move(row, i);
+            screen_put(c, color);
         }
+
+        // cycle color & offset for next frame
+        color = (color % 7) + 1;
+        offset = (offset + 1) % len;
+
         delay();
-        offset = (offset + 1) % len;   // scroll left continuously
     }
+
     return 0;
 }
