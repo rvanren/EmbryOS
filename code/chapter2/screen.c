@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include "screen.h"
 
 static int cur_row = 0;
 static int cur_col = 0;

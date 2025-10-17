@@ -1,5 +1,19 @@
 #include "screen.h"   // declare screen_* API
 
+typedef unsigned int uint32_t;
+
+struct uart { uint32_t txdata; };
+
+// Memory mapped IO:
+#define UART ((struct uart *) 0x10010000)
+#define TXFULL (1 << 31)
+
+void putchar(char c) {
+    while (UART->txdata & TXFULL)
+        ;
+    UART->txdata = c;
+}
+
 /* crude busy-wait delay; adjust for speed */
 static void delay(void) {
     for (volatile int i = 0; i < 800000; i++)

@@ -5,7 +5,7 @@ OBJCOPY     = riscv-none-elf-objcopy
 YELLOW      = \033[1;33m
 END         = \033[0m
 
-LDFLAGS     = -nostdlib -lc -lgcc
+LDFLAGS     = -nostdlib
 CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
