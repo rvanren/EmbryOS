@@ -1,11 +1,11 @@
-\chapter{Seeing Is Believing}
+\chapter{Seeing Is Believing: The Screen Abstraction}
 
 In Chapter~1 we learned to send characters to the UART.  In this chapter we
 build a small \texttt{screen} library that treats the terminal as a logical
 80$\times$24 grid of colored cells.  Using this abstraction we can animate a
 banner and, for the first time, \emph{see} EmbryOS doing something dynamic.
 
-\section{A Minimal Screen Abstraction}
+\section{A Small Screen Abstraction}
 
 The \texttt{screen} library provides three functions:
 \begin{itemize}
@@ -66,7 +66,7 @@ libraries.
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Minimal \texttt{printf()} implementation in \texttt{stdio.c}},
+  caption={Small \texttt{printf()} implementation in \texttt{stdio.c}},
   label={lst:stdio_c}
 ]{../code/chapter2/stdio.c}
 \end{minipage}
