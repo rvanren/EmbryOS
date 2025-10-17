@@ -93,7 +93,5 @@ int main(void) {
     proc_create(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
     proc_create(taskB, (struct rect){ 40, 12,  40, 12 });  // lower-right
 
-    timer_init();
-
     for (;;) { __asm__ volatile ("wfi"); }  // wait-for-interrupt
 }
