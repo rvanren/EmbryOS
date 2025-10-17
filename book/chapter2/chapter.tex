@@ -1,100 +1,113 @@
-\chapter{Seeing Is Believing}
+\chapter{Writing to the Screen (Text Mode)}
+\label{chap:textscreen}
 
-In Chapter~1, we printed ``Hello~World'' by writing to a UART register.  In this
-chapter we will take the next step and \emph{see} something appear on a screen.
-To do this, we will ask QEMU to emulate a simple framebuffer device, so that
-our kernel can draw pixels directly into memory.
+In the previous chapter, we learned how to send characters through the UART.
+In this one, we will use the very same device to \emph{draw} on a screen—our
+terminal window—by taking advantage of ANSI escape codes.  No new hardware
+drivers are required, and everything works even when running inside Docker.
 
-\section{From UART to Framebuffer}
+\section{The Terminal as a Screen}
 
-A \textbf{framebuffer} is simply a block of memory where each 32-bit word
-represents one pixel on the screen.  When your program writes color values into
-this memory, the display hardware (or QEMU) updates the corresponding pixels on
-the screen.
+Although our current output device is just a UART, the terminal emulator on the
+host interprets special sequences of characters that start with the \texttt{ESC}
+(``\textbackslash033'') character.  These \emph{escape sequences} tell the
+terminal to move the cursor, clear parts of the screen, or change text color.
 
-QEMU can emulate such a framebuffer with the \texttt{ramfb} device.  This device
-is extremely simple: it just exposes a memory region, and whatever bytes you
-write there become visible in a window on your host system.
+We can think of this as a very simple display: each position on the screen
+corresponds to a character cell, and the terminal remembers what was printed
+there.  Instead of manipulating pixels, we manipulate characters.
 
-\section{Running QEMU with a Screen}
+\section{Useful Escape Sequences}
 
-We can reuse the same build environment from Chapter~1, but we will run QEMU
-with an additional device and a graphical display:
+\begin{table}[h]
+  \centering
+  \begin{tabular}{ll}
+    \toprule
+    Sequence & Effect \\
+    \midrule
+    \texttt{\textbackslash033[2J} & Clear the entire screen \\
+    \texttt{\textbackslash033[H}  & Move cursor to top--left corner \\
+    \texttt{\textbackslash033[row;colH} & Move cursor to position \texttt{(row,col)} \\
+    \texttt{\textbackslash033[3\emph{n}m} & Set text color (\emph{n}=0..7) \\
+    \texttt{\textbackslash033[0m} & Reset attributes \\
+    \bottomrule
+  \end{tabular}
+  \caption{A few common ANSI escape sequences.}
+\end{table}
 
-\begin{lstlisting}[style=oscode,language=bash,caption={Running QEMU with a RAM framebuffer}]
-$ qemu-system-riscv32 -machine virt -device ramfb -display sdl \
-    -bios hello.bin
+\section{Our First Text-Mode Library}
+
+Create a file \texttt{screen.c} with the following helper functions:
+
+\begin{lstlisting}[style=oscode,language=C,caption={Minimal text-mode screen library},label={lst:screen_c}]
+#define ESC "\033"
+
+void clear_screen(void) {
+    printf(ESC "[2J");       // clear screen
+    printf(ESC "[H");        // move cursor home
+}
+
+void move_cursor(int row, int col) {
+    printf(ESC "[%d;%dH", row, col);
+}
+
+void set_color(int color) {
+    printf(ESC "[3%dm", color);  // 0=black ... 7=white
+}
 \end{lstlisting}
 
-The \texttt{-device ramfb} option adds a framebuffer device, and
-\texttt{-display sdl} tells QEMU to open a window to show it.  You will still
-see UART output in your terminal if you add \texttt{-serial mon:stdio}.
+\noindent
+These simply print special character sequences.  The terminal interprets them
+as commands rather than text.
 
-\section{Drawing to the Framebuffer}
+\section{A Simple Demo}
 
-For simplicity, we start by assuming that QEMU places the framebuffer at address
-\texttt{0x40000000}, with a resolution of 640\,$\times$\,480 pixels, and that
-each pixel is a 32-bit ARGB value (8 bits per color channel).  These defaults
-work well for the \texttt{ramfb} device.
+Let us use these helpers in \texttt{hello.c}:
 
-The following C code paints the entire screen green:
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.9\textwidth}
-\begin{lstlisting}[style=oscode,language=C,caption={Drawing a solid color on the framebuffer},label={lst:framebuffer}]
-#define FRAMEBUFFER ((volatile unsigned int *) 0x40000000)
-#define WIDTH   640
-#define HEIGHT  480
-
-void draw_screen(unsigned int color) {
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            FRAMEBUFFER[y * WIDTH + x] = color;
-        }
+\begin{lstlisting}[style=oscode,language=C,caption={Colored "Hello" in text mode},label={lst:hello_text}]
+int main(void) {
+    clear_screen();
+    for (int i = 0; i < 6; i++) {
+        set_color(i + 1);
+        move_cursor(2 + i, 10);
+        printf("EmbryOS says hello!\n");
     }
-}
-
-int main() {
-    draw_screen(0x0000FF00);   // ARGB: 00RRGGBB --> bright green
-    while (1) ;
+    set_color(7);
+    move_cursor(10, 0);
+    printf("\n");
+    return 0;
 }
 \end{lstlisting}
-\end{minipage}
-\end{figure}
 
-When you build and run this version of EmbryOS, QEMU opens a window filled with
-green.  Congratulations—your operating system just drew its first pixels!
+Recompile and run:
+\begin{verbatim}
+$ make qemu
+\end{verbatim}
 
-\section{Understanding the Address}
+If your terminal supports color (most do), you should see the message appear in
+a rainbow pattern down the left side of the screen.
 
-In a real system, the framebuffer might be located elsewhere in physical memory
-and described in the \textbf{device tree}.  QEMU also passes such a device tree
-to the guest, containing an entry like:
+\section{Toolbox: ANSI Escape Codes}
 
-\begin{lstlisting}[style=oscode,language={}]
-framebuffer@40000000 {
-    compatible = "ramfb";
-    reg = <0x0 0x40000000 0x0 0x96000>;
-};
-\end{lstlisting}
+Escape codes date back to the early 1970s.  They were designed for the DEC
+VT100 terminal and remain a universal standard today.  Modern Linux, macOS,
+and Windows terminals all recognize them.
 
-Later, we will learn how to parse this tree so that the kernel can discover the
-framebuffer address automatically.  For now, we simply hardcode it.
+They provide a convenient, device-independent way to control the layout of
+text.  For embedded or bare-metal systems, they are invaluable because they
+require no additional hardware—only a serial output.
 
-\section{Projects}
+\section*{Projects}
 
 \begin{enumerate}
-  \item \textbf{Change the color.}  
-        Modify \texttt{draw\_screen()} to fill the screen with red, blue, or a
-        gradient of your own design.
-  \item \textbf{Draw a pattern.}  
-        Replace the solid fill with horizontal or vertical stripes by varying
-        the color every few rows or columns.
-  \item \textbf{Simple animation.}  
-        Alternate colors in a loop, adding a short delay between frames.  You
-        will see the screen flicker as EmbryOS repeatedly redraws it.
-  \item \textbf{Optional challenge: parse the device tree.}  
-        Look at the \texttt{ramfb} node in the device tree and try to extract
-        the framebuffer address and size instead of hardcoding them.
+  \item \textbf{Screen clear animation.}
+  Write a program that fills the screen with `*` characters one row at a time,
+  pausing briefly between rows.  Hint: you will need a delay loop.
+  \item \textbf{Progress bar.}
+  Print a single line of text that gradually fills with `#` characters to
+  simulate progress.  Use \texttt{move\_cursor()} to update in place.
+  \item \textbf{Color cycling.}
+  Print “Hello World” repeatedly, changing colors every iteration.
+  \item \textbf{Bonus:}
+  Combine all of the above into a short “boot animation” for EmbryOS.
 \end{enumerate}

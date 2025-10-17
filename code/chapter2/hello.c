@@ -1,3 +1,5 @@
+#include "stdio.h"
+
 typedef unsigned int uint32_t;
 
 struct uart { uint32_t txdata; };
@@ -6,9 +8,7 @@ struct uart { uint32_t txdata; };
 #define UART ((struct uart *) 0x10010000)
 #define TXFULL (1 << 31)
 
-#define FRAMEBUFFER ((volatile unsigned int *) 0x40000000)
-#define WIDTH   640
-#define HEIGHT  480
+#define ESC "\033"
 
 void putchar(char c) {
     while (UART->txdata & TXFULL)
@@ -16,20 +16,29 @@ void putchar(char c) {
     UART->txdata = c;
 }
 
-void printf(char *str) {
-    while (*str != 0)
-        putchar(*str++);
+void clear_screen(void) {
+    printf(ESC "[2J");       // clear screen
+    printf(ESC "[H");        // move cursor home
 }
 
-void draw_screen(unsigned int color) {
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            FRAMEBUFFER[y * WIDTH + x] = color;
-        }
-    }
+void move_cursor(int row, int col) {
+    printf(ESC "[%d;%dH", row, col);
+}
+
+void set_color(int color) {
+    printf(ESC "[3%dm", color);  // 0=black … 7=white
 }
 
 int main() {
-    printf("Hello World\n");
-    draw_screen(0x0000FF00);   // ARGB: 00RRGGBB --> bright green
+int main(void) {
+    clear_screen();
+    for (int i = 0; i < 6; i++) {
+        set_color(i + 1);
+        move_cursor(2 + i, 10);
+        printf("EmbryOS says hello!\n");
+    }
+    set_color(7);
+    move_cursor(10, 0);
+    printf("\n");
+    return 0;
 }
