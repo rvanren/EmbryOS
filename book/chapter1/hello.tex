@@ -14,18 +14,7 @@ pointer, and then calls \texttt{main()} written in C.
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.9\textwidth}
-\begin{lstlisting}[style=oscode,language={[x86masm]Assembler},caption={Startup assembly for EmbryOS},label={lst:hello_s}]
-    .section .text.enter
-    .global _start
-
-_start:
-    csrr a0, mhartid
-    beq a0, x0, _end        /* disable core zero */
-    li sp, 0x80400000       /* set stack pointer */
-    call main
-_end:
-    j _end                  /* loop forever */
-\end{lstlisting}
+\lstinputlisting[style=oscode,language={[x86masm]Assembler},caption={Startup assembly for EmbryOS},label={lst:hello_s}]{../code/chapter1/hello.s}
 \end{minipage}
 \end{figure}
 

@@ -38,3 +38,35 @@ directory into Docker.
 \input{chapter1/hello}
 \input{chapter1/uart}
 \input{chapter1/loader}
+
+\section*{Projects}
+
+Each chapter ends with a few short projects designed to encourage exploration.
+These are not graded exercises but small experiments—things to try and observe
+what happens.  Modify the code, rebuild, and run it again under QEMU to see how
+EmbryOS behaves.
+
+\begin{enumerate}
+  \item \textbf{Disabling the \texttt{mhartid} check.}
+  Open \texttt{hello.s} and remove the first two lines:
+  \begin{lstlisting}[style=oscode,language={[x86masm]Assembler}]
+  csrr a0, mhartid
+  beq a0, x0, _end
+  \end{lstlisting}
+  Rebuild and run the program.
+  \begin{itemize}
+    \item What happens on your terminal?
+    \item Why might the output look different or garbled?
+    \item What does this tell you about how many cores QEMU is simulating?
+  \end{itemize}
+  This experiment reveals why the \texttt{mhartid} check was there: without it,
+  every hardware thread (hart) runs the same code and all write to the UART at
+  once.
+\end{enumerate}
+
+\bigskip
+\noindent
+Feel free to extend this experiment—try changing the number of simulated cores
+in the Makefile’s QEMU command line (\texttt{-smp 2}) and observe the results.
+In later chapters we’ll learn how to coordinate multiple cores properly using
+synchronization and interrupts.
