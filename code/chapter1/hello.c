@@ -1,4 +1,4 @@
-typedef unsigned int uint32_t;
+#include <stdint.h>
 
 struct uart { uint32_t txdata; };
 
