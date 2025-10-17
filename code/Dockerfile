@@ -4,7 +4,7 @@
 FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV EMBRYOS=/workspace
+ENV EMBRYOS=/embryos
 WORKDIR $EMBRYOS
 
 # Install build tools, RISC-V toolchain, QEMU, ...
@@ -23,7 +23,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Clone EmbryOS
-RUN git clone https://github.com/rvanren/EmbryOS.git
+RUN git clone https://github.com/rvanren/EmbryOS.git .
 
 # Setup the RISC-V compiler
 RUN wget https://github.com/xpack-dev-tools/riscv-none-elf-gcc-xpack/releases/download/v14.2.0-3/xpack-riscv-none-elf-gcc-14.2.0-3-linux-arm64.tar.gz && \
