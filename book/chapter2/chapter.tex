@@ -1,0 +1,100 @@
+\chapter{Seeing Is Believing}
+
+In Chapter~1, we printed ``Hello~World'' by writing to a UART register.  In this
+chapter we will take the next step and \emph{see} something appear on a screen.
+To do this, we will ask QEMU to emulate a simple framebuffer device, so that
+our kernel can draw pixels directly into memory.
+
+\section{From UART to Framebuffer}
+
+A \textbf{framebuffer} is simply a block of memory where each 32-bit word
+represents one pixel on the screen.  When your program writes color values into
+this memory, the display hardware (or QEMU) updates the corresponding pixels on
+the screen.
+
+QEMU can emulate such a framebuffer with the \texttt{ramfb} device.  This device
+is extremely simple: it just exposes a memory region, and whatever bytes you
+write there become visible in a window on your host system.
+
+\section{Running QEMU with a Screen}
+
+We can reuse the same build environment from Chapter~1, but we will run QEMU
+with an additional device and a graphical display:
+
+\begin{lstlisting}[style=oscode,language=bash,caption={Running QEMU with a RAM framebuffer}]
+$ qemu-system-riscv32 -machine virt -device ramfb -display sdl \
+    -bios hello.bin
+\end{lstlisting}
+
+The \texttt{-device ramfb} option adds a framebuffer device, and
+\texttt{-display sdl} tells QEMU to open a window to show it.  You will still
+see UART output in your terminal if you add \texttt{-serial mon:stdio}.
+
+\section{Drawing to the Framebuffer}
+
+For simplicity, we start by assuming that QEMU places the framebuffer at address
+\texttt{0x40000000}, with a resolution of 640\,$\times$\,480 pixels, and that
+each pixel is a 32-bit ARGB value (8 bits per color channel).  These defaults
+work well for the \texttt{ramfb} device.
+
+The following C code paints the entire screen green:
+
+\begin{figure}[H]
+\centering
+\begin{minipage}{0.9\textwidth}
+\begin{lstlisting}[style=oscode,language=C,caption={Drawing a solid color on the framebuffer},label={lst:framebuffer}]
+#define FRAMEBUFFER ((volatile unsigned int *) 0x40000000)
+#define WIDTH   640
+#define HEIGHT  480
+
+void draw_screen(unsigned int color) {
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            FRAMEBUFFER[y * WIDTH + x] = color;
+        }
+    }
+}
+
+int main() {
+    draw_screen(0x0000FF00);   // ARGB: 00RRGGBB --> bright green
+    while (1) ;
+}
+\end{lstlisting}
+\end{minipage}
+\end{figure}
+
+When you build and run this version of EmbryOS, QEMU opens a window filled with
+green.  Congratulations—your operating system just drew its first pixels!
+
+\section{Understanding the Address}
+
+In a real system, the framebuffer might be located elsewhere in physical memory
+and described in the \textbf{device tree}.  QEMU also passes such a device tree
+to the guest, containing an entry like:
+
+\begin{lstlisting}[style=oscode,language={}]
+framebuffer@40000000 {
+    compatible = "ramfb";
+    reg = <0x0 0x40000000 0x0 0x96000>;
+};
+\end{lstlisting}
+
+Later, we will learn how to parse this tree so that the kernel can discover the
+framebuffer address automatically.  For now, we simply hardcode it.
+
+\section{Projects}
+
+\begin{enumerate}
+  \item \textbf{Change the color.}  
+        Modify \texttt{draw\_screen()} to fill the screen with red, blue, or a
+        gradient of your own design.
+  \item \textbf{Draw a pattern.}  
+        Replace the solid fill with horizontal or vertical stripes by varying
+        the color every few rows or columns.
+  \item \textbf{Simple animation.}  
+        Alternate colors in a loop, adding a short delay between frames.  You
+        will see the screen flicker as EmbryOS repeatedly redraws it.
+  \item \textbf{Optional challenge: parse the device tree.}  
+        Look at the \texttt{ramfb} node in the device tree and try to extract
+        the framebuffer address and size instead of hardcoding them.
+\end{enumerate}
