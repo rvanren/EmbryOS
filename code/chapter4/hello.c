@@ -30,12 +30,17 @@ void handle_syscall() {
     printf("SYSCALL\n");
 }
 
+int is_interrupt(int mcause) {
+    // most significant bit in `mcause` is set only when there is an interrupt
+    return mcause & (1 << 31);
+}
+
 void software_trap_handler() {
     int mcause;
     asm("csrr %0, mcause":"=r"(mcause));
 
     if (is_interrupt(mcause)) {
-        printf("Is Interrupt\n");
+        proc_yield();
         mtime_reset(); // give program another quantum
     } else {
         switch (mcause) {
