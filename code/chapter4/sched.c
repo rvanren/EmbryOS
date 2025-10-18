@@ -19,9 +19,10 @@ void sched_yield(void) {
         proc_enqueue(&run_queue[1], me);
         proc_current = 1;
     }
-    struct pcb *current = run_queue[proc_current] = run_queue[proc_current]->next;
+    struct pcb *current = run_queue[proc_current]->next;
+    run_queue[proc_current] = current;
 
-    // Find highest non-empty queue
+    // Find highest non-empty queue and run next process
     proc_current = 0;
     while (proc_current < N_PRIORITIES && run_queue[proc_current] == 0)
         proc_current++;
