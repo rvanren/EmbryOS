@@ -45,11 +45,11 @@ void software_trap_handler() {
     }
     else {
         switch (mcause & 0xFFF) {
-        case EXCP_ECALL_U: // User-mode system call (ecall)
+        case 8: // EXCP_ECALL_U: User-mode system call (ecall)
             (*handlers[INTR_SYSCALL])();
             mepc += 4;
             break;
-        case EXCP_ECALL_M: // Kernel ecall (should not normally occur)
+        case 11: // EXCP_ECALL_M: Kernel ecall (should not normally occur)
             printf("Machine ecall\n");
             break;
         default:
