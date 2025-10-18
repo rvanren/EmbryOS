@@ -32,20 +32,20 @@ static void yield() {
         }
         else {
             former->next = current->next;
-        if (former->next < 0) panic("1?\n");
+            if (former->next < 0) panic("1?\n");
         }
 
         // Insert into next priority
-    if (run_queue[1] < 0) {
-        current->next = pid;
-    }
-    else {
-        former = FRAME(struct pcb, run_queue[1]);
-        current->next = former->next;
-        if (current->next < 0) panic("2?\n");
-        former->next = pid;
-        if (former->next < 0) panic("3?\n");
-    }
+        if (run_queue[1] < 0) {
+            current->next = pid;
+        }
+        else {
+            former = FRAME(struct pcb, run_queue[1]);
+            current->next = former->next;
+            if (current->next < 0) panic("2?\n");
+            former->next = pid;
+            if (former->next < 0) panic("3?\n");
+        }
         run_queue[1] = pid;
     }
     else {
