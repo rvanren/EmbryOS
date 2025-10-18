@@ -1,46 +1,51 @@
 \chapter{Preemption and Priorities}
 
 In Chapter~\ref{chap:contexts} we built a cooperative scheduler: processes
-yielded voluntarily. This worked, but a process that forgot to call
-\texttt{sched\_yield()} could monopolize the CPU forever. In this chapter,
-EmbryOS gains a hardware timer and turns cooperative multitasking into
-\emph{preemptive} scheduling. We also introduce priorities so that background
-tasks run only when nothing more important is ready.
+called \texttt{sched\_yield()} voluntarily.  This chapter connects EmbryOS to
+hardware interrupts so that the system can take the CPU away from a running
+process automatically.  We also add priorities: interactive processes at level~0,
+background work at level~1, and the main loop at level~2.  Level~2 runs only
+when nothing else is runnable.
 
-\section{Trap Entry}
+\section{Trap Entry and Exit}
 
-When any interrupt or exception occurs, the CPU jumps to the address stored in
-the \texttt{mtvec} register. EmbryOS installs \texttt{\_trap\_handler}, shown in
-Listing~\ref{lst:trap_s}, as a single entry point. It saves all general registers
-and calls \texttt{software\_trap\_handler()} in \texttt{clint.c}. The handler
-decides what to do—timer interrupt, system call, or fault—then returns to the
-same program counter via \texttt{mret}.
+Every trap—interrupt or exception—enters at the same assembly label,
+\texttt{\_trap\_handler}.  The CPU switches to machine mode, disables further
+interrupts, and jumps to the address stored in \texttt{mtvec}.  The handler in
+Listing~\ref{lst:trap_s} saves all integer registers on the current stack,
+calls the C function \texttt{software\_trap\_handler()}, and finally restores
+registers and returns with \texttt{mret}.  Because all state is preserved, C
+code can safely run inside the handler.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language={[x86masm]Assembler},
-  caption={Trap entry and exit, \texttt{trap.s}},
+  caption={Unified trap entry and exit, \texttt{trap.s}},
   label={lst:trap_s}
 ]{../code/chapter4/trap_short.s}
 \end{figure}
 
-\section{Core Local Interruptor}
+\section{Generalized Interrupt Handling}
 
-The \emph{CLINT} (Core Local Interruptor) connects each CPU core to its local
-timer. Its driver in Listings~\ref{lst:clint_c}–\ref{lst:clint_h} installs the
-trap handler, registers a C handler for each interrupt type, and provides simple
-functions to enable and disable interrupts globally.
+EmbryOS decodes all interrupts and exceptions in one place:
+\texttt{software\_trap\_handler()} (Listing~\ref{lst:interrupt_c}).
+Each interrupt type has an entry in a small table of C function pointers.
+\texttt{intr\_init()} installs \texttt{\_trap\_handler} in \texttt{mtvec},
+\texttt{intr\_set\_handler()} registers individual handlers, and
+\texttt{intr\_enable()} or \texttt{intr\_disable()} control the global
+\texttt{mstatus.MIE} bit.  The handler in this chapter is used for the timer,
+but later chapters will reuse the same interface for system calls and devices.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Interrupt controller, \texttt{clint.c}},
-  label={lst:clint_c}
-]{../code/chapter4/clint.c}
+  caption={Generic interrupt dispatcher, \texttt{interrupt.c}},
+  label={lst:interrupt_c}
+]{../code/chapter4/interrupt.c}
 \end{figure}
 
 \begin{figure}[H]
@@ -48,25 +53,25 @@ functions to enable and disable interrupts globally.
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Interrupt controller interface, \texttt{clint.h}},
-  label={lst:clint_h}
-]{../code/chapter4/clint.h}
+  caption={Interrupt interface, \texttt{interrupt.h}},
+  label={lst:interrupt_h}
+]{../code/chapter4/interrupt.h}
 \end{figure}
 
-\section{Machine Timer}
+\section{The Machine Timer}
 
-Every RISC-V core includes a 64-bit counter (\texttt{mtime}) and a compare
-register (\texttt{mtimecmp}). When the counter reaches the compare value, a
-machine-timer interrupt is raised. EmbryOS programs this timer in
-\texttt{mtime.c}. Each interrupt calls the scheduler and sets the next alarm,
-creating periodic preemption.
+The RISC-V machine timer consists of two 64-bit registers in the CLINT region:
+\texttt{mtime}, a free-running counter, and \texttt{mtimecmp}, which raises an
+interrupt when the counter reaches its value.  Listing~\ref{lst:mtime_c} shows
+how EmbryOS enables timer interrupts (\texttt{mie.MTIE}) and re-arms the timer
+each time it fires.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Machine timer, \texttt{mtime.c}},
+  caption={Machine timer driver, \texttt{mtime.c}},
   label={lst:mtime_c}
 ]{../code/chapter4/mtime.c}
 \end{figure}
@@ -81,12 +86,18 @@ creating periodic preemption.
 ]{../code/chapter4/mtime.h}
 \end{figure}
 
-\section{Prioritized Scheduler}
+\section{Priorities and Preemption}
 
-The scheduler now maintains three run queues: high, medium, and low. New
-processes enter at the highest level. Each time a process exhausts its quantum,
-it is demoted to the next queue. This simple aging policy ensures that every
-process runs, but interactive ones get more CPU time.
+The scheduler now maintains three run queues.  Priority~0 is for
+\emph{interactive} tasks such as user-facing animation or input handlers.
+Priority~1 is for \emph{background} work that can run when the system is idle.
+Priority~2 contains only the \emph{main loop}, which simply waits for
+interrupts and runs when nothing else is ready.
+
+Each timer interrupt calls \texttt{sched\_yield()}, which rotates the run
+queues.  Interactive tasks that use their entire quantum are demoted to level~1,
+while background processes and the main loop remain at their assigned levels.
+This yields a simple, realistic priority policy that still fits on one page.
 
 \begin{figure}[H]
 \centering
@@ -108,19 +119,20 @@ process runs, but interactive ones get more CPU time.
 ]{../code/chapter4/sched.h}
 \end{figure}
 
-\section{Demonstration: Preemption in Action}
+\section{Demonstration: Timed Preemption}
 
-The demonstration program (Listing~\ref{lst:hello_c}) installs a timer handler,
-creates four processes, and enables interrupts. Unlike Chapter~\ref{chap:contexts},
-no process ever calls \texttt{sched\_yield()}. The timer interrupt now drives
-context switches automatically, proving that preemption works.
+The demo (Listing~\ref{lst:hello_c}) installs the timer interrupt and creates
+four copies of \texttt{taskA()}, each drawing letters in its own window.
+None of them ever call \texttt{sched\_yield()}; preemption is handled entirely
+by the timer.  The main process runs at priority~2, sleeping in a
+\texttt{wfi} loop until all other processes are idle.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Preemptive demo, \texttt{hello.c}},
+  caption={Preemptive demo with three priority levels, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter4/hello.c}
 \end{figure}
@@ -128,10 +140,10 @@ context switches automatically, proving that preemption works.
 \section*{Projects}
 
 \begin{enumerate}
-  \item \textbf{Different quanta.} Change \texttt{QUANTUM} and observe the
-        smoothness of animation.
-  \item \textbf{Process aging.} Add a rule that moves idle processes back to a
-        higher priority.
-  \item \textbf{Other interrupts.} Extend \texttt{clint.c} to handle software
-        and external interrupts.
+  \item \textbf{More interrupt types.} Extend \texttt{interrupt.c} with a
+        keyboard or software interrupt handler.
+  \item \textbf{Dynamic priorities.} Allow processes to raise or lower their
+        priority based on activity.
+  \item \textbf{Timer frequency.} Change the quantum in
+        \texttt{hello.c} and observe how it affects responsiveness.
 \end{enumerate}
