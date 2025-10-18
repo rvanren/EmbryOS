@@ -63,10 +63,11 @@ void taskA(void) {
 }
 
 void run(entry_t fn, struct rect area) {
+    struct pcb *current = &run_queue[proc_current]->next;
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, &frames[pid].bytes[PAGE_SIZE], fn);
+    ctx_start(&current->sp, (struct page *) current + 1, fn);
 }
 
 int main(void) {

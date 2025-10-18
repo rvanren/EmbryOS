@@ -15,7 +15,7 @@ struct pcb {
     void *sp;           // saved stack pointer
 };
 
-struct pcb proc_init(struct rect area);
+struct pcb *proc_init(struct rect area);
 struct pcb *proc_create(struct rect area);
 void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg);
 void proc_enqueue(struct pcb **q, struct pcb *pcb);
