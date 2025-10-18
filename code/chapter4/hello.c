@@ -110,9 +110,10 @@ static void make_runnable(int pid, int priority) {
     }
 }
 
-void run(int pid, entry_t fn) {
+void run(entry_t fn, struct rect area) {
     struct pcb *former = FRAME(struct pcb, run_queue[proc_current]);
     struct pcb *current = FRAME(struct pcb, former->next);
+    int pid = proc_create(area);
     make_runnable(pid, 0);
     proc_current = 0;
     printf("RUN %d %d\n", proc_current, run_queue[proc_current]);
@@ -141,24 +142,17 @@ int main(void) {
     mtime_init();
     mtime_reset(QUANTUM);
 
-    // Allocate processes
-    int ul = proc_create((struct rect){ 0,   0,  40, 12 });  // upper-left
-    int ur = proc_create((struct rect){ 40,  0,  40, 12 });  // upper-right
-    int ll = proc_create((struct rect){ 0,  12,  40, 12 });  // lower-left
-    int lr = proc_create((struct rect){ 40, 12,  40, 12 });  // lower-right
-
-    // Run them at priority 0
-    run(ul, taskA);
-    run(ur, taskA);
-    run(ll, taskA);
-    run(lr, taskA);
+    // Run processes
+    run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
+    run(taskA, (struct rect){ 40,  0,  40, 12 });  // upper-right
+    run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
+    run(taskA, (struct rect){ 40, 12,  40, 12 });  // lower-right
 
     // Switch priority to level 2
     int pid = current_pid();
     make_unrunnable();
     make_runnable(pid, 2);
     proc_current = 2;
-
     yield();
 
     // Run the main loop, which is waiting for interrupts
