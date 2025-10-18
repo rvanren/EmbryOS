@@ -55,11 +55,10 @@ void software_trap_handler() {
     asm("csrr %0, mepc":"=r"(mepc));
 
     if (is_interrupt(mcause)) {
-        mtime_reset(); // add another quantum
-    // printf("[%x]", proc_self());
         proc_yield();
-    // printf("@[%x]", proc_self());
-    } else {
+        mtime_reset(); // add another quantum
+    }
+    else {
         switch (mcause) {
         case EXCP_ECALL_U: case EXCP_ECALL_M:
             handle_syscall();
@@ -85,7 +84,7 @@ void taskA(void) {
     struct pcb *self = proc_self();
     for (int cnt = 0;; cnt++) {
         proc_put(self, 0, 0, 'A', 2, 0);
-    printf(" %x %d", self, cnt);
+        printf(" %x %d", self, cnt);
         delay();
     }
 }
@@ -104,8 +103,6 @@ int main(void) {
 
     interrupts_enable();
     for (;;) {
-        // proc_yield();
-    // printf("*");
         __asm__ volatile ("wfi");  // wait-for-interrupt
     }
 }
