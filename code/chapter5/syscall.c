@@ -12,7 +12,7 @@ void syscall_handler(void) {
         register int c   asm("a2");
         register int fg  asm("a3");
         register int bg  asm("a4");
-        struct pcb *self = proc_self();
+        struct pcb *self = run_queue[proc_current]->next;
         proc_put(self, row, col, c, fg, bg);
     }
 }
