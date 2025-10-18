@@ -1,4 +1,6 @@
-#include "clint.h"
+#include "interrupt.h"
+
+#define CLINT_BASE       0x02000000UL
 
 #define MTIME_ADDR       (CLINT_BASE + 0xBFF8)
 #define MTIME_CMP(hart)  (CLINT_BASE + 0x4000 + 8 * (hart))

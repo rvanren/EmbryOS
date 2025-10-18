@@ -1,6 +1,6 @@
 #include "stdio.h"
 #include "process.h"
-#include "clint.h"
+#include "interrupt.h"
 
 #define MIE_MASK (1u << 3)
 
@@ -16,11 +16,11 @@ static entry_t handlers[] = {
     no_handler
 };
 
-void interrupts_enable(void) {
+void intr_enable(void) {
     __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
 }
 
-void interrupts_disable(void) {
+void intr_disable(void) {
     __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
 }
 
@@ -30,7 +30,7 @@ void software_trap_handler() {
     asm("csrr %0, mepc":"=r"(mepc));
 
     if (mcause & (1 << 31)) {   // interrupt?
-        (*handlers[CLINT_TIMER])();
+        (*handlers[INTR_TIMER])();
     }
     else {
         printf("Exception %x\n", mcause);
@@ -40,11 +40,11 @@ void software_trap_handler() {
     asm("csrw mepc, %0"::"r"(mepc));
 }
 
-void clint_set_handler(int which, entry_t handler){
+void intr_set_handler(int which, entry_t handler){
     handlers[which] = handler;
 }
 
-int clint_init(){
+int intr_init(){
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
 }

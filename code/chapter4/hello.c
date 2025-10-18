@@ -1,7 +1,7 @@
 #include "frame.h"
 #include "sched.h"
 #include "stdio.h"
-#include "clint.h"
+#include "interrupt.h"
 #include "ctx.h"
 #include "mtime.h"
 
@@ -13,9 +13,9 @@ void timer_handler() {
 }
 
 static void delay(void) {
-    interrupts_enable();
+    intr_enable();
     for (volatile int i = 0; i < 100000; i++) ;
-    interrupts_disable();
+    intr_disable();
 }
 
 void taskA(void) {
@@ -31,8 +31,8 @@ int main(void) {
     frame_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
-    clint_init();
-    clint_set_handler(CLINT_TIMER, timer_handler);
+    intr_init();
+    intr_set_handler(INTR_TIMER, timer_handler);
     mtime_init();
     mtime_reset(QUANTUM);
 
@@ -48,6 +48,6 @@ int main(void) {
     sched_yield();
 
     // Run the main loop, which is waiting for interrupts at lowest priority
-    interrupts_enable();
+    intr_enable();
     for (;;) __asm__ volatile ("wfi");  // wait-for-interrupt
 }
