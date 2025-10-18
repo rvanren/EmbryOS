@@ -30,7 +30,6 @@ static void delay(void) {
 
 void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
-    intr_enable();
     for (int cnt = 0;; cnt++) {
         user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
         delay();
