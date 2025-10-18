@@ -8,10 +8,21 @@ static void delay(void) {
 }
 
 void taskA(void) {
-    struct pcb *self = run_queue[proc_current]->next;
-    for (int cnt = 0;; cnt++) {
-        proc_put(self, 2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26,
-                                cnt, 7 - cnt % 8);
+    struct pcb *self = run_queue->next;
+    int col = 0;
+    while (1) {
+        proc_put(self, 1, col, 'A', 2, 0);
+        col = (col + 1) % self->area.w;
+        delay();
+    }
+}
+
+void taskB(void) {
+    struct pcb *self = run_queue->next;
+    int row = 0;
+    while (1) {
+        proc_put(self, row, 5, 'B', 4, 0);
+        row = (row + 1) % self->area.h;
         delay();
     }
 }
@@ -22,8 +33,8 @@ int main(void) {
     sched_init(pcb);
 
     sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
-    sched_run(taskA, (struct rect){ 40,  0,  40, 12 });  // upper-right
-    sched_run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
+    sched_run(taskB, (struct rect){ 40,  0,  40, 12 });  // upper-right
+    sched_run(taskB, (struct rect){ 0,  12,  40, 12 });  // lower-left
     sched_run(taskA, (struct rect){ 40, 12,  40, 12 });  // lower-right
 
     // Run the main loop
