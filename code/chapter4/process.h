@@ -1,3 +1,6 @@
+#ifndef PROCESS_H
+#define PROCESS_H
+
 typedef void (*entry_t)(void);
 
 struct rect {
@@ -15,3 +18,5 @@ struct pcb *proc_self();
 void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg);
 void proc_create(entry_t fn, struct rect area);
 void proc_yield(void);
+
+#endif // PROCESS_H
