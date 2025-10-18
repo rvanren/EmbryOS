@@ -11,11 +11,6 @@
 struct pcb *run_queue[N_PRIORITIES];
 int proc_current;       // current priority
 
-void panic(char *s) {
-    printf("PANIC %s\n", s);
-    for (;;) ;
-}
-
 // The current process yields to the next process to run.
 static void yield() {
     // If the priority of the current process is 0, move to priority 1.

@@ -35,15 +35,18 @@ SECTIONS
         *(.sdata .sdata.* .sdata2.*)
     } >ram :ram
 
-    .bss (NOLOAD): ALIGN(8) {
+    .bss (NOLOAD) : ALIGN(8) {
         *(.sbss*)
         *(.bss .bss.*)
         *(COMMON)
-    } >ram :ram 
-
-    .heap (NOLOAD) : ALIGN(8) {
-        PROVIDE( __heap_start = . );
     } >ram :ram
 
-    PROVIDE( __heap_end = 0x80200000 );
+    /* ---------------------------------------------------------
+     * Page-aligned frame allocator region (our heap)
+     * --------------------------------------------------------- */
+    .frames (NOLOAD) : ALIGN(4096) {
+        PROVIDE(__frames_start = .);
+        . = . + (4096 * 64);    /* 64 pages (256 KiB) */
+        PROVIDE(__frames_end = .);
+    } >ram :ram
 }

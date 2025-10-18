@@ -1,30 +1,30 @@
+#include <stdint.h>
 #include "frame.h"
-#include "stdio.h"
 
-#define N_FRAMES    16
+extern char __frames_start[];
+extern char __frames_end[];
 
-__attribute__((aligned(PAGE_SIZE))) struct page frames[N_FRAMES];
-static int frame_free_list;
+struct page *frames = (struct page *)__frames_start;
+int nframes;
 
-void frame_init() {
-    for (int f = 0; f < N_FRAMES - 1; f++) {
-        FRAME(struct free_frame, f)->next = f + 1;
-    }
-    FRAME(struct free_frame, N_FRAMES - 1)->next = -1;
-    frame_free_list = 0;
+void frame_init(void) {
+    nframes = ((uintptr_t)__frames_end - (uintptr_t)__frames_start) / PAGE_SIZE;
+
+    for (int i = 0; i < nframes - 1; i++)
+        FRAME(struct free_frame, i)->next = i + 1;
+    FRAME(struct free_frame, nframes - 1)->next = -1;
 }
 
-int frame_alloc() {
-    if (frame_free_list < 0) {
-        printf("OUT OF FRAMES\n");
-        for (;;) ;
-    }
-    int f = frame_free_list;
-    frame_free_list = FRAME(struct free_frame, f)->next;
+static int free_head = 0;
+
+int frame_alloc(void) {
+    if (free_head < 0) return -1;
+    int f = free_head;
+    free_head = FRAME(struct free_frame, f)->next;
     return f;
 }
 
 void frame_release(int f) {
-    FRAME(struct free_frame, f)->next = frame_free_list;
-    frame_free_list = f;
+    FRAME(struct free_frame, f)->next = free_head;
+    free_head = f;
 }
