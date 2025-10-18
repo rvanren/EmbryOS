@@ -56,7 +56,7 @@ static void yield() {
     proc_current = 0;
     while (proc_current < N_PRIORITIES) {
         if (run_queue[proc_current] >= 0) break;
-    proc_current++;
+        proc_current++;
     }
 
     // Switch contexts
