@@ -1,7 +1,6 @@
 #include "frame.h"
 #include "sched.h"
 #include "stdio.h"
-#include "process.h"
 #include "clint.h"
 #include "ctx.h"
 #include "mtime.h"
@@ -47,7 +46,7 @@ int main(void) {
 
     // Switch priority to level 2
     proc_dequeue(&run_queue[proc_current]);
-    proc_enqueue(&run_queue[2], init);
+    proc_enqueue(&run_queue[2], pcb);
     proc_current = 2;
     sched_yield();
 
