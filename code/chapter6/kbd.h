@@ -3,6 +3,6 @@
 
 void kbd_init(void);
 int  kbd_get(void);        // blocking read
-void kbd_isr(void);        // called from interrupt.c
+void kbd_isr();        // called from interrupt.c
 
 #endif

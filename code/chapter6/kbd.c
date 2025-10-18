@@ -2,11 +2,11 @@
 #include "kbd.h"
 #include "interrupt.h"
 #include "sched.h"
+#include "stdio.h"
 
 #define KBD_BUF_SIZE 64
-#define UART_RX (volatile unsigned char *) 0x10000000
 
-#define UART_BASE   0x10000000
+#define UART_BASE   0x10010000
 #define UART_TXDATA (*(volatile uint32_t *)(UART_BASE + 0x00))
 #define UART_RXDATA (*(volatile uint32_t *)(UART_BASE + 0x04))
 #define UART_TXCTRL (*(volatile uint32_t *)(UART_BASE + 0x08))
@@ -24,22 +24,29 @@ void kbd_init(void) {
 }
 
 void kbd_isr(void) {
-    char c = *UART_RX;
-    int next = (head + 1) % KBD_BUF_SIZE;
-    if (next != tail) {
-        buf[head] = c;
-        head = next;
+    for (;;) {
+        printf("KBD\n");
+        uint32_t val = UART_RXDATA;
+        if (val & (1 << 31)) break;
+	printf("KBD %x\n", val);
+        int next = (head + 1) % KBD_BUF_SIZE;
+        if (next != tail) {
+            buf[head] = val & 0xFF;
+            head = next;
+        }
     }
 
     // Put all sleepers on the run queue
     while (kbd_wait != 0) {
+        printf("WU %x %x\n", kbd_wait, kbd_wait->next);
+	struct pcb *next = kbd_wait->next;
         proc_enqueue(&run_queue[0], kbd_wait);
-        kbd_wait = kbd_wait->next;
+        kbd_wait = next;
     }
+    printf("DONE\n");
 }
 
 int kbd_get(void) {
-    // sleep while no characters
     while (head == tail) {
         struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
         pcb->next = kbd_wait;
@@ -48,6 +55,7 @@ int kbd_get(void) {
     }
 
     char c = buf[tail];
+    printf("GOT '%c'\n", c);
     tail = (tail + 1) % KBD_BUF_SIZE;
     return c;
 }

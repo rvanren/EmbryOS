@@ -1,7 +1,9 @@
 #include <stdint.h>
+#include "trap.h"
 #include "interrupt.h"
 #include "stdio.h"
 #include "process.h"
+#include "kbd.h"
 
 #define UART_IRQ    4
 
@@ -9,22 +11,24 @@
 #define PLIC_ENABLE (PLIC_BASE + 0x2080)   // enable bits for hart 0 M-mode
 #define PLIC_PRIORITY (PLIC_BASE + 0x0000)
 #define PLIC_THRESHOLD (PLIC_BASE + 0x200000)
+#define PLIC_CLAIM     (PLIC_BASE + 0x201004)
 
 #define MIE_MASK (1u << 3)
 
-void interrupt_handler() {
+void interrupt_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
+    printf("CLAIM %x\n", claim);
     if (claim == UART_IRQ)
-        kbd_isr();
+        kbd_isr(tf);
     *(volatile uint32_t *)PLIC_CLAIM = claim; // complete
 }
 
-static void no_handler() {
+static void no_handler(struct trap_frame *tf) {
     printf("Bad interrupt\n");
     for (;;) ;
 }
 
-static entry_t handlers[] = {
+static trap_entry_t handlers[] = {
     no_handler,     // timer
     no_handler,     // external
     no_handler,     // syscall
@@ -35,29 +39,34 @@ void intr_enable(void) {
     __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
 }
 
-void software_trap_handler() {
+void intr_disable(void) {
+    __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
+}
+
+void software_trap_handler(struct trap_frame *tf) {
     int mcause, mepc;
     asm("csrr %0, mcause":"=r"(mcause));
-    asm("csrr %0, mepc":"=r"(mepc));
+    // asm("csrr %0, mepc":"=r"(mepc));
     if (mcause & (1 << 31)) {   // interrupt?
         switch (mcause & 0xFFF) {
         case  3: break;
-        case  7: (*handlers[INTR_TIMER])(); break;
-        case 11: (*handlers[INTR_EXTERNAL])(); break;
+        case  7: (*handlers[INTR_TIMER])(tf); break;
+        case 11: (*handlers[INTR_EXTERNAL])(tf); break;
         default: printf("Unknown interrupt cause %x\n", mcause);
         }
     }
     else {
         switch (mcause & 0xFFF) {
-        case 8: case 11: (*handlers[INTR_SYSCALL])(); mepc += 4; break;
-        default: (*handlers[INTR_EXCEPTION])();
+        case 8: case 11: (*handlers[INTR_SYSCALL])(tf);
+			 tf->mepc += 4; break;
+        default: (*handlers[INTR_EXCEPTION])(tf);
         }
     }
-    asm("csrw mepc, %0"::"r"(mepc));
+    // asm("csrw mepc, %0"::"r"(mepc));
 }
 
 
-void intr_set_handler(int which, entry_t handler) {
+void intr_set_handler(int which, trap_entry_t handler) {
     handlers[which] = handler;
 }
 
