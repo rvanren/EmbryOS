@@ -21,7 +21,7 @@ static void delay(void) {
 void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
     for (int cnt = 0;; cnt++) {
-        proc_put(self, 0, 0, 'A', 2, 0);
+        proc_put(self, 0, 0, 'A' + cnt % 26, cnt, 7 - cnt % 8);
         delay();
     }
 }
