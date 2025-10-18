@@ -1,4 +1,4 @@
-#include "scheduler.h"
+#include "sched.h"
 #include "ctx.h"
 #include "frame.h"
 #include "process.h"
@@ -19,17 +19,14 @@ void sched_yield(void) {
         proc_enqueue(&run_queue[1], me);
         proc_current = 1;
     }
-
-    struct pcb *current = run_queue[proc_current]->next;
-    struct pcb *next = current->next;
+    struct pcb *current = run_queue[proc_current] = run_queue[proc_current]->next;
 
     // Find highest non-empty queue
     proc_current = 0;
     while (proc_current < N_PRIORITIES && run_queue[proc_current] == 0)
         proc_current++;
-
-    if (next != current)
-        ctx_switch(&current->sp, next->sp);
+    struct pcb *next = &run_queue[proc_current]->next;
+    if (next != current) ctx_switch(&current->sp, next->sp);
 }
 
 void sched_run(entry_t fn, struct rect area) {
