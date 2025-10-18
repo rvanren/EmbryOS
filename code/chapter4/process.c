@@ -35,7 +35,7 @@ void proc_enqueue(struct pcb **q, struct pcb *pcb) {
 }
 
 struct pcb *proc_dequeue(struct pcb **q) {
-    struct pcb = (*q)->next;
+    struct pcb *pcb = (*q)->next;
     if (pcb == pcb->next) *q = 0;
     else (*q)->next = pcb->next;
     pcb->next = 0;
