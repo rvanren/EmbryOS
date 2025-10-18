@@ -58,7 +58,7 @@ void timer_handler() {
 static void delay(void) {
     interrupts_enable();
     for (volatile int i = 0; i < 100000; i++)
-        ;
+        yield();
     interrupts_disable();
 }
 
@@ -114,8 +114,8 @@ int main(void) {
     clint_init();
     clint_set_handler(CLINT_TIMER, timer_handler);
 
-    mtime_init();
-    mtime_reset(QUANTUM);
+    // mtime_init();
+    // mtime_reset(QUANTUM);
 
     // Allocate processes
     int ul = proc_create((struct rect){ 0,   0,  40, 12 });  // upper-left
