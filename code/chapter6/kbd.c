@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "kbd.h"
 #include "interrupt.h"
 #include "sched.h"

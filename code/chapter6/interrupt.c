@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "interrupt.h"
 #include "stdio.h"
 #include "process.h"
