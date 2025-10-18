@@ -6,6 +6,7 @@
 #include "mtime.h"
 #include "syscall.h"
 #include "syslib.h"
+#include "kbd.h"
 
 #define QUANTUM          50000         // 50 milliseconds
 

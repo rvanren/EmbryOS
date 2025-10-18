@@ -1,9 +1,9 @@
 #include "kbd.h"
-#include "waitq.h"
 #include "interrupt.h"
+#include "sched.h"
 
 #define KBD_BUF_SIZE 64
-#define UART_RX (volatile uint8_t *) 0x10000000
+#define UART_RX (volatile unsigned char *) 0x10000000
 
 static char buf[KBD_BUF_SIZE];
 static int head = 0, tail = 0;
@@ -23,7 +23,7 @@ void kbd_isr(void) {
     // Put all sleepers on the run queue
     while (kbd_wait != 0) {
         proc_enqueue(&run_queue[0], kbd_wait);
-        kbd_wait = kdb_wait->next;
+        kbd_wait = kbd_wait->next;
     }
 }
 
@@ -33,7 +33,7 @@ int kbd_get(void) {
         struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
         pcb->next = kbd_wait;
         kbd_wait = pcb;
-        sched_block();
+        sched_block(pcb);
     }
 
     char c = buf[tail];
