@@ -48,7 +48,7 @@ EmbryOS behaves.
 
 \begin{enumerate}
   \item \textbf{Disabling the \texttt{mhartid} check.}
-  Open \texttt{hello.s} and remove the first two lines:
+  Open \texttt{start.s} and remove the first two lines:
   \begin{lstlisting}[style=oscode,language={[x86masm]Assembler}]
   csrr a0, mhartid
   beq a0, x0, _end
