@@ -1,5 +1,9 @@
-#include "frame.h"                                                              #include "stdio.h"                                                              #include "process.h"                                                            #include "clint.h"
-#include "ctx.h"                                                                #include "mtime.h"
+#include "frame.h"
+#include "stdio.h"
+#include "process.h"
+#include "clint.h"
+#include "ctx.h"
+#include "mtime.h"
 
 #define QUANTUM          100000         // 100 milliseconds
 #define N_PRIORITIES     3
