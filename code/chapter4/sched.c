@@ -12,7 +12,6 @@ void sched_init(struct pcb *first) {
     proc_current = 0;
 }
 
-// The current process yields to the next.
 void sched_yield(void) {
     if (proc_current == 0) {
         struct pcb *me = proc_dequeue(&run_queue[0]);
