@@ -2,6 +2,11 @@
 #include "stdio.h"
 #include "process.h"
 
+#define PLIC_BASE   0x0C000000
+#define PLIC_ENABLE (PLIC_BASE + 0x2080)   // enable bits for hart 0 M-mode
+#define PLIC_PRIORITY (PLIC_BASE + 0x0000)
+#define PLIC_THRESHOLD (PLIC_BASE + 0x200000)
+
 #define MIE_MASK (1u << 3)
 
 static void no_handler() {
@@ -49,4 +54,14 @@ void intr_set_handler(int which, entry_t handler) {
 int intr_init() {
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
+
+    // Give UART interrupt (source 10) a nonzero priority
+    *(volatile uint32_t *)(PLIC_PRIORITY + 4 * 10) = 1;
+    // Enable UART interrupt for hart 0
+    *(volatile uint32_t *)(PLIC_ENABLE) = (1 << 10);
+    // Set threshold = 0 (accept all priorities)
+    *(volatile uint32_t *)(PLIC_THRESHOLD) = 0;
+
+    asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 → allow external interrupts
+    asm("csrs mstatus, %0" :: "r"(1 << 3)); // MIE=1 → global interrupt enable
 }
