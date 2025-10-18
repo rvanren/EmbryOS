@@ -6,7 +6,6 @@
 enum { INTR_TIMER, INTR_EXTERNAL, INTR_SYSCALL, INTR_EXCEPTION };
 
 void intr_enable(void);
-void intr_disable(void);
 int intr_init();
 void intr_set_handler(int which, entry_t handler);
 

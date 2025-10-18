@@ -40,11 +40,11 @@ void software_trap_handler() {
     asm("csrw mepc, %0"::"r"(mepc));
 }
 
-void intr_set_handler(int which, entry_t handler){
+void intr_set_handler(int which, entry_t handler) {
     handlers[which] = handler;
 }
 
-int intr_init(){
+int intr_init() {
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
 }
