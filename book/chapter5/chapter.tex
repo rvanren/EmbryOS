@@ -1,1 +1,96 @@
-\chapter{System Calls}
+\chapter{User Mode and a First System Call}
+
+EmbryOS now runs processes in \emph{user mode} and lets them draw via a single system call. The kernel remains in machine mode. User code cannot poke devices or kernel data; it must request services via \texttt{ecall}.
+
+\section{Dropping to User Mode}
+
+The entry \texttt{ctx\_user()} saves the caller’s callee-saved registers, stores the resulting stack pointer through its argument, switches to the new process stack, sets \texttt{mepc} to the user entry, clears \texttt{mstatus.MPP} to U, and \texttt{mret}s. The helper \texttt{ctx\_user\_setup()} configures a PMP region so user code can execute and access memory safely.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language={[x86masm]Assembler},
+  caption={Entering user mode and PMP setup, \texttt{user.s}},
+  label={lst:user_s}
+]{../code/chapter5/user.s}
+\end{figure}
+
+\section{A Single System Call: \texttt{SYS\_PUT}}
+
+User code calls \texttt{user\_put(row, col, c, fg, bg)}. The wrapper places arguments in \texttt{a0--a4} and the syscall number in \texttt{a7}, then executes \texttt{ecall}. The kernel’s \texttt{syscall\_handler()} checks \texttt{a7} and routes \texttt{SYS\_PUT} to \texttt{proc\_put()} for the calling process’s window.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={User-mode wrapper, \texttt{syslib.h}},
+  label={lst:syslib_h}
+]{../code/chapter5/syslib.h}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={System call table (one call), \texttt{syscall.c}},
+  label={lst:syscall_c}
+]{../code/chapter5/syscall.c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={System call numbers, \texttt{syscall.h}},
+  label={lst:syscall_h}
+]{../code/chapter5/syscall.h}
+\end{figure}
+
+\section{Trap Dispatch: Timer and ECALL}
+
+The generalized interrupt layer decodes \texttt{mcause}. Timer interrupts preempt and then re-arm the quantum. ECALLs from user mode invoke the syscall handler and advance \texttt{mepc} by 4 to skip the \texttt{ecall} instruction.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Generic interrupt dispatcher, \texttt{interrupt.c}},
+  label={lst:interrupt_c}
+]{../code/chapter5/interrupt.c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Interrupt interface, \texttt{interrupt.h}},
+  label={lst:interrupt_h}
+]{../code/chapter5/interrupt.h}
+\end{figure}
+
+\section{Demonstration}
+
+The demo configures interrupts, installs the timer and syscall handlers, sets up user mode (PMP), and launches four user-mode processes that call \texttt{user\_put()} in loops. The main loop sleeps with \texttt{wfi} at priority~2.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={User-mode demo with preemption, \texttt{hello.c}},
+  label={lst:hello_c}
+]{../code/chapter5/hello.c}
+\end{figure}
+
+\section*{Projects}
+\begin{enumerate}
+  \item \textbf{Bounds checking.} Reject \texttt{SYS\_PUT} writes outside the caller’s rectangle.
+  \item \textbf{Return values.} Make \texttt{SYS\_PUT} return an error code in \texttt{a0}.
+  \item \textbf{Two syscalls.} Add \texttt{SYS\_YIELD} that maps to the scheduler’s yield.
+\end{enumerate}

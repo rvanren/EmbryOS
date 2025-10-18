@@ -35,7 +35,7 @@ ctx_user:
 
     .globl ctx_user_setup
 ctx_user_setup:
-    # pmp0: 4 MiB region from 0x80000000–0x803FFFFF
+    # pmp0: 4 MiB region from 0x80000000-0x803FFFFF
     li t0, 0x2003FFFF
     csrw pmpaddr0, t0
 
