@@ -25,7 +25,7 @@ void sched_yield(void) {
     proc_current = 0;
     while (proc_current < N_PRIORITIES && run_queue[proc_current] == 0)
         proc_current++;
-    struct pcb *next = &run_queue[proc_current]->next;
+    struct pcb *next = run_queue[proc_current]->next;
     if (next != current) ctx_switch(&current->sp, next->sp);
 }
 
@@ -34,5 +34,5 @@ void sched_run(entry_t fn, struct rect area) {
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, (struct page *)pcb + 1, fn);
+    ctx_start(&current->sp, (struct page *) pcb + 1, fn);
 }
