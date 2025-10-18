@@ -9,7 +9,7 @@ struct pcb *proc_init(struct rect area){
     struct pcb *pcb = FRAME(struct pcb, f);
     pcb->priority = 0;
     pcb->area = area;
-    pcb->next = NULL;
+    pcb->next = 0;
     return pcb;
 }
 
@@ -18,7 +18,7 @@ struct pcb *proc_create(struct rect area) {
     struct pcb *pcb = FRAME(struct pcb, f);
     pcb->priority = 0;
     pcb->area = area;
-    pcb->next = NULL;
+    pcb->next = 0;
     return pcb;
 }
 
@@ -30,14 +30,14 @@ void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg) {
 }
 
 void proc_enqueue(struct pcb **q, struct pcb *pcb) {
-    if (*q == NULL) { *q = pcb; pcb->next = pcb; }
+    if (*q == 0) { *q = pcb; pcb->next = pcb; }
     else { pcb->next = (*q)->next; (*q)->next = pcb; }
 }
 
 struct pcb *proc_dequeue(struct pcb **q) {
     struct pcb = (*q)->next;
-    if (pcb == pcb->next) *q = NULL;
+    if (pcb == pcb->next) *q = 0;
     else (*q)->next = pcb->next;
-    pcb->next = NULL;
+    pcb->next = 0;
     return pcb;
 }
