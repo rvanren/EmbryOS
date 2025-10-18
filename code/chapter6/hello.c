@@ -27,7 +27,7 @@ void taskB(void) {
     int counter = 0;
     for (;;) {
         char c = user_get();
-        user_put(10, 5, '0' + counter, 2, 0);
+        user_put(10, 5, c, 2, 0);
 	counter++;
     }
 }
@@ -47,10 +47,10 @@ int main(void) {
     kbd_init();
     ctx_user_setup();
 
-    // sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
+    sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
     sched_run(taskB, (struct rect){ 40,  0,  40, 12 });  // upper-right
-    // sched_run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
-    // sched_run(taskA, (struct rect){ 40, 12,  40, 12 });  // lower-right
+    sched_run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
+    sched_run(taskA, (struct rect){ 40, 12,  40, 12 });  // lower-right
 
     // Switch priority to level 2
     proc_dequeue(&run_queue[proc_current]);

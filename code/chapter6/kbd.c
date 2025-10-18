@@ -25,10 +25,8 @@ void kbd_init(void) {
 
 void kbd_isr(void) {
     for (;;) {
-        printf("KBD\n");
         uint32_t val = UART_RXDATA;
         if (val & (1 << 31)) break;
-	printf("KBD %x\n", val);
         int next = (head + 1) % KBD_BUF_SIZE;
         if (next != tail) {
             buf[head] = val & 0xFF;
@@ -38,12 +36,10 @@ void kbd_isr(void) {
 
     // Put all sleepers on the run queue
     while (kbd_wait != 0) {
-        printf("WU %x %x\n", kbd_wait, kbd_wait->next);
-	struct pcb *next = kbd_wait->next;
+        struct pcb *next = kbd_wait->next;
         proc_enqueue(&run_queue[0], kbd_wait);
         kbd_wait = next;
     }
-    printf("DONE\n");
 }
 
 int kbd_get(void) {
@@ -55,7 +51,6 @@ int kbd_get(void) {
     }
 
     char c = buf[tail];
-    printf("GOT '%c'\n", c);
     tail = (tail + 1) % KBD_BUF_SIZE;
     return c;
 }

@@ -17,7 +17,6 @@
 
 void interrupt_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
-    printf("CLAIM %x\n", claim);
     if (claim == UART_IRQ)
         kbd_isr(tf);
     *(volatile uint32_t *)PLIC_CLAIM = claim; // complete
@@ -46,7 +45,6 @@ void intr_disable(void) {
 void software_trap_handler(struct trap_frame *tf) {
     int mcause, mepc;
     asm("csrr %0, mcause":"=r"(mcause));
-    // asm("csrr %0, mepc":"=r"(mepc));
     if (mcause & (1 << 31)) {   // interrupt?
         switch (mcause & 0xFFF) {
         case  3: break;
@@ -57,14 +55,11 @@ void software_trap_handler(struct trap_frame *tf) {
     }
     else {
         switch (mcause & 0xFFF) {
-        case 8: case 11: (*handlers[INTR_SYSCALL])(tf);
-			 tf->mepc += 4; break;
+        case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
         default: (*handlers[INTR_EXCEPTION])(tf);
         }
     }
-    // asm("csrw mepc, %0"::"r"(mepc));
 }
-
 
 void intr_set_handler(int which, trap_entry_t handler) {
     handlers[which] = handler;
