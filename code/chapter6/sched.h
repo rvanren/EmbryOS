@@ -1,4 +1,5 @@
-#ifndef SCHED_H                                                                 #define SCHED_H
+#ifndef SCHED_H
+#define SCHED_H
 
 #include "process.h"
 
