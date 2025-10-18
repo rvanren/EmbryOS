@@ -44,7 +44,7 @@ int main(void) {
     intr_init();
     intr_set_handler(INTR_TIMER, timer_handler);
     syscall_init();
-    intr_set_handler(INTR_TIMER, syscall_handler);
+    intr_set_handler(INTR_SYSCALL, syscall_handler);
     mtime_init();
     mtime_reset(QUANTUM);
 
