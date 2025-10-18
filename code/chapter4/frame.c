@@ -3,7 +3,7 @@
 
 #define N_FRAMES    16
 
-struct page frames[N_FRAMES];
+__attribute__((aligned(PAGE_SIZE))) struct page frames[N_FRAMES];
 static int frame_free_list;
 
 void frame_init() {

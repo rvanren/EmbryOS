@@ -31,7 +31,7 @@ static void yield() {
     // Find the highest priority to run
     proc_current = 0;
     while (proc_current < N_PRIORITIES) {
-        if (run_queue[proc_current] >= 0) break;
+        if (run_queue[proc_current] != 0) break;
         proc_current++;
     }
 
@@ -67,7 +67,7 @@ void run(entry_t fn, struct rect area) {
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, (struct page *) current + 1, fn);
+    ctx_start(&current->sp, (struct page *) pcb + 1, fn);
 }
 
 int main(void) {
