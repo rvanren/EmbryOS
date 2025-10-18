@@ -41,7 +41,7 @@ void taskA(void) {
 int main(void) {
     proc_init();
     clint_init();
-    clint_set_handler(CLINT_TIMER, timer_handler());
+    clint_set_handler(CLINT_TIMER, timer_handler);
 
     mtime_reset();
     asm("csrs mie, %0"::"r"(MTIE_MASK)); // set MTIE=1, unmask timer interrupts

@@ -3,6 +3,8 @@
 
 #include "process.h"
 
+#define CLINT_BASE       0x02000000UL
+
 enum { CLINT_TIMER };
 
 void interrupts_enable(void);

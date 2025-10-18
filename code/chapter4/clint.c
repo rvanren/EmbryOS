@@ -2,7 +2,6 @@
 #include "process.h"
 #include "clint.h"
 
-#define CLINT_BASE       0x02000000UL
 #define MIE_MASK         (1u << 3)
 
 static void no_handler() {
