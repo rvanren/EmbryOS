@@ -1,4 +1,5 @@
 #include "frame.h"
+#include "stdio.h"
 
 #define N_FRAMES    16
 
