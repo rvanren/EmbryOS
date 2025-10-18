@@ -9,4 +9,6 @@ void intr_enable(void);
 int intr_init();
 void intr_set_handler(int which, entry_t handler);
 
+void interrupt_handler();
+
 #endif // INTERRUPT_H
