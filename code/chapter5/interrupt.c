@@ -52,6 +52,7 @@ void software_trap_handler() {
             break;
         default:
             printf("Unexpected exception cause %x\n", mcause);
+            for (;;) ;
         }
     }
 
