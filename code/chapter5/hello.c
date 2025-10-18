@@ -4,8 +4,20 @@
 #include "interrupt.h"
 #include "ctx.h"
 #include "mtime.h"
+#include "syscall.h"
 
 #define QUANTUM          50000         // 50 milliseconds
+
+static inline void user_put(int row, int col, char c, int fg, int bg) {
+    register int a7 asm("a7") = SYS_PUT;
+    register int a0 asm("a0") = row;
+    register int a1 asm("a1") = col;
+    register int a2 asm("a2") = c;
+    register int a3 asm("a3") = fg;
+    register int a4 asm("a4") = bg;
+    asm volatile("ecall" : : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a7));
+}
+
 
 void timer_handler() {
     sched_yield();
@@ -21,8 +33,7 @@ static void delay(void) {
 void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
     for (int cnt = 0;; cnt++) {
-        proc_put(self, 2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26,
-                                cnt, 7 - cnt % 8);
+        user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
         delay();
     }
 }

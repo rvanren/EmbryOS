@@ -1,6 +1,7 @@
 #include "syscall.h"
 #include "process.h"
 #include "stdio.h"
+#include "sched.h"
 
 // Single system call: write a character to the screen at (row, col, fg, bg)
 void syscall_handler(void) {
