@@ -63,7 +63,7 @@ void taskA(void) {
 }
 
 void run(entry_t fn, struct rect area) {
-    struct pcb *current = &run_queue[proc_current]->next;
+    struct pcb *current = run_queue[proc_current]->next;
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
@@ -87,7 +87,7 @@ int main(void) {
     run(taskA, (struct rect){ 40, 12,  40, 12 });  // lower-right
 
     // Switch priority to level 2
-    proc_dequeue(&run_queue[proc_current];
+    proc_dequeue(&run_queue[proc_current]);
     proc_enqueue(&run_queue[2], pcb);
     proc_current = 2;
     yield();
