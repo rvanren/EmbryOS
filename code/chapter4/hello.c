@@ -1,26 +1,21 @@
 #include "stdio.h"
 #include "process.h"
 
-#define EXCP_ECALL_U 8
-#define EXCP_ECALL_M 11
+#define CLINT_BASE       0x02000000UL
+#define MTIME_ADDR       (CLINT_BASE + 0xBFF8)
+#define MTIME_CMP(hart)  (CLINT_BASE + 0x4000 + 8 * (hart))
 
-#define CLINT_BASE     0x02000000UL
-#define MTIME (CLINT_BASE + 0xBFF8)
-#define MTIMECMP(hart) (CLINT_BASE + 0x4000 + 8 * (hart))
+#define MTIE_MASK        (1u << 7)
+#define MIE_MASK         (1u << 3)
 
-#define MTIE_MASK (1u << 7)
-#define MIE_MASK  (1u << 3)
-
-#define QUANTUM 100000
+#define QUANTUM          100000         // 100 milliseconds
 
 long long mtime_get() {
-    // read the current time in microseconds
-    return *((long long *) MTIME);
+    return *((long long *) MTIME_ADDR);
 }
 
 void mtime_reset() {
-    // signal the CPU QUANTUM after the current time
-    *((long long *) MTIMECMP(1)) = mtime_get() + QUANTUM;
+    *((long long *) MTIME_CMP(1)) = mtime_get() + QUANTUM;
 }
 
 static inline void interrupts_enable(void) {
@@ -31,11 +26,6 @@ static inline void interrupts_disable(void) {
     __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
 }
 
-// defined in `trap.s`: is the generic trap handler that saves the registers of
-// the user program that was executing. since traps (interrupts/exceptions) are
-// abnormal pieces of control flow, the OS does not want to overwrite the
-// registers that the user program was using. The OS is also just a program, and
-// needs to use these registers!
 void _trap_handler();
 
 void handle_syscall() {
@@ -48,10 +38,8 @@ int is_interrupt(int mcause) {
 }
 
 void software_trap_handler() {
-    int mcause;
+    int mcause, mepc;
     asm("csrr %0, mcause":"=r"(mcause));
-
-    int mepc;
     asm("csrr %0, mepc":"=r"(mepc));
 
     if (is_interrupt(mcause)) {
@@ -59,24 +47,17 @@ void software_trap_handler() {
         mtime_reset(); // add another quantum
     }
     else {
-        switch (mcause) {
-        case EXCP_ECALL_U: case EXCP_ECALL_M:
-            handle_syscall();
-            break;
-        default:
-            printf("Bad Exception %x\n", mcause);
-            while(1);
-        }
+        printf("Exception %x\n", mcause);
+        for (;;) ;
     }
 
     asm("csrw mepc, %0"::"r"(mepc));
 }
 
-/* crude busy-wait delay */
 static void delay(void) {
     interrupts_enable();
     for (volatile int i = 0; i < 100000; i++)
-        ; // proc_yield();
+        ;
     interrupts_disable();
 }
 
