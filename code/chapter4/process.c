@@ -1,19 +1,7 @@
 #include <stdint.h>
 #include "frame.h"
-#include "stdio.h"
 #include "process.h"
 #include "screen.h"
-#include "ctx.h"
-
-#define MAX_PROCESSES     8
-
-union proc_page {
-    struct pcb pcb;
-    char page[PAGE_SIZE];
-};
-
-static union proc_page procs[MAX_PROCESSES];
-static int proc_current, proc_count;
 
 void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg) {
     if (row < 0 || row >= p->area.h) return;
@@ -22,31 +10,19 @@ void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg) {
     screen_put(ch, fg, bg);
 }
 
-void proc_init(){
+int proc_init(struct rect area){
     screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
-    int pid = proc_count++;
-    union proc_page *p = &procs[pid];
-    proc_current = pid;
+    int f = frame_alloc();
+    struct pcb *pcb = FRAME(struct pcb, f);
+    pcb->priority = 0;
+    pcb->next = f;
+    return f;
 }
 
-void proc_create(entry_t fn, struct rect area) {
-    if (proc_count >= MAX_PROCESSES) {
-    printf("NO MORE PROCESSES\n");
-        return;
-    }
-    int pid = proc_count++, prev = proc_current;
-    union proc_page *p = &procs[pid];
-    p->pcb.area = area;
-    proc_current = pid;
-    ctx_start(&procs[prev].pcb.sp, p->page + PAGE_SIZE, fn);
-}
-
-void proc_yield(void) {
-    int prev = proc_current;
-    proc_current = (proc_current + 1) % proc_count;
-    ctx_switch(&procs[prev].pcb.sp, procs[proc_current].pcb.sp);
-}
-
-struct pcb *proc_self(void) {
-    return &procs[proc_current].pcb;
+int proc_create(struct rect area) {
+    int f = frame_alloc();
+    struct pcb *pcb = FRAME(struct pcb, f);
+    pcb->priority = 0;
+    pcb->area = area;
+    return f;
 }

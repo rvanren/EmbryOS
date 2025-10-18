@@ -3,6 +3,8 @@
 
 #define PAGE_SIZE      4096
 
+#define FRAME(t, f)     ((t *) &frames[f])
+
 struct page {
     char bytes[PAGE_SIZE];
 };

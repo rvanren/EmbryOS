@@ -15,10 +15,8 @@ struct pcb {
     int next;           // next process to run at same priority
 };
 
-void proc_init();
-struct pcb *proc_self();
+int proc_init(struct rect area);
 void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg);
-void proc_create(entry_t fn, struct rect area);
-void proc_yield(void);
+int proc_create(struct rect area);
 
 #endif // PROCESS_H
