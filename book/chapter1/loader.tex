@@ -13,57 +13,7 @@ as the program’s entry point.
 \begin{figure}[H]
 \centering
 \begin{minipage}{0.95\textwidth}
-\begin{lstlisting}[style=oscode,language={},caption={Linker script \texttt{hello.lds} for EmbryOS},label={lst:hello_lds}]
-OUTPUT_ARCH("riscv")
-
-ENTRY(_start)
-
-MEMORY
-{
-    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000
-}
-
-PHDRS
-{
-    ram PT_LOAD;
-}
-
-SECTIONS
-{
-    .init : ALIGN(8) {
-        *(.text.enter)
-    } >ram :ram
-
-    .text : ALIGN(8) {
-        *(.text .text.*)
-    } >ram :ram
-
-    .rodata : ALIGN(8) {
-        *(.rdata)
-        *(.rodata .rodata.*)
-        . = ALIGN(8);
-        *(.srodata .srodata.*)
-    } >ram :ram
-
-    .data : ALIGN(8) {
-        *(.data .data.*)
-        . = ALIGN(8);
-        *(.sdata .sdata.* .sdata2.*)
-    } >ram :ram
-
-    .bss (NOLOAD): ALIGN(8) {
-        *(.sbss*)
-        *(.bss .bss.*)
-        *(COMMON)
-    } >ram :ram
-
-    .heap (NOLOAD) : ALIGN(8) {
-        PROVIDE( __heap_start = . );
-    } >ram :ram
-
-    PROVIDE( __heap_end = 0x80200000 );
-}
-\end{lstlisting}
+\lstinputlisting[style=oscode,language={},caption={Linker script \texttt{hello.lds} for EmbryOS},label={lst:hello_lds}]{../code/chapter1/hello.lds}
 \end{minipage}
 \end{figure}
 
@@ -81,15 +31,15 @@ Here is what the main parts mean:
         object files and places them sequentially in RAM.
   \item \textbf{Alignment directives} (\texttt{ALIGN(8)}) ensure proper
         alignment for 64-bit accesses, even though we are running a 32-bit CPU.
-  \item The \textbf{heap symbols} \texttt{\_\_heap\_start} and
-        \texttt{\_\_heap\_end} reserve a small area for dynamic allocation later.
+  \item The \textbf{heap symbols} \texttt{frames} and
+        \texttt{\_\_frames\_end} reserve an area for dynamic allocation later.
 \end{itemize}
 
 At this point, the entire system layout is defined:
 \begin{center}
 \begin{tabular}{ll}
 \texttt{0x80000000} & --- code (\texttt{.text}, \texttt{.rodata}) \\
-\texttt{0x80200000} & --- heap end (\texttt{\_\_heap\_end}) \\
+\texttt{0x80200000} & --- heap end (\texttt{\_\_frames\_end}) \\
 \texttt{0x80400000} & --- stack top (set in assembly)
 \end{tabular}
 \end{center}

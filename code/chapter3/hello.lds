@@ -1,4 +1,10 @@
-OUTPUT_ARCH("riscv")                                                            ENTRY(_start)                                                                                                                                                   MEMORY                                                                          {                                                                                   ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000                       }
+OUTPUT_ARCH("riscv")
+ENTRY(_start)
+
+MEMORY
+{
+    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000
+}
 
 PHDRS
 {
