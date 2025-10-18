@@ -1,1 +1,137 @@
-\chapter{System Calls}
+\chapter{Preemption and Priorities}
+
+In Chapter~\ref{chap:contexts} we built a cooperative scheduler: processes
+yielded voluntarily. This worked, but a process that forgot to call
+\texttt{sched\_yield()} could monopolize the CPU forever. In this chapter,
+EmbryOS gains a hardware timer and turns cooperative multitasking into
+\emph{preemptive} scheduling. We also introduce priorities so that background
+tasks run only when nothing more important is ready.
+
+\section{Trap Entry}
+
+When any interrupt or exception occurs, the CPU jumps to the address stored in
+the \texttt{mtvec} register. EmbryOS installs \texttt{\_trap\_handler}, shown in
+Listing~\ref{lst:trap_s}, as a single entry point. It saves all general registers
+and calls \texttt{software\_trap\_handler()} in \texttt{clint.c}. The handler
+decides what to do—timer interrupt, system call, or fault—then returns to the
+same program counter via \texttt{mret}.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language={[x86masm]Assembler},
+  caption={Trap entry and exit, \texttt{trap.s}},
+  label={lst:trap_s}
+]{../code/chapter4/trap_short.s}
+\end{figure}
+
+\section{Core Local Interruptor}
+
+The \emph{CLINT} (Core Local Interruptor) connects each CPU core to its local
+timer. Its driver in Listings~\ref{lst:clint_c}–\ref{lst:clint_h} installs the
+trap handler, registers a C handler for each interrupt type, and provides simple
+functions to enable and disable interrupts globally.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Interrupt controller, \texttt{clint.c}},
+  label={lst:clint_c}
+]{../code/chapter4/clint.c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Interrupt controller interface, \texttt{clint.h}},
+  label={lst:clint_h}
+]{../code/chapter4/clint.h}
+\end{figure}
+
+\section{Machine Timer}
+
+Every RISC-V core includes a 64-bit counter (\texttt{mtime}) and a compare
+register (\texttt{mtimecmp}). When the counter reaches the compare value, a
+machine-timer interrupt is raised. EmbryOS programs this timer in
+\texttt{mtime.c}. Each interrupt calls the scheduler and sets the next alarm,
+creating periodic preemption.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Machine timer, \texttt{mtime.c}},
+  label={lst:mtime_c}
+]{../code/chapter4/mtime.c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Timer interface, \texttt{mtime.h}},
+  label={lst:mtime_h}
+]{../code/chapter4/mtime.h}
+\end{figure}
+
+\section{Prioritized Scheduler}
+
+The scheduler now maintains three run queues: high, medium, and low. New
+processes enter at the highest level. Each time a process exhausts its quantum,
+it is demoted to the next queue. This simple aging policy ensures that every
+process runs, but interactive ones get more CPU time.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Priority scheduler, \texttt{sched.c}},
+  label={lst:sched_c}
+]{../code/chapter4/sched.c}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Scheduler interface, \texttt{sched.h}},
+  label={lst:sched_h}
+]{../code/chapter4/sched.h}
+\end{figure}
+
+\section{Demonstration: Preemption in Action}
+
+The demonstration program (Listing~\ref{lst:hello_c}) installs a timer handler,
+creates four processes, and enables interrupts. Unlike Chapter~\ref{chap:contexts},
+no process ever calls \texttt{sched\_yield()}. The timer interrupt now drives
+context switches automatically, proving that preemption works.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Preemptive demo, \texttt{hello.c}},
+  label={lst:hello_c}
+]{../code/chapter4/hello.c}
+\end{figure}
+
+\section*{Projects}
+
+\begin{enumerate}
+  \item \textbf{Different quanta.} Change \texttt{QUANTUM} and observe the
+        smoothness of animation.
+  \item \textbf{Process aging.} Add a rule that moves idle processes back to a
+        higher priority.
+  \item \textbf{Other interrupts.} Extend \texttt{clint.c} to handle software
+        and external interrupts.
+\end{enumerate}
