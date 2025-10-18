@@ -1,3 +1,4 @@
+#include "frame.h"
 #include "stdio.h"
 #include "process.h"
 #include "clint.h"
@@ -27,6 +28,7 @@ void taskA(void) {
 }
 
 int main(void) {
+    frame_init();
     proc_init();
     clint_init();
     clint_set_handler(CLINT_TIMER, timer_handler);

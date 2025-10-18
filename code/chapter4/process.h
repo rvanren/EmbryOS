@@ -11,6 +11,8 @@ struct rect {
 struct pcb {
     void *sp;           // saved stack pointer
     struct rect area;   // allowed screen region
+    int priority;       // priority level
+    int next;           // next process to run at same priority
 };
 
 void proc_init();

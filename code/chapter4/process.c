@@ -4,7 +4,6 @@
 #include "screen.h"
 #include "ctx.h"
 
-#define PAGE_SIZE      4096
 #define MAX_PROCESSES     8
 
 union proc_page {
