@@ -13,4 +13,8 @@ struct free_frame {
 
 extern struct page frames[];
 
+void frame_init();
+int frame_alloc();
+void frame_release(int f);
+
 #endif // FRAME_H

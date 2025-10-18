@@ -3,7 +3,7 @@
 #define N_FRAMES    16
 
 struct page frames[N_FRAMES];
-static frame_free_list;
+static int frame_free_list;
 
 void frame_init() {
     for (int f = 0; f < N_FRAMES - 1; f++) {
@@ -18,8 +18,8 @@ int frame_alloc() {
         return -1;
     }
     int f = frame_free_list;
-    frame_free_list = ((struct free_frame *) &frames[i])->next;
-    retunr f;
+    frame_free_list = ((struct free_frame *) &frames[f])->next;
+    return f;
 }
 
 void frame_release(int f) {

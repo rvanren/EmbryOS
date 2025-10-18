@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "frame.h"
 #include "stdio.h"
 #include "process.h"
 #include "screen.h"
