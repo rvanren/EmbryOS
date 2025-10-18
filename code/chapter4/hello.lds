@@ -1,5 +1,4 @@
 OUTPUT_ARCH("riscv")
-
 ENTRY(_start)
 
 MEMORY
@@ -45,7 +44,7 @@ SECTIONS
      * Page-aligned frame allocator region (our heap)
      * --------------------------------------------------------- */
     .frames (NOLOAD) : ALIGN(4096) {
-        PROVIDE(__frames_start = .);
+        PROVIDE(frames = .);
         . = . + (4096 * 64);    /* 64 pages (256 KiB) */
         PROVIDE(__frames_end = .);
     } >ram :ram
