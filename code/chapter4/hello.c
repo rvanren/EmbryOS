@@ -1,12 +1,11 @@
 #include "stdio.h"
 #include "process.h"
+#include "clint.h"
 
-#define CLINT_BASE       0x02000000UL
 #define MTIME_ADDR       (CLINT_BASE + 0xBFF8)
 #define MTIME_CMP(hart)  (CLINT_BASE + 0x4000 + 8 * (hart))
 
 #define MTIE_MASK        (1u << 7)
-#define MIE_MASK         (1u << 3)
 
 #define QUANTUM          100000         // 100 milliseconds
 
@@ -18,40 +17,9 @@ void mtime_reset() {
     *((long long *) MTIME_CMP(1)) = mtime_get() + QUANTUM;
 }
 
-static inline void interrupts_enable(void) {
-    __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
-}
-
-static inline void interrupts_disable(void) {
-    __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
-}
-
-void _trap_handler();
-
-void handle_syscall() {
-    printf("SYSCALL\n");
-}
-
-int is_interrupt(int mcause) {
-    // most significant bit in `mcause` is set only when there is an interrupt
-    return mcause & (1 << 31);
-}
-
-void software_trap_handler() {
-    int mcause, mepc;
-    asm("csrr %0, mcause":"=r"(mcause));
-    asm("csrr %0, mepc":"=r"(mepc));
-
-    if (is_interrupt(mcause)) {
-        proc_yield();
-        mtime_reset(); // add another quantum
-    }
-    else {
-        printf("Exception %x\n", mcause);
-        for (;;) ;
-    }
-
-    asm("csrw mepc, %0"::"r"(mepc));
+void timer_handler() {
+    proc_yield();
+    mtime_reset(); // add another quantum
 }
 
 static void delay(void) {
@@ -72,8 +40,9 @@ void taskA(void) {
 
 int main(void) {
     proc_init();
+    clint_init();
+    clint_set_handler(CLINT_TIMER, timer_handler());
 
-    asm("csrw mtvec, %0"::"r"(_trap_handler));
     mtime_reset();
     asm("csrs mie, %0"::"r"(MTIE_MASK)); // set MTIE=1, unmask timer interrupts
 
