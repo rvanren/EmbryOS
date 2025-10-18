@@ -5,7 +5,7 @@
 #include "ctx.h"
 #include "mtime.h"
 
-#define QUANTUM          100000         // 100 milliseconds
+#define QUANTUM          50000         // 50 milliseconds
 
 void timer_handler() {
     sched_yield();
@@ -21,7 +21,8 @@ static void delay(void) {
 void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
     for (int cnt = 0;; cnt++) {
-        proc_put(self, 0, 0, 'A' + cnt % 26, cnt, 7 - cnt % 8);
+        proc_put(self, 2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26,
+                                cnt, 7 - cnt % 8);
         delay();
     }
 }
