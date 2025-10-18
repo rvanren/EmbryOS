@@ -1,25 +1,13 @@
 #include "stdio.h"
 #include "process.h"
 #include "clint.h"
-
-#define MTIME_ADDR       (CLINT_BASE + 0xBFF8)
-#define MTIME_CMP(hart)  (CLINT_BASE + 0x4000 + 8 * (hart))
-
-#define MTIE_MASK        (1u << 7)
+#include "mtime.h"
 
 #define QUANTUM          100000         // 100 milliseconds
 
-long long mtime_get() {
-    return *((long long *) MTIME_ADDR);
-}
-
-void mtime_reset() {
-    *((long long *) MTIME_CMP(1)) = mtime_get() + QUANTUM;
-}
-
 void timer_handler() {
     proc_yield();
-    mtime_reset(); // add another quantum
+    mtime_reset(QUANTUM); // add another quantum
 }
 
 static void delay(void) {
@@ -43,8 +31,8 @@ int main(void) {
     clint_init();
     clint_set_handler(CLINT_TIMER, timer_handler);
 
-    mtime_reset();
-    asm("csrs mie, %0"::"r"(MTIE_MASK)); // set MTIE=1, unmask timer interrupts
+    mtime_init();
+    mtime_reset(QUANTUM);
 
     proc_create(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
     proc_create(taskA, (struct rect){ 40,  0,  40, 12 });  // upper-right

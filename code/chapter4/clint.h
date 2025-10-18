@@ -5,7 +5,7 @@
 
 #define CLINT_BASE       0x02000000UL
 
-enum { CLINT_TIMER };
+enum { CLINT_TIMER, CLINT_INTERRUPT, CLINT_SYSCALL, CLINT_EXCEPTION };
 
 void interrupts_enable(void);
 void interrupts_disable(void);
