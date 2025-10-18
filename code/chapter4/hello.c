@@ -133,12 +133,12 @@ void make_unrunnable() {
 }
 
 int main(void) {
+    // Initialize
     frame_init();
     run_queue[0] = proc_init((struct rect){ 0, 0, 80, 24 });
     run_queue[1] = run_queue[2] = -1;
     clint_init();
     clint_set_handler(CLINT_TIMER, timer_handler);
-
     mtime_init();
     mtime_reset(QUANTUM);
 
@@ -155,7 +155,7 @@ int main(void) {
     proc_current = 2;
     yield();
 
-    // Run the main loop, which is waiting for interrupts
+    // Run the main loop, which is waiting for interrupts at lowest priority
     interrupts_enable();
     for (;;) {
         __asm__ volatile ("wfi");  // wait-for-interrupt
