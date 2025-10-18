@@ -1,31 +1,102 @@
 \chapter{User Mode and a First System Call}
 
-EmbryOS now runs processes in \emph{user mode} and lets them draw via a single system call. The kernel remains in machine mode. User code cannot poke devices or kernel data; it must request services via \texttt{ecall}.
+Up to now, all of EmbryOS has run in machine mode.  Processes, the scheduler,
+and even \texttt{taskA()} all shared the same privilege.  This makes for simple
+code, but it also means that a faulty process could scribble over the kernel or
+hang the entire system.  Real operating systems prevent this by running
+applications in \emph{user mode}, a restricted environment.  The kernel, still
+in machine mode, exposes a controlled set of entry points called
+\emph{system calls}.  This chapter makes that transition.
+
+\section{Why User Mode?}
+
+A privilege boundary gives us two essential properties:
+
+\begin{itemize}
+  \item \textbf{Isolation.} User code cannot modify kernel memory or device
+        registers directly.  Faults in user programs become recoverable errors,
+        not kernel panics.
+  \item \textbf{Mediation.} All access to hardware---printing to the screen,
+        reading input, allocating memory---goes through the kernel.  This lets
+        the OS decide who can do what.
+\end{itemize}
+
+RISC-V defines three privilege levels: Machine~(M), Supervisor~(S), and
+User~(U).  EmbryOS uses only two of them: M-mode for the kernel, and U-mode for
+processes.  The CPU switches between them automatically whenever a \emph{trap}
+occurs.
+
+\section{How Traps Work}
+
+When an interrupt or exception happens, the CPU saves the program counter in
+\texttt{mepc}, records the cause in \texttt{mcause}, disables further
+interrupts, and jumps to the address stored in \texttt{mtvec}.  Our assembly
+handler \texttt{\_trap\_handler} (from earlier chapters) saves all registers on
+the current stack and calls the C function
+\texttt{software\_trap\_handler()}.  When that function returns, the assembly
+code restores registers and executes \texttt{mret}.  The instruction
+\texttt{mret} is what actually performs the privilege transition: it sets the
+CPU's mode to whatever value is stored in the \texttt{mstatus.MPP} field and
+resumes execution at \texttt{mepc}.
+
+If the kernel clears \texttt{mstatus.MPP} to zero before executing
+\texttt{mret}, control returns in user mode.  That is the key to launching user
+programs.
 
 \section{Dropping to User Mode}
 
-The entry \texttt{ctx\_user()} saves the caller’s callee-saved registers, stores the resulting stack pointer through its argument, switches to the new process stack, sets \texttt{mepc} to the user entry, clears \texttt{mstatus.MPP} to U, and \texttt{mret}s. The helper \texttt{ctx\_user\_setup()} configures a PMP region so user code can execute and access memory safely.
+The entry function \texttt{ctx\_user()} in Listing~\ref{lst:user_s} saves the
+caller’s registers, stores the resulting stack pointer through its argument,
+switches to the new process stack, sets \texttt{mepc} to the user entry
+address, clears \texttt{mstatus.MPP} to select U-mode, and executes
+\texttt{mret}.  The new process begins in user mode; the kernel remains dormant
+until the next trap.
+
+Because RISC-V does not provide memory protection by default, we use Physical
+Memory Protection (PMP) to define which addresses user code may access.
+\texttt{ctx\_user\_setup()} installs a NAPOT PMP region that starts at
+0x80000000 and ends at 0x80400000, granting read, write, and execute
+permissions within that 4\,MiB window.  Attempts to fetch or access memory
+outside that range will cause an access fault.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language={[x86masm]Assembler},
-  caption={Entering user mode and PMP setup, \texttt{user.s}},
+  caption={Entering user mode and configuring PMP, \texttt{user.s}},
   label={lst:user_s}
 ]{../code/chapter5/user.s}
 \end{figure}
 
-\section{A Single System Call: \texttt{SYS\_PUT}}
+\section{System Calls and ECALL}
 
-User code calls \texttt{user\_put(row, col, c, fg, bg)}. The wrapper places arguments in \texttt{a0--a4} and the syscall number in \texttt{a7}, then executes \texttt{ecall}. The kernel’s \texttt{syscall\_handler()} checks \texttt{a7} and routes \texttt{SYS\_PUT} to \texttt{proc\_put()} for the calling process’s window.
+Once in user mode, a process can no longer reach kernel symbols like
+\texttt{proc\_put()}.  Instead it executes \texttt{ecall}, the
+\emph{environment call} instruction.  This traps back into the kernel with
+\texttt{mcause}=8 (ECALL from U-mode).  The handler runs in machine mode and
+decides what to do.  The CPU then executes \texttt{mret} and the process
+resumes where it left off.
+
+\subsection*{A First Call: \texttt{SYS\_PUT}}
+
+EmbryOS begins with just one system call: \texttt{SYS\_PUT}, which draws a
+character in the process’s screen rectangle.  It takes five arguments:
+row, column, character, foreground, and background color.
+
+Listing~\ref{lst:syslib_h} shows the user stub \texttt{user\_put()}, which
+places arguments in \texttt{a0--a4}, the system call number in \texttt{a7}, and
+executes \texttt{ecall}.  Listing~\ref{lst:syscall_c} is the kernel’s handler.
+It inspects \texttt{a7} to identify the system call, reads arguments from
+\texttt{a0--a4}, finds the current process’s \texttt{pcb}, and calls
+\texttt{proc\_put()} on its behalf.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={User-mode wrapper, \texttt{syslib.h}},
+  caption={User-mode wrapper for \texttt{SYS\_PUT}, \texttt{syslib.h}},
   label={lst:syslib_h}
 ]{../code/chapter5/syslib.h}
 \end{figure}
@@ -35,7 +106,7 @@ User code calls \texttt{user\_put(row, col, c, fg, bg)}. The wrapper places argu
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={System call table (one call), \texttt{syscall.c}},
+  caption={System call implementation (one call), \texttt{syscall.c}},
   label={lst:syscall_c}
 ]{../code/chapter5/syscall.c}
 \end{figure}
@@ -50,16 +121,21 @@ User code calls \texttt{user\_put(row, col, c, fg, bg)}. The wrapper places argu
 ]{../code/chapter5/syscall.h}
 \end{figure}
 
-\section{Trap Dispatch: Timer and ECALL}
+\section{Traps Revisited: Timer and ECALL}
 
-The generalized interrupt layer decodes \texttt{mcause}. Timer interrupts preempt and then re-arm the quantum. ECALLs from user mode invoke the syscall handler and advance \texttt{mepc} by 4 to skip the \texttt{ecall} instruction.
+The trap dispatcher from Chapter~\ref{chap:preemption} now handles both
+interrupts and exceptions.  A timer interrupt (\texttt{mcause}=0x80000007)
+causes a preemption; the kernel resets the timer and calls the scheduler.
+An ECALL from user mode (\texttt{mcause}=8) invokes the system call handler and
+then increments \texttt{mepc} by~4 to skip the \texttt{ecall} instruction.
+This prevents the process from re-trapping immediately upon return.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Generic interrupt dispatcher, \texttt{interrupt.c}},
+  caption={Trap dispatcher with ECALL and timer handling, \texttt{interrupt.c}},
   label={lst:interrupt_c}
 ]{../code/chapter5/interrupt.c}
 \end{figure}
@@ -74,23 +150,43 @@ The generalized interrupt layer decodes \texttt{mcause}. Timer interrupts preemp
 ]{../code/chapter5/interrupt.h}
 \end{figure}
 
-\section{Demonstration}
+\section{Putting It All Together}
 
-The demo configures interrupts, installs the timer and syscall handlers, sets up user mode (PMP), and launches four user-mode processes that call \texttt{user\_put()} in loops. The main loop sleeps with \texttt{wfi} at priority~2.
+The demonstration program (Listing~\ref{lst:hello_c}) initializes the timer and
+interrupt subsystem, installs the ECALL handler, sets up PMP, and launches four
+user-mode processes.  Each user process runs a loop that calls
+\texttt{user\_put()} to draw moving letters in its window.  None of these
+processes can access kernel data directly; all interaction goes through the
+system call path:
+
+\begin{enumerate}
+  \item User executes \texttt{ecall}.
+  \item CPU traps to machine mode, jumps to \texttt{\_trap\_handler}.
+  \item \texttt{software\_trap\_handler()} calls \texttt{syscall\_handler()}.
+  \item The kernel performs the service (here, \texttt{proc\_put()}).
+  \item Kernel returns with \texttt{mret}; user resumes.
+\end{enumerate}
+
+This is the same basic sequence used by Unix, Linux, and every modern
+operating system: a privilege change, a well-defined kernel entry, and a return
+to user space.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={User-mode demo with preemption, \texttt{hello.c}},
+  caption={User-mode demo with preemption and \texttt{SYS\_PUT}, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter5/hello.c}
 \end{figure}
 
 \section*{Projects}
 \begin{enumerate}
-  \item \textbf{Bounds checking.} Reject \texttt{SYS\_PUT} writes outside the caller’s rectangle.
-  \item \textbf{Return values.} Make \texttt{SYS\_PUT} return an error code in \texttt{a0}.
-  \item \textbf{Two syscalls.} Add \texttt{SYS\_YIELD} that maps to the scheduler’s yield.
+  \item \textbf{Add a second system call.}  Implement \texttt{SYS\_YIELD()} that
+        calls the scheduler’s \texttt{yield()}.
+  \item \textbf{Report errors.}  Make \texttt{SYS\_PUT()} return an error code in
+        \texttt{a0} if the coordinates are outside the process’s rectangle.
+  \item \textbf{Run-time privilege check.}  Print the value of
+        \texttt{mstatus.MPP} at key points to verify the mode transitions.
 \end{enumerate}
