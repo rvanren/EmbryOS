@@ -9,14 +9,16 @@ struct rect {
 };
 
 struct pcb {
-    void *sp;           // saved stack pointer
-    struct rect area;   // allowed screen region
+    struct pcb *next;   // queue management
     int priority;       // priority level
-    int next;           // next process to run at same priority
+    struct rect area;   // allowed screen region
+    void *sp;           // saved stack pointer
 };
 
-int proc_init(struct rect area);
-void proc_put(struct pcb *p, int row, int col, char ch, int fg, int bg);
-int proc_create(struct rect area);
+struct pcb proc_init(struct rect area);
+struct pcb *proc_create(struct rect area);
+void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg);
+void proc_enqueue(struct pcb **q, struct pcb *pcb);
+struct pcb *proc_dequeue(struct pcb **q);
 
 #endif // PROCESS_H
