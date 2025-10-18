@@ -80,7 +80,6 @@ static void delay(void) {
 
 int current_pid() {
     struct pcb *former = FRAME(struct pcb, run_queue[proc_current]);
-    printf("CP %d %d %d\n", proc_current, run_queue[proc_current], former->next);
     if (former->next < 0) panic("CP\n");
     return former->next;
 }
