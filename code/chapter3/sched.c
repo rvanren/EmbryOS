@@ -2,7 +2,6 @@
 #include "ctx.h"
 #include "frame.h"
 #include "process.h"
-#include "interrupt.h"
 
 struct pcb *run_queue;
 
@@ -17,7 +16,7 @@ void sched_block(struct pcb *current) {
 
 void sched_yield(void) {
     struct pcb *current = run_queue->next;
-    run_queue[proc_current] = current;
+    run_queue = current;
     sched_block(current);
 }
 

@@ -1,7 +1,6 @@
 #include "frame.h"
 #include "sched.h"
 #include "stdio.h"
-#include "interrupt.h"
 #include "ctx.h"
 #include "uart.h"
 
@@ -31,8 +30,8 @@ int main(void) {
     sched_init(pcb);
 
     sched_run(taskA, (struct rect){  0,  0, 40, 12 });  // upper-left
-    sched_run(taskA, (struct rect){ 40,  0, 40, 12 });  // upper-right
-    sched_run(taskA, (struct rect){  0, 12, 40, 12 });  // lower-left
+    sched_run(taskB, (struct rect){ 40,  0, 40, 12 });  // upper-right
+    sched_run(taskB, (struct rect){  0, 12, 40, 12 });  // lower-left
     sched_run(taskA, (struct rect){ 40, 12, 40, 12 });  // lower-left
 
     sched_idle();
