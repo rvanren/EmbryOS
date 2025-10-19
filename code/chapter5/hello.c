@@ -17,6 +17,7 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 void taskA(void) {
+    intr_enable();
     for (int cnt = 0;; cnt++) {
         user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
         for (volatile int i = 0; i < 100000; i++) ;

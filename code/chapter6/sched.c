@@ -37,7 +37,7 @@ void sched_run(void (*fn)(void), struct rect area) {
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_user(&current->sp, (struct page *) pcb + 1, fn);
+    ctx_start(&current->sp, (struct page *) pcb + 1, fn);
 }
 
 void sched_idle() {
