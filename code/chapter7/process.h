@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mmu.h"
+
 // Each process only gets to write in a particular rectangle of the screen
 struct rect {
     int x, y;   // top-left corner on global screen
@@ -12,6 +14,10 @@ struct pcb {
     int priority;       // priority level
     struct rect area;   // allowed screen region
     void *sp;           // saved stack pointer
+
+    uint32_t usp;      // user stack pointer (virtual, used by sret)
+    uint32_t pc;       // user program counter
+    pagetable_t *pagetable;   // user page table
 };
 
 // Initialize the process module.  Returns a PCB for the initial process.

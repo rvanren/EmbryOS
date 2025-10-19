@@ -1,47 +1,59 @@
-// userload.c — load and start an embedded user program
-#include <stdint.h>
-#include "process.h"
-#include "mmu.h"
+// userload.c — Load and start a user program in EmbryOS
 
+#include <stdint.h>
+#include "frame.h"
+#include "mmu.h"
+#include "process.h"
+#include "platform.h"
+#include "stdio.h"
+
+// These symbols are created when user.bin is linked into the kernel as user.o
 extern uint8_t _binary_user_bin_start[];
 extern uint8_t _binary_user_bin_end[];
 
 #define USER_BASE   0x80400000u
 #define USER_TOP    0x80800000u
+#define USER_SIZE   (USER_TOP - USER_BASE)
 
-void load_user(struct pcb *p) {
-    uint32_t size = _binary_user_bin_end - _binary_user_bin_start;
-    uint8_t *src = _binary_user_bin_start;
+/* Copy the user program into its address space */
+void user_load(struct pcb *p) {
+    uint32_t size = (uint32_t)(_binary_user_bin_end - _binary_user_bin_start);
+    if (size > USER_SIZE) {
+        printf("User program too large (%u bytes)\n", size);
+        return;
+    }
+
+    // Copy into the user region (already identity mapped by vm_init)
     uint8_t *dst = (uint8_t *)USER_BASE;
-
-    // Copy user code into user address space
     for (uint32_t i = 0; i < size; i++)
-        dst[i] = src[i];
+        dst[i] = _binary_user_bin_start[i];
 
-    // Initialize process state
-    p->pc = USER_BASE;
-    p->sp = USER_TOP;
+    // Initialize user entry and stack
+    p->pc  = USER_BASE;   // entry point
+    p->usp = USER_TOP;    // top of user stack
 }
 
-/* Run a user process by switching to its page table and dropping to U-mode */
-void run_user(struct pcb *p) {
-    // Switch to process address space
-    asm volatile("csrw satp, %0" :: "r"(p->satp));
+/* Enter user mode — assumes vm_enable() has already been called */
+void user_run(struct pcb *p) {
+    // Select the process's page table (for now, everyone uses kernel_root)
+    uint32_t root_pa = (uint32_t)(uintptr_t)p->pagetable;
+    uint32_t satp = (1u << 31) | (root_pa >> 12);   // MODE = Sv32
+    asm volatile("csrw satp, %0" :: "r"(satp));
     asm volatile("sfence.vma zero, zero");
 
-    // Set program counter (entry)
+    // Set user entry point
     asm volatile("csrw sepc, %0" :: "r"(p->pc));
 
-    // Prepare stack
-    asm volatile("mv sp, %0" :: "r"(p->sp));
+    // Enable interrupts and set SPP=0 (next privilege = U)
+    uint32_t sstatus;
+    asm volatile("csrr %0, sstatus" : "=r"(sstatus));
+    sstatus &= ~(1 << 8);        // SPP = 0 → U-mode after sret
+    sstatus |=  (1 << 5);        // SPIE = 1 → enable interrupts after sret
+    asm volatile("csrw sstatus, %0" :: "r"(sstatus));
 
-    // Enable interrupts in S-mode and set U-mode next
-    register uint32_t mstatus;
-    asm volatile("csrr %0, mstatus" : "=r"(mstatus));
-    mstatus &= ~(3 << 11);      // clear MPP
-    mstatus |= (1 << 11);       // set MPP = S (so mret → S-mode)
-    asm volatile("csrw mstatus, %0" :: "r"(mstatus));
+    // Load user stack pointer (virtual address)
+    asm volatile("mv sp, %0" :: "r"(p->usp));
 
-    // mret will enter S-mode, and then sret (in S trap handler) will enter U-mode
-    asm volatile("mret");
+    // Jump into user code
+    asm volatile("sret");
 }
