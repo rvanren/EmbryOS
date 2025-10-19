@@ -28,6 +28,7 @@ void taskB(void) {
     for (;;) {
         char c = user_get();
         user_put(10, 5 + counter % 10, c, 2, 0);
+        counter++;
     }
 }
 
