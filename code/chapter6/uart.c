@@ -7,7 +7,6 @@
 
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 #define UART ((volatile struct uart *) UART_BASE)
-
 #define FULL (1 << 31)
 
 static char buf[KBD_BUF_SIZE];		 // receive buffer
@@ -48,7 +47,6 @@ int uart_get(void) {
         uart_wait = pcb;
         sched_block(pcb);
     }
-
     char c = buf[tail];
     tail = (tail + 1) % KBD_BUF_SIZE;
     return c;
