@@ -5,8 +5,6 @@
 #include "interrupt.h"
 #include "ctx.h"
 #include "mtime.h"
-#include "syscall.h"
-#include "syslib.h"
 #include "uart.h"
 
 #define QUANTUM          50000         // 50 milliseconds
@@ -17,8 +15,9 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 void taskA(void) {
+    struct pcb *self = run_queue[proc_current]->next;
     for (int cnt = 0;; cnt++) {
-        user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
+        proc_put(self, 2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
         intr_enable();
         for (volatile int i = 0; i < 100000; i++) ;
         intr_disable();
@@ -26,7 +25,7 @@ void taskA(void) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); syscall_init(); uart_init(); mtime_init();
+    frame_init(); intr_init(); uart_init(); mtime_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
     intr_set_handler(INTR_TIMER, timer_handler);
