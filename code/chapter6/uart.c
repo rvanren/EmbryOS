@@ -1,51 +1,39 @@
 #include <stdint.h>
-#include "kbd.h"
-#include "interrupt.h"
+#include "uart.h"
 #include "sched.h"
-#include "stdio.h"
 
 #define KBD_BUF_SIZE 64
 
-struct uart {
-    uint32_t txdata, rxdata;
-    uint32_t txctrl, rxctrl;
-    uint32_t ie, ip;
-};
+struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
-// Memory mapped IO:
 #define UART ((struct uart *) 0x10010000)
-#define RXFULL (1 << 31)
-#define TXFULL (1 << 31)
+#define FULL (1 << 31)
 
-// Receive buffer
-static char buf[KBD_BUF_SIZE];
+static char buf[KBD_BUF_SIZE];		 // receive buffer
 static int head = 0, tail = 0;
 static struct pcb *uart_wait = 0;        // wait queue
 
 void putchar(char c) {
-    while (UART->txdata & TXFULL)
-        ;
+    while (UART->txdata & FULL) ;
     UART->txdata = c;
 }
 
 void uart_init(void) {
-    UART->rxctrl = 1;  // enable receiver (bit 0)
+    UART->rxctrl = 1;     // enable receiver (bit 0)
     UART->ie = (1 << 1);  // enable RX interrupt (bit 1)
 }
 
 void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;
-        if (val & RXFULL) break;
+        if (val & FULL) break;
         int next = (head + 1) % KBD_BUF_SIZE;
         if (next != tail) {
             buf[head] = val & 0xFF;
             head = next;
         }
     }
-
-    // Put all sleepers on the run queue
-    while (uart_wait != 0) {
+    while (uart_wait != 0) { // Put all sleepers on the run queue
         struct pcb *next = uart_wait->next;
         proc_enqueue(&run_queue[0], uart_wait);
         uart_wait = next;
