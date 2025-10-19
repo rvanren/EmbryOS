@@ -11,11 +11,6 @@
 
 #define QUANTUM          50000         // 50 milliseconds
 
-void timer_handler(struct trap_frame *tf) {
-    sched_yield();
-    mtime_reset(QUANTUM); // add another quantum
-}
-
 void taskA(void) {
     for (int cnt = 0;; cnt++) {
         user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);

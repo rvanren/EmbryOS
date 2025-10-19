@@ -13,4 +13,6 @@ void sched_block(struct pcb *current);
 void sched_yield(void);
 void sched_run(entry_t fn, struct rect area);
 
+void timer_handler(struct trap_frame *tf);
+
 #endif // SCHED_H

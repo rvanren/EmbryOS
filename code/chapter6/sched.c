@@ -39,3 +39,8 @@ void sched_run(entry_t fn, struct rect area) {
     proc_current = 0;
     ctx_user(&current->sp, (struct page *) pcb + 1, fn);
 }
+
+void timer_handler(struct trap_frame *tf) {
+    sched_yield();
+    mtime_reset(QUANTUM); // add another quantum
+}
