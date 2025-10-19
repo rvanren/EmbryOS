@@ -3,24 +3,8 @@
 #include "interrupt.h"
 #include "stdio.h"
 #include "process.h"
-#include "uart.h"
-
-#define UART_IRQ    4
-
-#define PLIC_BASE   0x0C000000
-#define PLIC_ENABLE (PLIC_BASE + 0x2080)   // enable bits for hart 0 M-mode
-#define PLIC_PRIORITY (PLIC_BASE + 0x0000)
-#define PLIC_THRESHOLD (PLIC_BASE + 0x200000)
-#define PLIC_CLAIM     (PLIC_BASE + 0x201004)
 
 #define MIE_MASK (1u << 3)
-
-void interrupt_handler(struct trap_frame *tf) {
-    uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
-    if (claim == UART_IRQ)
-        uart_isr(tf);
-    *(volatile uint32_t *)PLIC_CLAIM = claim; // complete
-}
 
 static void no_handler(struct trap_frame *tf) {
     printf("Bad interrupt\n");
@@ -68,13 +52,6 @@ void intr_set_handler(int which, trap_entry_t handler) {
 int intr_init() {
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
-
-    // Give UART interrupt a nonzero priority
-    *(volatile uint32_t *)(PLIC_PRIORITY + 4 * UART_IRQ) = 1;
-    // Enable UART interrupt for hart 0
-    *(volatile uint32_t *)(PLIC_ENABLE) = (1 << UART_IRQ);
-    // Set threshold = 0 (accept all priorities)
-    *(volatile uint32_t *)(PLIC_THRESHOLD) = 0;
-
+    plic_init();
     asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 → allow external interrupts
 }
