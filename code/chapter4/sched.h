@@ -23,7 +23,7 @@ void sched_init(struct pcb *first);
 // The current process pcb is replaced by the highest priority process.
 void sched_block(struct pcb *pcb);
 
-// The curent process voluntarily yields to another. If its priority was 0,
+// The current process voluntarily yields to another. If its priority was 0,
 // it is moved to run_queue[1].
 void sched_yield(void);
 
