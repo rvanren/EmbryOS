@@ -43,12 +43,9 @@ void sched_run(entry_t fn, struct rect area) {
 }
 
 void sched_idle() {
-    // Switch priority to level 2
-    proc_dequeue(&run_queue[proc_current]);
+    struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
     proc_enqueue(&run_queue[2], pcb);
     proc_current = 2;
-
-    // Run the main loop, which is waiting for interrupts at lowest priority
     for (;;) {
         sched_yield();
         intr_enable();
