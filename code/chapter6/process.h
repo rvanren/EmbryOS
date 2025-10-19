@@ -1,5 +1,4 @@
-#ifndef PROCESS_H
-#define PROCESS_H
+#pragma once
 
 typedef void (*entry_t)(void);
 
@@ -20,5 +19,3 @@ struct pcb *proc_create(struct rect area);
 void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg);
 void proc_enqueue(struct pcb **q, struct pcb *pcb);
 struct pcb *proc_dequeue(struct pcb **q);
-
-#endif // PROCESS_H

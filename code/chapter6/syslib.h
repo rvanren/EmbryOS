@@ -1,5 +1,4 @@
-#ifndef SYSLIB_H
-#define SYSLIB_H
+#pragma once
 
 #include "syscall.h"
 
@@ -19,5 +18,3 @@ static inline int user_get(void) {
     asm volatile("ecall" : "=r"(a0) : "r"(a7));
     return a0;
 }
-
-#endif // SYSLIB_H

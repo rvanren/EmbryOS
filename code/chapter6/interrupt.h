@@ -1,5 +1,4 @@
-#ifndef INTERRUPT_H
-#define INTERRUPT_H
+#pragma once
 
 #include "trap.h"
 
@@ -13,5 +12,3 @@ int intr_init();
 void intr_set_handler(int which, trap_entry_t handler);
 
 void interrupt_handler(struct trap_frame *);
-
-#endif // INTERRUPT_H

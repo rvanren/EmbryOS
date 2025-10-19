@@ -5,10 +5,8 @@
 #include "process.h"
 #include "uart.h"
 #include "plic.h"
+#include "platform.h"
 
-#define UART_IRQ         4
-
-#define PLIC_BASE       0x0C000000
 #define PLIC_ENABLE     (PLIC_BASE + 0x2080)      // enable bits for hart 0 M-mode
 #define PLIC_PRIORITY   (PLIC_BASE + 0x0000)
 #define PLIC_THRESHOLD  (PLIC_BASE + 0x200000)

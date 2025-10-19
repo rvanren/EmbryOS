@@ -1,5 +1,4 @@
-#ifndef SCHED_H
-#define SCHED_H
+#pragma once
 
 #include "process.h"
 #include "trap.h"
@@ -14,5 +13,3 @@ void sched_block(struct pcb *current);
 void sched_yield(void);
 void sched_run(entry_t fn, struct rect area);
 void sched_idle();
-
-#endif // SCHED_H

@@ -1,5 +1,4 @@
-#ifndef TRAP_H
-#define TRAP_H
+#pragma once
 
 #include <stdint.h>
 
@@ -14,5 +13,3 @@ struct trap_frame {
     uint32_t t3, t4, t5, t6;                // caller-saved
     uint32_t mepc;                          // saved program counter
 };
-
-#endif

@@ -1,12 +1,13 @@
 #include <stdint.h>
 #include "uart.h"
 #include "sched.h"
+#include "platform.h"
 
 #define KBD_BUF_SIZE 64
 
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
+#define UART ((volatile struct uart *) UART_BASE)
 
-#define UART ((struct uart *) 0x10010000)
 #define FULL (1 << 31)
 
 static char buf[KBD_BUF_SIZE];		 // receive buffer
