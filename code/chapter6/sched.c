@@ -2,7 +2,6 @@
 #include "ctx.h"
 #include "frame.h"
 #include "process.h"
-#include "mtime.h"
 #include "interrupt.h"
 
 struct pcb *run_queue[N_PRIORITIES];
