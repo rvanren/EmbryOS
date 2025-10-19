@@ -27,7 +27,7 @@ USER_OBJ    = user.o
 USER_LDS    = user.lds
 
 $(USER_ELF): $(USER_SRC) $(USER_LDS)
-	$(RISCV_CC) $(CFLAGS) -nostdlib -T $(USER_LDS) -o $@ $(USER_SRC)
+	$(RISCV_CC) $(CFLAGS) -nostdlib -T $(USER_LDS) -o $@ crt0.s $(USER_SRC)
 
 $(USER_BIN): $(USER_ELF)
 	$(OBJCOPY) -O binary $< $@

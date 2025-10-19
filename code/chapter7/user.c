@@ -1,10 +1,7 @@
-// user.c — simple user program for EmbryOS
-
-extern void putchar(char c);
-extern void printf(const char *s);
+#include "syslib.h"
 
 void main(void) {
-    printf("Hello from user mode!\n");
+    user_put(0, 0, 'X', 0, 7);
     for (;;)
         ;
 }
