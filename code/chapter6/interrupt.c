@@ -53,5 +53,5 @@ int intr_init() {
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
     plic_init();
-    asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 → allow external interrupts
+    asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
 }
