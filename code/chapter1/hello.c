@@ -3,11 +3,11 @@
 struct uart { uint32_t txdata; };
 
 // Memory mapped IO:
-#define UART ((struct uart *) 0x10010000)
-#define TXFULL (1 << 31)
+#define UART ((volatile struct uart *) 0x10010000)
+#define FULL (1 << 31)
 
 void putchar(char c) {
-    while (UART->txdata & TXFULL)
+    while (UART->txdata & FULL)
         ;
     UART->txdata = c;
 }
