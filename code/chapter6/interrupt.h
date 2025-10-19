@@ -2,11 +2,11 @@
 
 #include "trap.h"
 
-# All interrupt handlers have this type.  They are called with a pointer to
-# a trap frame that contains all the saved registers.
+// All interrupt handlers have this type.  They are called with a pointer to
+// a trap frame that contains all the saved registers.
 typedef void (*trap_entry_t)(struct trap_frame *);
 
-# These are the classes of interrupts
+// These are the classes of interrupts
 enum intr_class { INTR_TIMER, INTR_EXTERNAL, INTR_SYSCALL, INTR_EXCEPTION };
 
 void intr_enable(void);     // enable interrupts
