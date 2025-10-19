@@ -7,6 +7,7 @@
 #include "mtime.h"
 #include "syscall.h"
 #include "syslib.h"
+#include "uart.h"
 
 #define QUANTUM          50000         // 50 milliseconds
 
@@ -23,7 +24,7 @@ void taskA(void) {
 }
 
 void taskB(void) {
-    for (int counter = 0;;, counter++) {
+    for (int counter = 0;; counter++) {
         char c = user_get();
         user_put(10, 5 + counter % 10, c, 2, 0);
     }
