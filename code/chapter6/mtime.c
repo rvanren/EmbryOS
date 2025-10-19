@@ -10,10 +10,10 @@ void mtime_init() {
     asm("csrs mie, %0"::"r"(MTIE_MASK)); // set MTIE=1, unmask timer interrupts
 }
 
-long long mtime_get() {
-    return *((long long *) MTIME_ADDR);
+uint64_t mtime_get() {
+    return *((volatile uint64_t *) MTIME_ADDR);
 }
 
-void mtime_reset(long long quantum) {
-    *((long long *) MTIME_CMP(1)) = mtime_get() + quantum;
+void mtime_reset(uint64_t quantum) {
+    *((volatile uint64_t *) MTIME_CMP(1)) = mtime_get() + quantum;
 }
