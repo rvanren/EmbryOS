@@ -3,7 +3,7 @@
 #include "interrupt.h"
 #include "stdio.h"
 #include "process.h"
-#include "kbd.h"
+#include "uart.h"
 
 #define UART_IRQ    4
 
@@ -18,7 +18,7 @@
 void interrupt_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
     if (claim == UART_IRQ)
-        kbd_isr(tf);
+        uart_isr(tf);
     *(volatile uint32_t *)PLIC_CLAIM = claim; // complete
 }
 

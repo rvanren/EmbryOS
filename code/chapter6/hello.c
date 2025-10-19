@@ -7,7 +7,7 @@
 #include "mtime.h"
 #include "syscall.h"
 #include "syslib.h"
-#include "kbd.h"
+#include "uart.h"
 
 #define QUANTUM          50000         // 50 milliseconds
 
@@ -40,11 +40,10 @@ int main(void) {
     intr_set_handler(INTR_TIMER, timer_handler);
     syscall_init();
     intr_set_handler(INTR_SYSCALL, syscall_handler);
-    kbd_init();
+    uart_init();
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     mtime_init();
     mtime_reset(QUANTUM);
-    kbd_init();
     ctx_user_setup();
 
     sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
