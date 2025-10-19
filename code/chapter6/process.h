@@ -1,7 +1,5 @@
 #pragma once
 
-typedef void (*entry_t)(void);
-
 struct rect {
     int x, y;   // top-left corner on global screen
     int w, h;   // width and height

@@ -33,7 +33,7 @@ void sched_yield(void) {
     sched_block(current);
 }
 
-void sched_run(entry_t fn, struct rect area) {
+void sched_run(void (*fn)(void), struct rect area) {
     struct pcb *current = run_queue[proc_current]->next;
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
