@@ -1,8 +1,8 @@
 #include "stdio.h"
 #include "screen.h"
+#include "uart.h"
 
-static int cur_row = 0;
-static int cur_col = 0;
+static int cur_row = 0, cur_col = 0;
 
 static void term_move(int row, int col) {
     printf("\033[%d;%dH", row + 1, col + 1);

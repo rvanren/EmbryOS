@@ -1,12 +1,7 @@
-#include "screen.h"   // declare screen_* API
+#include "stdio.h"
+#include "uart.h"
 
-/* crude busy-wait delay; adjust for speed */
-static void delay(void) {
-    for (volatile int i = 0; i < 10000000; i++)
-        ;
-}
-
-int main(void) {
+void taskA(void) {
     const char *banner = "==== EmbryOS says Hello World ====   ";
     const int len   = 38;                 // length of banner string (include spaces)
     const int row   = 12;                 // vertical position (middle of 24-line screen)
@@ -28,8 +23,12 @@ int main(void) {
         color = (color % 7) + 1;
         offset = (offset + 1) % len;
 
-        delay();
+        // delay
+        for (volatile int i = 0; i < 10000000; i++) ;
     }
+}
 
-    return 0;
+int main(void) {
+    uart_init();
+    taskA();
 }

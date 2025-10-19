@@ -1,14 +1,17 @@
 #include <stdint.h>
-#include "stdio.h"
+#include "uart.h"
+#include "platform.h"
 
-struct uart { uint32_t txdata; };
+#define KBD_BUF_SIZE 64
 
-// Memory mapped IO:
-#define UART ((struct uart *) 0x10010000)
-#define TXFULL (1 << 31)
+struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
+#define UART ((volatile struct uart *) UART_BASE)
+#define FULL (1 << 31)
 
 void putchar(char c) {
-    while (UART->txdata & TXFULL)
-        ;
+    while (UART->txdata & FULL) ;
     UART->txdata = c;
+}
+
+void uart_init(void) {
 }
