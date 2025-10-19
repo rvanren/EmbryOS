@@ -15,7 +15,6 @@ void sched_init(struct pcb *first) {
 }
 
 void sched_block(struct pcb *current) {
-    // Find highest non-empty queue and run next process
     proc_current = 0;
     while (proc_current < N_PRIORITIES && run_queue[proc_current] == 0)
         proc_current++;

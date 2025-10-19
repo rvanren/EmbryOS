@@ -11,12 +11,7 @@ static void no_handler(struct trap_frame *tf) {
     for (;;) ;
 }
 
-static trap_entry_t handlers[] = {
-    no_handler,     // timer
-    no_handler,     // external
-    no_handler,     // syscall
-    no_handler      // exception
-};
+static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
 void intr_enable(void) {
     __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
