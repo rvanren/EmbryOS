@@ -34,7 +34,15 @@ void software_trap_handler(struct trap_frame *tf) {
     else {
         switch (mcause & 0xFFF) {
         case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
-        default: (*handlers[INTR_EXCEPTION])(tf);
+        default: {
+	    uint32_t mcause, mtval, mepc;
+	    asm volatile ("csrr %0, mcause" : "=r"(mcause));
+	    asm volatile ("csrr %0, mtval"  : "=r"(mtval));
+	    asm volatile ("csrr %0, mepc"   : "=r"(mepc));
+	    printf("mcause=%u mtval=0x%x mepc=0x%x\n", mcause, mtval, mepc);
+		 // (*handlers[INTR_EXCEPTION])(tf);
+		for (;;) ;
+	  }
         }
     }
 }
@@ -44,7 +52,8 @@ void intr_set_handler(enum intr_class which, trap_entry_t handler) {
 }
 
 int intr_init() {
-    void _trap_handler();
+    void _trap_handler(), pmp_open_all();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
+    pmp_open_all();
     asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
 }

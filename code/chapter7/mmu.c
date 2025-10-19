@@ -1,17 +1,7 @@
-// mmu.c — Minimal Sv32 paging for EmbryOS
-// Depends on: frame_alloc() from frame.c
-
-#include <stdint.h>
-#include "frame.h"
-#include "mmu.h"
-
-// ---- Internal helpers ----
-
-// Extract VPN indices from a virtual address
-static inline uint32_t vpn1(uint32_t va) { return (va >> 22) & 0x3FF; }
-static inline uint32_t vpn0(uint32_t va) { return (va >> 12) & 0x3FF; }
-
-// Convert a physical address to PTE format
+// mmu.c — Minimal Sv32 paging for EmbryOS                                      // Depends on: frame_alloc() from frame.c
+                                                                                #include <stdint.h>                                                             #include "frame.h"                                                              #include "mmu.h"                                                                                                                                                // ---- Internal helpers ----
+                                                                                // Extract VPN indices from a virtual address                                   static inline uint32_t vpn1(uint32_t va) { return (va >> 22) & 0x3FF; }         static inline uint32_t vpn0(uint32_t va) { return (va >> 12) & 0x3FF; }
+                                                                                // Convert a physical address to PTE format
 #define PA2PTE(pa)  (((uint32_t)(pa) >> 2) & ~0x3FFu)
 
 // Global kernel root page table
@@ -43,9 +33,14 @@ static pte_t *walk_create(pagetable_t *root, uint32_t va) {
 static int map_page(pagetable_t *root, uint32_t va, uint32_t pa, uint32_t flags) {
     pte_t *pte = walk_create(root, va);
     if (!pte) return -1;
-    *pte = PA2PTE(pa) | flags | PTE_V;
+
+    uint32_t f = flags | PTE_V | PTE_A;      // mark accessed
+    if (flags & PTE_W) f |= PTE_D;           // mark dirty if writable
+
+    *pte = PA2PTE(pa) | f;
     return 0;
 }
+
 
 // Map a contiguous range (size multiple of PAGE_SIZE)
 static int map_range(pagetable_t *root, uint32_t va, uint32_t pa,
@@ -80,13 +75,17 @@ void vm_init(void) {
     kernel_root = alloc_pt();
     if (!kernel_root) return;
 
-    // Kernel: 0x80000000–0x80400000, R/W/X for supervisor only
+    // Kernel: 0x80000000-0x80400000, R/W/X for supervisor only
     vm_map_kernel_identity(0x80000000u, 0x00400000u,
                            PTE_R | PTE_W | PTE_X | PTE_G);
 
-    // User region: 0x80400000–0x80800000, accessible from U-mode
+    // User region: 0x80400000-0x80800000, accessible from U-mode
     vm_map_user_identity(0x80400000u, 0x00400000u,
                          PTE_R | PTE_W | PTE_X | PTE_U);
+
+    // PLUS: one (or more) stack pages at the top
+    vm_map_user_identity(0x80800000u - 0x1000, 0x1000, PTE_R|PTE_W|PTE_U|PTE_A|PTE_D);
+
 }
 
 // Enable Sv32 paging

@@ -33,27 +33,50 @@ void user_load(struct pcb *p) {
     p->usp = USER_TOP;    // top of user stack
 }
 
-/* Enter user mode — assumes vm_enable() has already been called */
+static void dump_pte(uint32_t va, pagetable_t *root) {
+    uint32_t l1i = (va >> 22) & 0x3FF;
+    uint32_t l0i = (va >> 12) & 0x3FF;
+
+    pte_t pte1 = (*root)[l1i];
+    printf("L1[%u]=0x%x\n", l1i, pte1);
+    if ((pte1 & PTE_V) == 0) { printf("L1 invalid\n"); return; }
+
+    uint32_t leaf_pa = (pte1 >> 10) << 12;       // physical address of L0
+    pte_t *leaf = (pte_t *)leaf_pa;
+    pte_t pte0 = leaf[l0i];
+    printf("  L0[%u]=0x%x (U=%d X=%d R=%d W=%d V=%d)\n", l0i, pte0,
+           !!(pte0 & PTE_U), !!(pte0 & PTE_X),
+           !!(pte0 & PTE_R), !!(pte0 & PTE_W), !!(pte0 & PTE_V));
+}
+
+/* Enter user mode - assumes vm_enable() has already been called */
 void user_run(struct pcb *p) {
-    // Select the process's page table (for now, everyone uses kernel_root)
-    uint32_t root_pa = (uint32_t)(uintptr_t)p->pagetable;
-    uint32_t satp = (1u << 31) | (root_pa >> 12);   // MODE = Sv32
+    // Set user entry point
+    asm volatile("csrw mepc, %0" :: "r"(p->pc));
+
+    // Enable interrupts and set MPP = U
+    uint32_t mstatus;
+    asm volatile("csrr %0, mstatus" : "=r"(mstatus));
+    mstatus &= ~(3 << 11);   // clear MPP bits
+    mstatus |=  (0 << 11);   // MPP = 0 → U-mode
+    mstatus |=  (1 << 7);    // MPIE = 1
+    asm volatile("csrw mstatus, %0" :: "r"(mstatus));
+
+    // Switch page tables if desired (Sv32 works in M-mode too)
+    uint32_t satp = (1u << 31) | ((uint32_t)p->pagetable >> 12);
     asm volatile("csrw satp, %0" :: "r"(satp));
     asm volatile("sfence.vma zero, zero");
 
-    // Set user entry point
-    asm volatile("csrw sepc, %0" :: "r"(p->pc));
-
-    // Enable interrupts and set SPP=0 (next privilege = U)
-    uint32_t sstatus;
-    asm volatile("csrr %0, sstatus" : "=r"(sstatus));
-    sstatus &= ~(1 << 8);        // SPP = 0 → U-mode after sret
-    sstatus |=  (1 << 5);        // SPIE = 1 → enable interrupts after sret
-    asm volatile("csrw sstatus, %0" :: "r"(sstatus));
-
-    // Load user stack pointer (virtual address)
+    // Set up user stack
     asm volatile("mv sp, %0" :: "r"(p->usp));
 
-    // Jump into user code
-    asm volatile("sret");
+    uint32_t Xsatp, Xmstatus, Xmepc;
+    asm volatile("csrr %0, satp"    : "=r"(Xsatp));
+    asm volatile("csrr %0, mstatus" : "=r"(Xmstatus));
+    asm volatile("csrr %0, mepc"    : "=r"(Xmepc));
+    printf("satp=0x%x mstatus=0x%x mepc=0x%x\n", Xsatp, Xmstatus, Xmepc);
+    dump_pte(0x80400000u, vm_root());
+    printf("user[0]=0x%x\n", *(volatile uint32_t*)0x80400000);
+    // Jump to user mode
+    asm volatile("mret");
 }

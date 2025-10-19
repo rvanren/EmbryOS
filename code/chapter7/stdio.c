@@ -26,6 +26,11 @@ void printf(const char *fmt, ...) {
             print_unsigned((unsigned int) x, 10);
             break;
         }
+        case 'u': {
+            unsigned int x = va_arg(ap, unsigned int);
+            print_unsigned(x, 10);
+            break;
+        }
         case 'x': {
             unsigned int x = va_arg(ap, unsigned int);
             print_unsigned(x, 16);
