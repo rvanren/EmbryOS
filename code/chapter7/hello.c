@@ -19,14 +19,16 @@ void timer_handler(struct trap_frame *tf) {
 
 void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
-    void user_load(struct pcb *p);
-    void user_run(struct pcb *p);
-    self->pagetable = vm_root();
-    printf("LOAD\n");
-    user_load(self);
-    printf("RUN\n");
-    user_run(self);
-    printf("DONE\n");
+    self->pagetable = vm_create_root();
+    vm_clone_kernel_mappings(self->pagetable);
+
+    // Allocate frames for code and stack, map them
+    int f_code = frame_alloc();
+    int f_stack = frame_alloc();
+    vm_map(self->pagetable, USER_BASE, f_code,
+           PTE_R|PTE_X|PTE_U|PTE_A);
+    vm_map(self->pagetable, USER_TOP - PAGE_SIZE, f_stack,
+           PTE_R|PTE_W|PTE_U|PTE_A|PTE_D);
 }
 
 int main(void) {
