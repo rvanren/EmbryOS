@@ -1,13 +1,15 @@
-// mmu.c — Minimal Sv32 paging for EmbryOS                                      // Depends on: frame_alloc() from frame.c
-                                                                                #include <stdint.h>                                                             #include "frame.h"                                                              #include "mmu.h"                                                                                                                                                // ---- Internal helpers ----
-                                                                                // Extract VPN indices from a virtual address                                   static inline uint32_t vpn1(uint32_t va) { return (va >> 22) & 0x3FF; }         static inline uint32_t vpn0(uint32_t va) { return (va >> 12) & 0x3FF; }
-                                                                                // Convert a physical address to PTE format
+// mmu.c — Minimal Sv32 paging for EmbryOS
+#include <stdint.h>
+#include "frame.h"
+#include "mmu.h"
+
+// --- add to mmu.c ---
+
+// (Reuses your existing helpers and frame_alloc())
+static inline uint32_t vpn1(uint32_t va) { return (va >> 22) & 0x3FF; }
+static inline uint32_t vpn0(uint32_t va) { return (va >> 12) & 0x3FF; }
 #define PA2PTE(pa)  (((uint32_t)(pa) >> 2) & ~0x3FFu)
 
-// Global kernel root page table
-static pagetable_t *kernel_root __attribute__((aligned(PAGE_SIZE))) = 0;
-
-// Allocate and clear a new page table
 static pagetable_t *alloc_pt(void) {
     int f = frame_alloc();
     if (f < 0) return 0;
@@ -16,31 +18,38 @@ static pagetable_t *alloc_pt(void) {
     return pt;
 }
 
-// Walk or create the next-level page table
 static pte_t *walk_create(pagetable_t *root, uint32_t va) {
     pte_t *pte1 = &(*root)[vpn1(va)];
     if (!(*pte1 & PTE_V)) {
         pagetable_t *leaf = alloc_pt();
         if (!leaf) return 0;
-        *pte1 = PA2PTE(leaf) | PTE_V;
+        *pte1 = PA2PTE(leaf) | PTE_V;          // pointer PTE (R=W=X=0)
     }
     uintptr_t leaf_pa = (uintptr_t)((*pte1 >> 10) << 12);
-    pagetable_t *leaf = (pagetable_t *)leaf_pa;   // identity during setup
-    return &(*leaf)[vpn0(va)];
+    return &((pagetable_t*)leaf_pa)[0][vpn0(va)];
 }
 
-// Map one 4 KiB page
-static int map_page(pagetable_t *root, uint32_t va, uint32_t pa, uint32_t flags) {
+int vm_map(pagetable_t *root, uint32_t va, uint32_t pa, uint32_t flags) {
     pte_t *pte = walk_create(root, va);
     if (!pte) return -1;
-
-    uint32_t f = flags | PTE_V | PTE_A;      // mark accessed
-    if (flags & PTE_W) f |= PTE_D;           // mark dirty if writable
-
+    uint32_t f = flags | PTE_V | PTE_A;
+    if (flags & PTE_W) f |= PTE_D;
     *pte = PA2PTE(pa) | f;
     return 0;
 }
 
+pagetable_t *vm_create_root(void) {
+    return alloc_pt();
+}
+
+void vm_clone_kernel_mappings(pagetable_t *dst) {
+    // Recreate kernel identity map in 'dst' (supervisor-only).
+    // (Same ranges/flags you used in vm_init())
+    uint32_t kstart = KERN_BASE;
+    uint32_t kend   = KERN_BASE + KERN_SIZE;
+    for (uint32_t pa = kstart; pa < kend; pa += PAGE_SIZE)
+        vm_map(dst, pa, pa, PTE_R | PTE_W | PTE_X | PTE_G);
+}
 
 // Map a contiguous range (size multiple of PAGE_SIZE)
 static int map_range(pagetable_t *root, uint32_t va, uint32_t pa,

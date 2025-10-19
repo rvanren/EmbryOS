@@ -46,3 +46,19 @@ void vm_map_kernel_identity(uint32_t start, uint32_t size, uint32_t flags);
 
 // Identity map a user range: VA == PA, user-accessible (U=1).
 void vm_map_user_identity(uint32_t start, uint32_t size, uint32_t flags);
+
+// Create a fresh, empty Sv32 root page table (all zeros).
+pagetable_t *vm_create_root(void);
+
+// Map a single 4 KiB page: va -> pa with given PTE flags.
+int vm_map(pagetable_t *root, uint32_t va, uint32_t pa, uint32_t flags);
+
+// Reproduce the kernel identity mappings into 'dst' (supervisor-only).
+// Keeps user region unmapped; you’ll map user pages per-process.
+void vm_clone_kernel_mappings(pagetable_t *dst);
+
+// (Optional: centralize these if not already in a shared header)
+#define KERN_BASE  0x80000000u
+#define KERN_SIZE  0x00400000u
+#define USER_BASE  0x80400000u
+#define USER_TOP   0x80800000u
