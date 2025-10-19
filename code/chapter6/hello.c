@@ -27,8 +27,7 @@ void taskB(void) {
     int counter = 0;
     for (;;) {
         char c = user_get();
-        user_put(10, 5, c, 2, 0);
-	counter++;
+        user_put(10, 5 + counter % 10, c, 2, 0);
     }
 }
 
@@ -58,9 +57,9 @@ int main(void) {
 
     // Run the main loop, which is waiting for interrupts at lowest priority
     for (;;) {
-	sched_yield();
-	intr_enable();
-	__asm__ volatile ("wfi");  // wait-for-interrupt
-	intr_disable();
+        sched_yield();
+        intr_enable();
+        __asm__ volatile ("wfi");  // wait-for-interrupt
+        intr_disable();
     }
 }
