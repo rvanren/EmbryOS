@@ -1,107 +1,133 @@
-\chapter{Seeing Is Believing: The Screen Abstraction}
-\label{chap:textscreen}
+\chapter{Seeing is Believing}
 
-In Chapter~1 we learned to send characters to the UART.  In this chapter we
-build a small \texttt{screen} library that treats the terminal as a logical
-80$\times$24 grid of colored cells.  Using this abstraction we can animate a
-banner and, for the first time, \emph{see} EmbryOS doing something dynamic.
+In the previous chapter we printed \texttt{"Hello, World"} through the UART.  
+Now we use that same UART to draw to a \emph{screen}: the terminal connected to QEMU or your board’s serial port.  
+By sending ANSI escape sequences, we can move the cursor, set colors, and print text anywhere.  
+This provides a simple 80\,$\times$\,24 text display we can treat as a “frame buffer.”
 
-\section{A Small Screen Abstraction}
+We also refactor the structure: all platform-dependent constants move into \texttt{platform.h},  
+the UART access routines into \texttt{uart.c/h}, and the new “screen” layer builds on top.
 
-The \texttt{screen} library provides three functions:
+\section*{Platform parameters}
+
+Hardware constants live in \texttt{platform.h}.  
+For now we only define the UART base address, but this file will later include the CLINT and PLIC bases.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{platform.h}: board-specific constants.},
+  label={lst-platform-h}]{../code/chapter2/platform.h}
+\end{figure}
+
+\paragraph{Portability.}
+Changing to a different QEMU machine or board requires editing only this file.
+
+\paragraph{Unsigned literals.}
+The \texttt{UL} suffix marks constants as unsigned, avoiding sign extension on 64-bit compilers.
+
+\section*{UART driver}
+
+The UART (Universal Asynchronous Receiver/Transmitter) presents memory-mapped registers for transmit and receive.  
+We only use transmit for now.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{uart.h}: interface for UART I/O.},
+  label={lst-uart-h}]{../code/chapter2/uart.h}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{uart.c}: minimal transmit path.},
+  label={lst-uart-c}]{../code/chapter2/uart.c}
+\end{figure}
+
+\noindent
+The driver waits until the transmit FIFO is not full, then writes one byte to \texttt{txdata}.  
+All registers are declared \texttt{volatile} so the compiler never reorders MMIO operations.
+
+\section*{Minimal \texttt{printf}}
+
+To print formatted text conveniently, we layer a tiny \texttt{printf} on top of the UART.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{stdio.h}: prototypes for formatted output.},
+  label={lst-stdio-h}]{../code/chapter2/stdio.h}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{stdio.c}: a minimal \texttt{printf}.},
+  label={lst-stdio-c}]{../code/chapter2/stdio.c}
+\end{figure}
+
+\section*{Text screen}
+
+We treat the terminal as an 80\,$\times$\,24 grid.  
+Each function in \texttt{screen.c} emits ANSI escape sequences to move the cursor and set colors.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{screen.h}: screen API.},
+  label={lst-screen-h}]{../code/chapter2/screen.h}
+\end{figure}
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{screen.c}: ANSI-based text rendering.},
+  label={lst-screen-c}]{../code/chapter2/screen.c}
+\end{figure}
+
+\noindent
+Escape sequences such as \verb|\033[<r>;<c>H| move the cursor,
+and \verb|\033[3<f>m| or \verb|\033[4<b>m| set the foreground and background colors.
+We use the eight basic ANSI colors (\texttt{0..7}).
+
+\section*{Demo program}
+
+The application animates a banner that scrolls horizontally across the middle row, cycling colors as it moves.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{hello.c}: scrolling banner demo.},
+  label={lst-hello-c}]{../code/chapter2/hello.c}
+\end{figure}
+
+\paragraph{Behavior.}
 \begin{itemize}
-  \item \texttt{screen\_move(row, col)} --- move the cursor to a specific
-        position on the logical screen;
-  \item \texttt{screen\_put(ch, fg, bg)} --- draw one printable character in the
-        given foreground and background colors and advance the cursor;
-  \item \texttt{screen\_clear(x, y, w, h, color)} --- fill rectangle with colored spaces.
+  \item The banner wraps horizontally for a continuous scroll.
+  \item Colors cycle through the eight ANSI basic colors.
+  \item Timing is provided by a simple busy-wait loop.
 \end{itemize}
-The header \texttt{screen.h} defines these prototypes together with constants
-for the screen size.
 
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.7\textwidth}
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Header file \texttt{screen.h}},
-  label={lst:screen_h}
-]{../code/chapter2/screen.h}
-\end{minipage}
-\end{figure}
+\section*{Building and running}
 
-\section{Implementing the Screen Library}
+Use the same \texttt{Makefile} structure as in Chapter 1:
 
-Internally, the library translates screen coordinates into ANSI escape sequences
-understood by the terminal.  Each call to \texttt{screen\_put()} prints exactly
-one character, optionally changing its color.
+\begin{verbatim}
+qemu-system-riscv32 -machine sifive_u -nographic \
+  -bios none -kernel hello.elf
+\end{verbatim}
 
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.9\textwidth}
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Implementation of the logical screen in \texttt{screen.c}},
-  label={lst:screen_c}
-]{../code/chapter2/screen.c}
-\end{minipage}
-\end{figure}
+If you use the \texttt{virt} machine, set \texttt{UART\_BASE} in \texttt{platform.h}
+to \texttt{0x10000000UL} instead.  
+In Docker, detach from QEMU with \texttt{Ctrl-P Ctrl-Q} and stop the container from the host when done.
 
-The cursor position \texttt{(cur\_row, cur\_col)} is tracked in software so that
-later we can implement off-screen buffers or multiple windows without changing
-the interface.
-
-\section{Formatted Output}
-
-Our \texttt{stdio} module from Chapter~1 is extended with a simple
-\texttt{printf()} that understands \texttt{\%d}, \texttt{\%x}, \texttt{\%s},
-and \texttt{\%c}.  The implementation uses the standard C mechanism for
-variable argument lists (\texttt{<stdarg.h>}) but does not rely on any external
-libraries.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.9\textwidth}
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Small \texttt{printf()} implementation in \texttt{stdio.c}},
-  label={lst:stdio_c}
-]{../code/chapter2/stdio.c}
-\end{minipage}
-\end{figure}
-
-\section{The Animated Banner}
-
-The program in Listing~\ref{lst:ch2_hello_c} displays a continuously scrolling,
-colored banner using the new screen abstraction.  Each frame rewrites only the
-row that contains the banner, giving the impression of smooth motion.
-
-\begin{figure}[H]
-\centering
-\begin{minipage}{0.9\textwidth}
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Animated banner using the logical screen},
-  label={lst:ch2_hello_c}
-]{../code/chapter2/hello.c}
-\end{minipage}
-\end{figure}
-
-When run under QEMU with \texttt{-nographic}, the terminal itself acts as a
-display: the colored text moves left across the screen, wraps around, and
-continues indefinitely.
-
-\section{Projects}
+\section*{Projects}
 
 \begin{enumerate}
-  \item \textbf{Double banner.}
-        Draw two independent rows of text scrolling at different speeds or
-        colors.  How would you manage two cursors?
-  \item \textbf{Screen buffer.}
-        Replace \texttt{screen\_clear()} with a memory array representing all
-        characters.  Update only cells that change.
+  \item \textbf{Color stripes.} Fill each row with a different background color.
+  \item \textbf{Box drawing.} Draw a filled 20\,$\times$\,5 rectangle at row 10, column 30.
+  \item \textbf{Wraparound scroll.} Make the banner wrap seamlessly around the edges.
+  \item \textbf{Blinking cursor.} Add a blinking colored cursor.
+  \item \textbf{Port test.} Change \texttt{UART\_BASE} for a different QEMU machine and confirm output.
 \end{enumerate}

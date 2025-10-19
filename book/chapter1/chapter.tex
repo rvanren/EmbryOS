@@ -1,72 +1,111 @@
-\chapter{Hello World}
+\chapter{Hello, World}
 
-Before we dive into kernel code, let's set up a clean, reproducible environment.
-This chapter will guide you through creating a Docker container that can build
-and run our operating system, \textbf{EmbryOS}, on a RISC\textendash V
-emulator.  By the end, we will make the machine print ``Hello~World'' using a
-single UART register.
+We begin by building the smallest possible operating system: one that simply prints
+\texttt{"Hello, World"} through the UART.  
+This chapter introduces the build environment, linker script, and a first taste of C and assembly in the RISC-V setting.
 
-\section{Why Docker?}
+\section*{Project layout}
 
-Different computers have different toolchains and library versions.  Using a
-container guarantees that everyone---on macOS, Windows, or Linux---is building
-the same thing.  We will use Docker to install the RISC\textendash V compiler
-and QEMU emulator inside a self-contained Ubuntu environment.
+Each chapter has its own directory under \texttt{code/}.  
+For example, Chapter 1’s code lives in \texttt{code/chapter1/} and builds with a simple \texttt{Makefile}.  
+The resulting binary can run both in QEMU and, later, on real RISC-V hardware.
 
-\section{Project Layout}
+\section*{Docker build environment}
 
-Each chapter comes with its own directory under \texttt{code/}:
+We use Docker to keep the environment identical across hosts.  
+The Docker image installs a RISC-V cross-compiler and QEMU.
 
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language={},
+  caption={\texttt{Dockerfile}: build and run environment for EmbryOS.},
+  label={lst-dockerfile}]{../code/Dockerfile}
+\end{figure}
+
+Once built, run an interactive shell inside the container:
 \begin{verbatim}
-code/
- +- chapter0/
- +- chapter1/
- |   +- Dockerfile
- |   +- Makefile
- |   +- main.c
- |   +- start.S
- |   \- linker.ld
- \- ...
+docker build -t embryos .
+docker run -it --rm embryos
 \end{verbatim}
 
-You can open these files in a simple text editor such as \texttt{nano} (already
-included in the container) or your favorite local editor if you mount the
-directory into Docker.
+\section*{Makefile}
 
-\input{chapter1/dockerfile}
-\input{chapter1/makefile}
-\input{chapter1/hello}
-\input{chapter1/uart}
-\input{chapter1/loader}
+The \texttt{Makefile} compiles both assembly and C, links them with a minimal linker script, and
+launches QEMU.  
+To quit QEMU’s terminal, press \texttt{Ctrl-A} followed by \texttt{x}.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=make,
+  caption={\texttt{Makefile}: build and run using QEMU.},
+  label={lst-makefile}]{../code/chapter1/Makefile}
+\end{figure}
+
+\section*{Assembly start-up code}
+
+Execution begins at the symbol \texttt{\_start}.  
+We disable all but one core and jump into C.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language={[x86masm]Assembler},
+  caption={\texttt{start.s}: minimal start-up.},
+  label={lst-start-s}]{../code/chapter1/start.s}
+\end{figure}
+
+\paragraph{About the \texttt{mhartid} register.}
+Each RISC-V core (hart) has a unique ID in the \texttt{mhartid} CSR.  
+We use it to let only core 0 continue into C, keeping the others parked in an infinite loop.
+
+\section*{C source}
+
+The C portion writes characters to a memory-mapped UART.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{hello.c}: write “Hello, World” over the UART.},
+  label={lst-hello-c}]{../code/chapter1/hello.c}
+\end{figure}
+
+\noindent
+The UART lives at \texttt{0x10010000} in QEMU’s \texttt{sifive\_u} machine.  
+We spin until the transmitter is free, then send one character at a time.
+
+\section*{Linker script}
+
+The linker script defines our memory map and entry point.
+
+\begin{figure}[htb]
+\centering
+\lstinputlisting[style=oscode,language=C,
+  caption={\texttt{hello.lds}: linker script.},
+  label={lst-hello-lds}]{../code/chapter1/hello.lds}
+\end{figure}
+
+\noindent
+The code is loaded at \texttt{0x80000000} in RAM.  
+The \texttt{ENTRY(\_start)} directive tells the linker where execution begins.
+
+\section*{Running it}
+
+Build and run:
+\begin{verbatim}
+make qemu
+\end{verbatim}
+
+If all goes well, you’ll see:
+\begin{verbatim}
+Hello, World
+\end{verbatim}
+
+Congratulations—you have written a working (if tiny) operating system!
 
 \section*{Projects}
 
-Each chapter ends with a few short projects designed to encourage exploration.
-These are not graded exercises but small experiments—things to try and observe
-what happens.  Modify the code, rebuild, and run it again under QEMU to see how
-EmbryOS behaves.
-
 \begin{enumerate}
-  \item \textbf{Disabling the \texttt{mhartid} check.}
-  Open \texttt{start.s} and remove the first two lines:
-  \begin{lstlisting}[style=oscode,language={[x86masm]Assembler}]
-  csrr a0, mhartid
-  beq a0, x0, _end
-  \end{lstlisting}
-  Rebuild and run the program.
-  \begin{itemize}
-    \item What happens on your terminal?
-    \item Why might the output look different or garbled?
-    \item What does this tell you about how many cores QEMU is simulating?
-  \end{itemize}
-  This experiment reveals why the \texttt{mhartid} check was there: without it,
-  every hardware thread (hart) runs the same code and all write to the UART at
-  once.
+  \item \textbf{Remove the first two assembly lines.} What happens?
+  \item \textbf{Modify the message.} Try printing your name.
+  \item \textbf{Add a newline.} Does \texttt{"\textbackslash n"} behave as expected?
+  \item \textbf{Add another function.} Write \texttt{puthex(int x)} that prints a value in hex.
 \end{enumerate}
-
-\bigskip
-\noindent
-Feel free to extend this experiment—try changing the number of simulated cores
-in the Makefile’s QEMU command line (\texttt{-smp 2}) and observe the results.
-In later chapters we’ll learn how to coordinate multiple cores properly using
-synchronization and interrupts.

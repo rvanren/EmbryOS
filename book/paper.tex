@@ -19,16 +19,25 @@
 % Listings configuration
 % =====================
 \lstdefinestyle{oscode}{
-  basicstyle=\ttfamily\small,
-  backgroundcolor=\color{gray!5},
+  basicstyle=\ttfamily\footnotesize,
   frame=single,
   breaklines=true,
-  columns=fullflexible,
+  breakatwhitespace=true,
+  postbreak=\mbox{\textcolor{gray}{$\hookrightarrow$}\space},
   keepspaces=true,
-  numbers=left,
-  numbersep=5pt,
+  showstringspaces=false,
   xleftmargin=1em,
-  captionpos=b
+  framexleftmargin=1em
+}
+
+% Make this the default for all listings
+\lstset{style=oscode}
+
+\lstdefinelanguage{Dockerfile}{
+  sensitive=false,
+  morekeywords={FROM,RUN,CMD,ENTRYPOINT,COPY,ADD,ENV,ARG,WORKDIR,USER,VOLUME,EXPOSE,LABEL,ONBUILD,STOPSIGNAL,HEALTHCHECK,SHELL},
+  morecomment=[l]{\#},
+  morestring=[b]",
 }
 
 % =====================
