@@ -2,7 +2,6 @@
 #include "trap.h"
 #include "interrupt.h"
 #include "stdio.h"
-#include "plic.h"
 
 #define MIE_MASK (1u << 3)
 
@@ -47,6 +46,5 @@ void intr_set_handler(enum intr_class which, trap_entry_t handler) {
 int intr_init() {
     void _trap_handler();
     asm("csrw mtvec, %0"::"r"(_trap_handler));
-    plic_init();
     asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
 }

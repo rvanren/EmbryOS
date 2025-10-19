@@ -1,9 +1,13 @@
-#ifndef SYSCALL_H
-#define SYSCALL_H
+#pragma once
 
-#define SYS_PUT 0  // write a character to the process's window
+// Here is the current system call interface
 
+#define SYS_PUT 0       // write a character to the screen
+
+#include "interrupt.h"
+
+// Initialize the syscall module
 void syscall_init(void);
-void syscall_handler(void);
 
-#endif
+// This handler is invoked on a system call (ecall).
+void syscall_handler(struct trap_frame *);
