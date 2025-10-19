@@ -3,7 +3,7 @@
 #include "process.h"
 #include "stdio.h"
 #include "sched.h"
-#include "kbd.h"
+#include "uart.h"
 
 void syscall_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
@@ -14,7 +14,7 @@ void syscall_handler(struct trap_frame *tf) {
         break;
 
     case SYS_GET:
-        tf->a0 = kbd_get();  // <-- result returned to user in a0
+        tf->a0 = uart_get();  // <-- result returned to user in a0
         break;
 
     default:
