@@ -2,6 +2,7 @@
 #include "ctx.h"
 #include "frame.h"
 #include "process.h"
+#include "mtime.h"
 
 struct pcb *run_queue[N_PRIORITIES];
 int proc_current;
