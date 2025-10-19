@@ -1,4 +1,5 @@
 #include "stdio.h"
+#include "screen.h"
 #include "uart.h"
 
 void taskA(void) {
