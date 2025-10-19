@@ -1,28 +1,29 @@
+    .equ TRAP_FRAME_SIZE, 128
+
     .section .text
-    .global _trap_handler
-
-/* Single point of entry and exit in the OS */
+    .globl _trap_handler
 _trap_handler:
-    addi sp, sp, -128
+    # make space for trap frame
+    addi sp, sp, -TRAP_FRAME_SIZE  # 31 regs * 4 + mepc = 128 bytes (align as needed)
 
-    /* Save Registers */
-    sw a0,  0(sp)
-    sw a1,  4(sp)
-    sw a2,  8(sp)
-    sw a3,  12(sp)
-    sw a4,  16(sp)
-    sw a5,  20(sp)
-    sw a6,  24(sp)
-    sw a7,  28(sp)
-    sw t0,  32(sp)
-    sw t1,  36(sp)
-    sw t2,  40(sp)
-    sw t3,  44(sp)
-    sw t4,  48(sp)
-    sw t5,  52(sp)
-    sw t6,  56(sp)
-    sw s0,  60(sp)
-    sw s1,  64(sp)
+    # save caller-saved + callee-saved registers
+    sw ra,   0(sp)
+    sw sp,   4(sp)
+    sw gp,   8(sp)
+    sw tp,  12(sp)
+    sw t0,  16(sp)
+    sw t1,  20(sp)
+    sw t2,  24(sp)
+    sw s0,  28(sp)
+    sw s1,  32(sp)
+    sw a0,  36(sp)
+    sw a1,  40(sp)
+    sw a2,  44(sp)
+    sw a3,  48(sp)
+    sw a4,  52(sp)
+    sw a5,  56(sp)
+    sw a6,  60(sp)
+    sw a7,  64(sp)
     sw s2,  68(sp)
     sw s3,  72(sp)
     sw s4,  76(sp)
@@ -33,31 +34,35 @@ _trap_handler:
     sw s9,  96(sp)
     sw s10, 100(sp)
     sw s11, 104(sp)
-    sw ra,  108(sp)
-    sw gp,  112(sp)
-    sw tp,  116(sp)
+    sw t3,  108(sp)
+    sw t4,  112(sp)
+    sw t5,  116(sp)
+    sw t6,  120(sp)
 
-    /* add C handler here */
-    jal software_trap_handler
+    csrr t0, mepc
+    sw t0, 124(sp)      # save trap PC
 
-    /* Restore Regs */
-    lw a0,  0(sp)
-    lw a1,  4(sp)
-    lw a2,  8(sp)
-    lw a3,  12(sp)
-    lw a4,  16(sp)
-    lw a5,  20(sp)
-    lw a6,  24(sp)
-    lw a7,  28(sp)
-    lw t0,  32(sp)
-    lw t1,  36(sp)
-    lw t2,  40(sp)
-    lw t3,  44(sp)
-    lw t4,  48(sp)
-    lw t5,  52(sp)
-    lw t6,  56(sp)
-    lw s0,  60(sp)
-    lw s1,  64(sp)
+    mv a0, sp           # a0 = &trap_frame
+    call software_trap_handler
+
+    # restore registers
+    lw ra,   0(sp)
+    lw sp,   4(sp)
+    lw gp,   8(sp)
+    lw tp,  12(sp)
+    lw t0,  16(sp)
+    lw t1,  20(sp)
+    lw t2,  24(sp)
+    lw s0,  28(sp)
+    lw s1,  32(sp)
+    lw a0,  36(sp)
+    lw a1,  40(sp)
+    lw a2,  44(sp)
+    lw a3,  48(sp)
+    lw a4,  52(sp)
+    lw a5,  56(sp)
+    lw a6,  60(sp)
+    lw a7,  64(sp)
     lw s2,  68(sp)
     lw s3,  72(sp)
     lw s4,  76(sp)
@@ -68,11 +73,13 @@ _trap_handler:
     lw s9,  96(sp)
     lw s10, 100(sp)
     lw s11, 104(sp)
-    lw ra,  108(sp)
-    lw gp,  112(sp)
-    lw tp,  116(sp)
+    lw t3,  108(sp)
+    lw t4,  112(sp)
+    lw t5,  116(sp)
+    lw t6,  120(sp)
 
-    addi sp, sp, 128
+    lw t0, 124(sp)
+    csrw mepc, t0       # restore mepc
 
-    /* Return From Interrupt */
+    addi sp, sp, TRAP_FRAME_SIZE
     mret
