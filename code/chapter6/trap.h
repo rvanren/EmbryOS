@@ -2,6 +2,12 @@
 
 #include <stdint.h>
 
+// When an interrupt or exception occurs, all registers are saved on the stack
+// in a "trap frame".  We define here what exactly is being saved and in what
+// position on the stack.  For example, when a system call is performed, we
+// need to be able to extract the arguments.  We also sometimes need to change
+// registers, for example to return the value of a system call.
+
 #define TRAP_FRAME_SIZE 128                 // 32 4-byte registers
 
 struct trap_frame {
