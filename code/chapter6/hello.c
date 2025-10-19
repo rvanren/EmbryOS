@@ -11,6 +11,11 @@
 
 #define QUANTUM          50000         // 50 milliseconds
 
+void timer_handler(struct trap_frame *tf) {
+    sched_yield();
+    mtime_reset(QUANTUM); // add another quantum
+}
+
 void taskA(void) {
     for (int cnt = 0;; cnt++) {
         user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
@@ -39,16 +44,5 @@ int main(void) {
     sched_run(taskB, (struct rect){ 40,  0,  40, 12 });  // upper-right
     sched_run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
 
-    // Switch priority to level 2
-    proc_dequeue(&run_queue[proc_current]);
-    proc_enqueue(&run_queue[2], pcb);
-    proc_current = 2;
-
-    // Run the main loop, which is waiting for interrupts at lowest priority
-    for (;;) {
-        sched_yield();
-        intr_enable();
-        __asm__ volatile ("wfi");  // wait-for-interrupt
-        intr_disable();
-    }
+    sched_idle();
 }

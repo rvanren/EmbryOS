@@ -3,6 +3,7 @@
 #include "frame.h"
 #include "process.h"
 #include "mtime.h"
+#include "interrupt.h"
 
 struct pcb *run_queue[N_PRIORITIES];
 int proc_current;
@@ -41,7 +42,17 @@ void sched_run(entry_t fn, struct rect area) {
     ctx_user(&current->sp, (struct page *) pcb + 1, fn);
 }
 
-void timer_handler(struct trap_frame *tf) {
-    sched_yield();
-    mtime_reset(QUANTUM); // add another quantum
+void sched_idle() {
+    // Switch priority to level 2
+    proc_dequeue(&run_queue[proc_current]);
+    proc_enqueue(&run_queue[2], pcb);
+    proc_current = 2;
+
+    // Run the main loop, which is waiting for interrupts at lowest priority
+    for (;;) {
+        sched_yield();
+        intr_enable();
+        __asm__ volatile ("wfi");  // wait-for-interrupt
+        intr_disable();
+    }
 }
