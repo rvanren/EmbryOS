@@ -6,4 +6,4 @@ void uart_init(void);
 int  uart_get(void);
 void uart_isr();
 
-#endif
+#endif // UART_H

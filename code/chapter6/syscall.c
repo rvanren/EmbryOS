@@ -12,11 +12,9 @@ void syscall_handler(struct trap_frame *tf) {
     case SYS_PUT:
         proc_put(self, tf->a0, tf->a1, tf->a2, tf->a3, tf->a4);
         break;
-
     case SYS_GET:
-        tf->a0 = uart_get();  // <-- result returned to user in a0
+        tf->a0 = uart_get();
         break;
-
     default:
         printf("Unknown syscall %d\n", tf->a7);
     }

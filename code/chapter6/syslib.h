@@ -1,3 +1,6 @@
+#ifndef SYSLIB_H
+#define SYSLIB_H
+
 #include "syscall.h"
 
 static inline void user_put(int row, int col, char c, int fg, int bg) {
@@ -16,3 +19,5 @@ static inline int user_get(void) {
     asm volatile("ecall" : "=r"(a0) : "r"(a7));
     return a0;
 }
+
+#endif // SYSLIB_H
