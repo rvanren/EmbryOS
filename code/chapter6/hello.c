@@ -8,6 +8,7 @@
 #include "syscall.h"
 #include "syslib.h"
 #include "uart.h"
+#include "plic.h"
 
 #define QUANTUM          50000         // 50 milliseconds
 
