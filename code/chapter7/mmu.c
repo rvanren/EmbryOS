@@ -138,4 +138,3 @@ void vm_dump_pte(pagetable_t *root, uint32_t va) {
            !!(pte0 & PTE_V));
 }
 #endif
-
