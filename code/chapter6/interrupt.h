@@ -1,7 +1,6 @@
 #ifndef INTERRUPT_H
 #define INTERRUPT_H
 
-#include "process.h"
 #include "trap.h"
 
 typedef void (*trap_entry_t)(struct trap_frame *);

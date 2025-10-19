@@ -2,7 +2,7 @@
 #include "trap.h"
 #include "interrupt.h"
 #include "stdio.h"
-#include "process.h"
+#include "plic.h"
 
 #define MIE_MASK (1u << 3)
 
