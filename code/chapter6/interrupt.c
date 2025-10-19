@@ -40,7 +40,7 @@ void software_trap_handler(struct trap_frame *tf) {
     }
 }
 
-void intr_set_handler(int which, trap_entry_t handler) {
+void intr_set_handler(enum intr_class which, trap_entry_t handler) {
     handlers[which] = handler;
 }
 
