@@ -16,11 +16,11 @@
 
 void interrupt_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
-    if (claim == UART_IRQ) uart_isr(tf);
+    if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM = claim;
 }
 
-int plic_init() {
+void plic_init() {
     *(volatile uint32_t *)(PLIC_PRIORITY + 4 * UART_IRQ) = 1;
     *(volatile uint32_t *)(PLIC_ENABLE) = (1 << UART_IRQ);
     *(volatile uint32_t *)(PLIC_THRESHOLD) = 0;
