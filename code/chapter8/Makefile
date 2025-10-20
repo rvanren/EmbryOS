@@ -14,7 +14,7 @@ KERNEL_CFLAGS = -Wall -O2 -g \
 
 KERNEL_LDFLAGS = -T kernel.lds -nostdlib -nostartfiles
 
-KERNEL_SRCS = main.c uart.c trap.c sched.c process.c frame.c \
+KERNEL_SRCS = hello.c uart.c trap.c sched.c process.c proc_load.c frame.c \
 	       interrupt.c plic.c mtime.c ctx.s
 KERNEL_OBJS = $(KERNEL_SRCS:.c=.o)
 
