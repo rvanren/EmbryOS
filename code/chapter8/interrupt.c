@@ -35,7 +35,11 @@ void software_trap_handler(struct trap_frame *tf) {
         switch (mcause & 0xFFF) {
         case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
         default: // (*handlers[INTR_EXCEPTION])(tf);
-            printf("trap: cause=%d epc=%p tval=%p\n", tf->cause, tf->epc, tf->tval);
+            {
+                uint32_t mtval;
+                asm volatile ("csrr %0, mtval" : "=r"(mtval));
+                printf("trap: cause=%d epc=%p mtval=%x\n", mcause & 0xFFF, tf->epc, mtval);
+            }
         }
     }
 }
