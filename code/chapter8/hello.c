@@ -17,10 +17,14 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 void taskA(void) {
-    for (int cnt = 0;; cnt++) {
-        user_put(2 + cnt % 3, 2 + cnt % 3, 'A' + cnt % 26, cnt, 7 - cnt % 8);
-        for (volatile int i = 0; i < 100000; i++) ;
+    extern char _binary_user_bin_start[], _binary_user_bin_end[];
+    size_t size = _binary_user_bin_end - _binary_user_bin_start;
+
+    char *code_page = frame_alloc();
+    for (int i = 0; i < size; i++) {
+        code_page[i] = _binary_user_bin_start[i];
     }
+    (* (void (*)()) code_page)();
 }
 
 void taskB(void) {
