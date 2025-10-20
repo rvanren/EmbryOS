@@ -5,8 +5,6 @@
 #include "interrupt.h"
 #include "ctx.h"
 #include "mtime.h"
-#include "syscall.h"
-#include "syslib.h"
 #include "uart.h"
 #include "plic.h"
 
