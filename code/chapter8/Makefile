@@ -23,7 +23,7 @@ qemu: all
 # --- Build user binary ---
 
 user.elf: user.c user.lds
-	$(RISCV_CC) $(CFLAGS) -fpie -ffreestanding -nostdlib -nostartfiles -march=rv32i -nostdlib -T user.lds -o $@ crt0.s user.c
+	$(RISCV_CC) $(CFLAGS) -fpie -ffreestanding -nostdlib -nostartfiles -march=rv32im -nostdlib -T user.lds -o $@ crt0.s user.c
 
 user.bin: user.elf
 	$(OBJCOPY) -O binary $< $@
