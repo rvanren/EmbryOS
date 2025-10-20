@@ -25,7 +25,7 @@ void taskA(void) {
     for (int i = 0; i < size; i++) base[i] = _binary_user_bin_start[i];
 
     uintptr_t gp_val = (uintptr_t) (base + USER_GP_OFFSET);
-    uintptr_t user_sp = (uintptr_t)stack_frame + PAGE_SIZE;
+    uintptr_t user_sp = (uintptr_t) stack + PAGE_SIZE;
 
     asm volatile (
         "mv gp, %[gp]\n"
