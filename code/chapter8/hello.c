@@ -17,14 +17,11 @@ void timer_handler(struct trap_frame *tf) {
     mtime_reset(QUANTUM); // add another quantum
 }
 
+extern char _binary_user_bin_start[], _binary_user_bin_end[];
+
 void taskA(void) {
-    extern char _binary_user_bin_start[], _binary_user_bin_end[];
-    extern char __global_pointer$[];
-
-    uintptr_t base = (uintptr_t)_binary_user_bin_start;
+    uintptr_t base = (uintptr_t) _binary_user_bin_start;
     uintptr_t gp_value = base + 0x888;
-
-    printf("BASE: %x\n", (int) base);
 
     register uintptr_t gp asm("gp") = gp_value;
     asm volatile ("mv gp, %0" :: "r"(gp_value));
@@ -54,6 +51,8 @@ int main(void) {
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     mtime_reset(QUANTUM);
     ctx_user_setup();
+
+    printf("BASE: %x\n", (unsigned int) _binary_user_bin_start);
 
     sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
     sched_run(taskB, (struct rect){ 40,  0,  40, 12 });  // upper-right
