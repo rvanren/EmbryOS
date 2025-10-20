@@ -1,7 +1,6 @@
 #include "frame.h"
 #include "sched.h"
 #include "stdio.h"
-#include "trap.h"
 #include "interrupt.h"
 #include "ctx.h"
 #include "mtime.h"
