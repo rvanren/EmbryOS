@@ -148,12 +148,3 @@ avoiding livelock under bursts.
   \item \textbf{Proof sketch.} Argue that \texttt{uart\_get()} does not deadlock assuming interrupts
         are eventually delivered and the scheduler is fair.
 \end{enumerate}
-
-\section*{Notes and Small Fixes}
-
-\begin{itemize}
-  \item \textbf{Consistent ISR signature.} Ensure the PLIC call site and \texttt{uart\_isr} agree
-        on parameters (either pass none, or update the prototype everywhere).
-  \item \textbf{Init return type.} Make \texttt{plic\_init} either return \texttt{0} or use
-        \texttt{void} for clarity.
-\end{itemize}
