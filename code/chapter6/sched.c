@@ -20,9 +20,6 @@ void sched_block(struct pcb *current) {
 
     struct pcb *next = run_queue[proc_current]->next;
     if (next != current) ctx_switch(&current->sp, next->sp);
-
-    // We are now running on the *new* process's stack.
-    // Safe point to reclaim any zombies created by the previous context.
     proc_reap_zombies();
 }
 
@@ -43,8 +40,6 @@ void sched_run(void (*fn)(void), struct rect area) {
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
     ctx_start(&current->sp, (char *) pcb + PAGE_SIZE, fn);
-
-    // If ctx_start ever returned (it shouldn't), still safe to reap.
     proc_reap_zombies();
 }
 
@@ -53,9 +48,6 @@ void sched_idle() {
     proc_enqueue(&run_queue[2], pcb);
     proc_current = 2;
     for (;;) {
-        // Reap here too (cheap), but correctness no longer depends on idling.
-        proc_reap_zombies();
-
         sched_yield();
         intr_enable();
         __asm__ volatile ("wfi");  // wait-for-interrupt
