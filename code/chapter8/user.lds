@@ -1,8 +1,8 @@
-ENTRY(main)
+ENTRY(_start)
 
 SECTIONS
 {
-  . = 0;
+  . = ALIGN(4);
   .text : {
     *(.text*)
     *(.rodata*)
@@ -10,13 +10,16 @@ SECTIONS
 
   .data : {
     *(.data*)
+    *(.sdata*)
   }
 
-  /* Define global pointer 0x800 bytes past start of sdata region */
+  /* Define where gp should point for small-data access */
   __global_pointer$ = . + 0x800;
 
   .bss (NOLOAD) : {
+    __bss_start = .;
     *(.bss*)
     *(COMMON)
+    __bss_end = .;
   }
 }
