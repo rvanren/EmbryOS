@@ -36,12 +36,15 @@ The file \texttt{ctx.s} contains two assembly routines:
 \texttt{ctx\_start}, which switches to a new stack and begins execution of a
 function in user mode.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language={[x86masm]Assembler},
   caption={Context management and entry into user mode, \texttt{ctx.s}},
   label={lst:ctx_s}
-]{../code/chapter6/ctx.s}
+]{../code/chapter6/ctx_short.s}
+\end{figure}
 
 The helper \texttt{ctx\_user\_setup()} programs the Physical Memory Protection (PMP)
 registers so that user code can safely access kernel memory for now.
@@ -59,12 +62,15 @@ A system call is a controlled entry from user mode to kernel mode.
 User code triggers a trap using the \texttt{ecall} instruction, which saves the
 current context and vectors to \texttt{syscall\_handler()}.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={System call handler, \texttt{syscall.c}},
   label={lst:syscall_c}
 ]{../code/chapter6/syscall.c}
+\end{figure}
 
 The current interface defines two calls:
 
@@ -75,12 +81,15 @@ The current interface defines two calls:
 \end{tabular}
 \end{center}
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={System call numbers and prototypes, \texttt{syscall.h}},
   label={lst:syscall_h}
 ]{../code/chapter6/syscall.h}
+\end{figure}
 
 The handler inspects the \texttt{a7} register to determine which system call was
 invoked and uses the \texttt{trap\_frame} structure to access arguments and
@@ -94,12 +103,15 @@ The user-side interface consists of small inline wrappers defined in
 \texttt{syslib.h}.  
 These issue the correct system-call number and execute \texttt{ecall}.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={Inline user-level system call stubs, \texttt{syslib.h}},
   label={lst:syslib_h}
 ]{../code/chapter6/syslib.h}
+\end{figure}
 
 \section{Demonstration Program}
 
@@ -110,12 +122,15 @@ Task~B uses \texttt{user\_get()} to echo typed input.
 Each \texttt{ecall} traps into the kernel, which performs the corresponding
 service and returns to user mode.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={Multitasking demonstration with system calls, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter6/hello.c}
+\end{figure}
 
 \section{Control Flow Summary}
 
@@ -130,23 +145,6 @@ service and returns to user mode.
   \item On return, \texttt{mret} restores user mode and resumes at the next
         instruction.
 \end{enumerate}
-
-\section{Discussion and Pitfalls}
-
-\paragraph{Borrowed stacks.}
-Currently, user code executes on the same stack used by the kernel thread.
-This is acceptable for simple synchronous system calls, but unsafe for blocking
-operations.  Chapter~\ref{chap:picload} will allocate separate user stacks when
-we introduce loadable user programs.
-
-\paragraph{Limited protection.}
-Although the PMP permits user execution, all memory is still shared.
-Protection and address-space isolation will come with virtual memory.
-
-\paragraph{Minimal syscall table.}
-The interface currently supports only two calls.
-Adding new calls is easy: assign a number, extend \texttt{syscall.h}, and add a
-case in \texttt{syscall\_handler()}.
 
 \section*{Projects}
 
