@@ -1,20 +1,19 @@
-OUTPUT_ARCH("riscv")
-ENTRY(_start)
+ENTRY(main)
 
 SECTIONS
 {
-    . = 0x80400000;      /* where user space begins */
+  . = 0;
+  .text : {
+    *(.text*)
+    *(.rodata*)
+  }
 
-    .text : {
-        *(.text*)
-    }
-    .rodata : {
-        *(.rodata*)
-    }
-    .data : {
-        *(.data*)
-    }
-    .bss : {
-        *(.bss*) *(COMMON)
-    }
+  .data : {
+    *(.data*)
+  }
+
+  .bss (NOLOAD) : {
+    *(.bss*)
+    *(COMMON)
+  }
 }
