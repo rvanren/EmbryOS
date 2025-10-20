@@ -1,9 +1,10 @@
 # --------------------------------------------------------------------
 #  Toolchain
 # --------------------------------------------------------------------
-CC      = riscv64-unknown-elf-gcc
-OBJCOPY = riscv64-unknown-elf-objcopy
-OBJDUMP = riscv64-unknown-elf-objdump
+QEMU        = qemu-system-riscv32
+CC          = riscv-none-elf-gcc
+OBJDUMP     = riscv-none-elf-objdump
+OBJCOPY     = riscv-none-elf-objcopy
 
 # --------------------------------------------------------------------
 #  Kernel build configuration
