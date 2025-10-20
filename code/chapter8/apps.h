@@ -1,0 +1,1 @@
+void apps_init();
