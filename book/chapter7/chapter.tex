@@ -1,0 +1,147 @@
+\chapter{User Mode and System Calls}
+\label{chap:user-mode}
+
+In Chapter~\ref{chap:termination}, processes could already create new processes
+and terminate using the \texttt{!} and \texttt{.} keys, but all of that still
+happened entirely in \emph{kernel mode}.  In this chapter, we introduce
+\emph{user mode} and move process management behind a \emph{system-call}
+interface.  The same commands now work by trapping into the kernel through
+\texttt{ecall}, marking the transition from a monolithic kernel to one that
+supports protected user processes.
+
+\section{Learning Goals}
+
+\begin{itemize}
+  \item Understand RISC-V privilege levels and the trap mechanism between
+        user and kernel mode.
+  \item Implement system calls for process creation, termination, and I/O.
+  \item Observe how user code invokes kernel services using the \texttt{ecall}
+        instruction.
+\end{itemize}
+
+\section{Overview}
+
+User code now runs in a lower privilege level.  When it needs to interact with
+the kernel—printing to the screen, reading a key, spawning a new process, or
+exiting—it executes an \texttt{ecall} instruction.  
+The hardware traps into the kernel, which inspects register~\texttt{a7} to
+identify the requested service and executes it safely on behalf of the user.
+
+From the user's perspective, nothing changes: typing \texttt{!} still spawns a
+new process and typing \texttt{.} still exits.  What has changed is that these
+actions now go through a carefully controlled user–kernel boundary.
+
+\section{Context Setup for User Mode}
+
+The assembly file \texttt{ctx.s} defines context switching and user-mode entry.
+The function \texttt{ctx\_user\_setup()} configures Physical Memory Protection
+(PMP) to allow user code to run within a limited memory region.  The
+\texttt{mret} instruction then switches to user mode.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language={[x86masm]Assembler},
+  caption={Context management and user-mode entry, \texttt{ctx.s}},
+  label={lst:ctx_s}
+]{../code/chapter7/ctx.s}
+\end{figure}
+
+\section{System Calls}
+
+The system-call handler dispatches requests based on the call number in
+register~\texttt{a7}.  Two new calls, \texttt{SYS\_EXIT} and
+\texttt{SYS\_SPAWN}, provide process control, while \texttt{SYS\_GET} and
+\texttt{SYS\_PUT} handle I/O.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={System-call handler with user-mode process control, \texttt{syscall.c}},
+  label={lst:syscall_c}
+]{../code/chapter7/syscall.c}
+\end{figure}
+
+Their numeric assignments appear in \texttt{syscall.h}.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={System-call numbers and prototypes, \texttt{syscall.h}},
+  label={lst:syscall_h}
+]{../code/chapter7/syscall.h}
+\end{figure}
+
+\section{User Library}
+
+The user library \texttt{syslib.h} provides inline wrappers that hide the raw
+\texttt{ecall} instructions.  Applications can now call functions such as
+\texttt{user\_get()}, \texttt{user\_put()}, \texttt{user\_spawn()}, and
+\texttt{user\_exit()} as ordinary C functions.  Each wrapper places arguments in
+the appropriate registers and executes \texttt{ecall}.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={User-level system-call stubs, \texttt{syslib.h}},
+  label={lst:syslib_h}
+]{../code/chapter7/syslib.h}
+\end{figure}
+
+\section{Demonstration Program}
+
+The demonstration (\texttt{hello.c}) is structurally similar to the previous
+chapter but now runs its tasks entirely in user mode.  Both \texttt{taskA()} and
+\texttt{taskB()} use user-level system-call wrappers to perform I/O and manage
+processes.
+
+When running, typing an exclamation mark~(\texttt{!}) spawns a new
+\texttt{taskA()} process by invoking \texttt{user\_spawn()}, while typing a
+period~(\texttt{.}) calls \texttt{user\_exit()} to terminate the current task.
+The kernel mediates all of these requests through the system-call interface.
+
+\begin{figure}[H]
+\centering
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Interactive demo in user mode using system calls, \texttt{hello.c}},
+  label={lst:hello_c}
+]{../code/chapter7/hello.c}
+\end{figure}
+
+\section{Discussion}
+
+\paragraph{Continuity.}
+The system behaves the same as in Chapter~\ref{chap:termination}, but the
+architecture has changed fundamentally: user tasks now operate at a lower
+privilege level, and all I/O or process management crosses into the kernel via
+system calls.
+
+\paragraph{Protection.}
+While memory is still shared, privilege separation ensures that user code cannot
+execute kernel instructions directly.  This is the first step toward true
+isolation.
+
+\paragraph{Toward per-process user stacks.}
+Currently, user programs execute on kernel stacks for simplicity.  In the next
+chapter, we will allocate separate user stacks to give each process its own
+complete user context.
+
+\section*{Projects}
+
+\begin{enumerate}
+  \item Add a new system call \texttt{SYS\_TIME} that returns the current timer
+        value from user mode.
+  \item Modify \texttt{user\_spawn()} to accept parameters such as color or
+        position.
+  \item Extend the system-call interface with an explicit \texttt{yield()}
+        call for cooperative multitasking.
+\end{enumerate}
