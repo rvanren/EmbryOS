@@ -34,13 +34,7 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
     self->base = frame_alloc();
     self->stack = frame_alloc();
     for (size_t i = 0; i < size; i++) self->base[i] = start[i];
-    enter_user(self->base, (uintptr_t) (self->base + gp_offset),
+    apps_enter_user(self->base, (uintptr_t) (self->base + gp_offset),
                             (uintptr_t) self->stack + PAGE_SIZE,
                             (uintptr_t) self + PAGE_SIZE);
-}
-
-extern void (*applications[])();
-
-void apps_init(){
-    sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });  // upper-left
 }
