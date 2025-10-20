@@ -1,7 +1,8 @@
     .equ TRAP_FRAME_SIZE, 144
 
     .section .text
-    .globl _trap_handler                                                            .align 2
+    .globl _trap_handler
+    .align 2
 _trap_handler:
     /* If trap came from user mode (MPP==0), swap sp with mscratch. */
     csrr   t0, mstatus
