@@ -12,7 +12,7 @@ struct pcb {
     int priority;       // priority level
     struct rect area;   // allowed screen region
     void *sp;           // saved stack pointer
-    void *base, *stack; // user space frames
+    char *base, *stack; // user space frames
 };
 
 // Initialize the process module.  Returns a PCB for the initial process.
