@@ -27,6 +27,7 @@ void taskA(void) {
 
 void taskB(void) {
     struct pcb *self = run_queue[proc_current]->next;
+    proc_put(self, 10, 3, '$', 2, 0);
     for (int counter = 0;; counter++) {
         char c = uart_get();
         proc_put(self, 10, 5 + counter % 10, c, 2, 0);

@@ -5,8 +5,7 @@
 
 struct pcb *proc_init(struct rect area){
     screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
-    int f = frame_alloc();
-    struct pcb *pcb = FRAME(struct pcb, f);
+    struct pcb *pcb = frame_alloc();
     pcb->priority = 0;
     pcb->area = area;
     pcb->next = 0;
@@ -14,8 +13,7 @@ struct pcb *proc_init(struct rect area){
 }
 
 struct pcb *proc_create(struct rect area) {
-    int f = frame_alloc();
-    struct pcb *pcb = FRAME(struct pcb, f);
+    struct pcb *pcb = frame_alloc();
     pcb->priority = 0;
     pcb->area = area;
     pcb->next = 0;

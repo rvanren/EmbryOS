@@ -24,11 +24,17 @@ void taskA(void) {
 }
 
 void taskB(void) {
+    user_put(10, 3, '$', 2, 0);
     for (int counter = 0;; counter++) {
         char c = user_get();
         user_put(10, 5 + counter % 10, c, 2, 0);
+        if (c == '!') user_spawn(0, 40, 12, 40, 12);
+        if (c == '.') user_exit();
     }
 }
+
+void (*applications[])() = { taskA, taskB };
+int n_applications = sizeof(applications) / sizeof(applications[0]);
 
 int main(void) {
     frame_init(); intr_init(); plic_init(); syscall_init(); uart_init(); mtime_init();
