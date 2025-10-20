@@ -42,7 +42,7 @@ void sched_run(void (*fn)(void), struct rect area) {
     struct pcb *pcb = proc_create(area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, (struct page *) pcb + 1, fn);
+    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE, fn);
 
     // If ctx_start ever returned (it shouldn't), still safe to reap.
     proc_reap_zombies();

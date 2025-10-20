@@ -30,6 +30,7 @@ void taskB(void) {
     for (int counter = 0;; counter++) {
         char c = uart_get();
         proc_put(self, 10, 5 + counter % 10, c, 2, 0);
+        if (c == '.') proc_exit();
     }
 }
 

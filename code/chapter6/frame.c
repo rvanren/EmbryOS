@@ -7,7 +7,7 @@ union free_frame {
     char bytes[PAGE_SIZE];
 };
 
-extern union free_frame frames, __frames_end[];
+extern union free_frame frames[], __frames_end[];
 static union free_frame *free_list = frames;
 
 void frame_init(void) {

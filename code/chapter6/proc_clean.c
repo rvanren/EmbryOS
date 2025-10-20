@@ -15,7 +15,7 @@ void proc_reap_zombies(void) {
         zombies = zombies->next;
 
         // PCB + kernel stack live in the same frame allocated in proc_create()
-        frame_free(p);
+        frame_release(p);
     }
 }
 
