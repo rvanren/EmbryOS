@@ -1,9 +1,9 @@
 #pragma once
 
-#define SYS_EXIT 0      // exit process
+#define SYS_EXIT  0     // exit process
 #define SYS_SPAWN 1     // start a new process
-#define SYS_GET 1       // read a character from the keyboard
-#define SYS_PUT 0       // write a character to the screen
+#define SYS_GET   2     // read a character from the keyboard
+#define SYS_PUT   3     // write a character to the screen
 
 #include "interrupt.h"
 
