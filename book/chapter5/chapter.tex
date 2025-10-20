@@ -44,19 +44,25 @@ the corresponding ISR, then write the same ID back to \emph{complete} it so the 
 future interrupts. We program a non-zero priority for the UART interrupt, enable it for the hart,
 and leave the threshold at~0 so all positive-priority interrupts are deliverable.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={PLIC glue: claim, dispatch (UART), and completion, \texttt{plic.c}},
   label={lst:plic_c}
 ]{../code/chapter5/plic.c}
+\end{figure}
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={PLIC interface, \texttt{plic.h}},
   label={lst:plic_h}
 ]{../code/chapter5/plic.h}
+\end{figure}
 
 \section{UART Driver (Bottom-Half)}
 \label{sec:uart}
@@ -78,19 +84,25 @@ The ISR runs in interrupt context. It repeatedly reads \texttt{rxdata} until the
 “no byte available”, enqueues each received byte into the ring buffer (if not full), and finally
 moves any sleepers from the UART wait queue to a CPU run queue so they can resume.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={UART driver and ISR (receive path), \texttt{uart.c}},
   label={lst:uart_c}
 ]{../code/chapter5/uart.c}
+\end{figure}
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={UART interface, \texttt{uart.h}},
   label={lst:uart_h}
 ]{../code/chapter5/uart.h}
+\end{figure}
 
 \section{Control Flow}
 
@@ -114,12 +126,15 @@ and UART initialization to show multiple concurrent tasks updating regions of th
 Each task repeatedly writes characters to its own rectangle, yielding on timer interrupts.
 The UART driver remains active and interrupt-driven while the tasks run.
 
+\begin{figure}[H]
+\centering
 \lstinputlisting[
   style=oscode,
   language=C,
   caption={Multitasking demo using timer and UART, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter5/hello.c}
+\end{figure}
 
 \section{Correctness and Common Pitfalls}
 
