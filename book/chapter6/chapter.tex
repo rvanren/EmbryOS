@@ -1,157 +1,115 @@
-\chapter{User Mode and System Calls}
-\label{chap:syscalls}
+\chapter{Process Termination and Cleanup}
+\label{chap:termination}
 
-In Chapter~\ref{chap:blocking-io} we built an interrupt-driven kernel that supported
-preemption and blocking I/O entirely within kernel mode.  
-In this chapter we extend the kernel with the ability to execute application
-code in \emph{user mode}, and to transfer control to the kernel through
-\emph{system calls}.  
-This introduces privilege separation and the first simple user–kernel interface.
+In Chapter~\ref{chap:blocking-io}, our kernel gained interrupts, blocking I/O,
+and preemptive scheduling.  However, once created, processes would run forever:
+there was no way to terminate a process or reclaim its resources.
+In this chapter we add safe process termination and automatic cleanup,
+so that the system can start and stop processes dynamically.
 
 \section{Learning Goals}
 
 \begin{itemize}
-  \item Understand RISC-V privilege levels and the role of the \texttt{mstatus} and \texttt{mepc} registers.
-  \item Enter user mode safely using the \texttt{mret} instruction.
-  \item Implement the \texttt{ecall} instruction to trap into the kernel.
-  \item Provide a small system-call interface for I/O operations.
+  \item Understand why a process cannot safely free its own stack.
+  \item Implement process termination without memory leaks.
+  \item Integrate cleanup into the regular scheduling cycle.
+  \item Demonstrate a simple interactive system that can create and end tasks.
 \end{itemize}
 
-\section{Overview}
+\section{Motivation}
 
-Up to this point, all code has executed in machine mode.  
-We now introduce user mode so that application code executes with reduced privileges.  
-When user code needs a service (for example, to print or read a character), it executes the
-\texttt{ecall} instruction.  The hardware then traps into the kernel, which
-examines the trap frame and dispatches to the appropriate service routine.
+A running process occupies a kernel stack and a Process Control Block (PCB),
+both allocated from the kernel’s frame allocator.  If a process simply returns
+from its main function, the kernel would still be executing on its own stack,
+so freeing that memory immediately would destroy the very stack currently in
+use.  The kernel therefore needs a mechanism for a process to
+\emph{mark itself as terminated}, switch to another process, and allow the new
+process to clean up the old one safely.
 
-At this stage, user programs still share the same address space and kernel stack as the kernel.
-Separate user stacks and address spaces will be introduced in Chapter~\ref{chap:picload}.
+\section{Design Overview}
 
-\section{Context Switching and User Entry}
-\label{sec:ctx}
+Our solution divides the work into two small routines:
+\begin{itemize}
+  \item \texttt{proc\_exit()}~— called by a process to remove itself from the
+        run queue and mark its PCB for deletion.
+  \item \texttt{proc\_reap\_zombies()}~— called after every context switch to
+        free PCBs that have been marked as terminated.
+\end{itemize}
 
-The file \texttt{ctx.s} contains two assembly routines:
-\texttt{ctx\_switch}, which saves and restores callee-saved registers, and
-\texttt{ctx\_start}, which switches to a new stack and begins execution of a
-function in user mode.
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language={[x86masm]Assembler},
-  caption={Context management and entry into user mode, \texttt{ctx.s}},
-  label={lst:ctx_s}
-]{../code/chapter6/ctx_short.s}
-\end{figure}
-
-The helper \texttt{ctx\_user\_setup()} programs the Physical Memory Protection (PMP)
-registers so that user code can safely access kernel memory for now.
-It configures PMP~0 to cover 4\,MiB around \texttt{0x80000000}, enabling read, write,
-and execute permissions.
-
-\paragraph{Privilege control.}
-To enter user mode, we clear the MPP (machine previous privilege) bits in
-\texttt{mstatus} and set \texttt{mepc} to the user entry point.
-The \texttt{mret} instruction restores privilege and begins user execution.
-
-\section{System Calls}
-
-A system call is a controlled entry from user mode to kernel mode.
-User code triggers a trap using the \texttt{ecall} instruction, which saves the
-current context and vectors to \texttt{syscall\_handler()}.
+When a process exits, it adds itself to a global list of “zombie” PCBs and calls
+\texttt{sched\_block()} to switch to another process.  After the switch, the new
+process executes on its own stack and can safely free any zombies that were left
+behind.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={System call handler, \texttt{syscall.c}},
-  label={lst:syscall_c}
-]{../code/chapter6/syscall.c}
+  caption={Process termination and cleanup, \texttt{proc\_clean.c}},
+  label={lst:proc_clean}
+]{../code/chapter6/proc_clean.c}
 \end{figure}
 
-The current interface defines two calls:
+\section{Integration with the Scheduler}
 
-\begin{center}
-\begin{tabular}{ll}
-  \texttt{SYS\_PUT} & Write a character to the display. \\
-  \texttt{SYS\_GET} & Read a character from the keyboard (blocking). \\
-\end{tabular}
-\end{center}
+The scheduler now calls \texttt{proc\_reap\_zombies()} after every context
+switch, ensuring that terminated processes are always reclaimed promptly,
+even in systems that never become idle.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={System call numbers and prototypes, \texttt{syscall.h}},
-  label={lst:syscall_h}
-]{../code/chapter6/syscall.h}
-\end{figure}
-
-The handler inspects the \texttt{a7} register to determine which system call was
-invoked and uses the \texttt{trap\_frame} structure to access arguments and
-return values.  
-For now, calls simply wrap existing kernel routines like \texttt{proc\_put()} and
-\texttt{uart\_get()}.
-
-\section{User Library}
-
-The user-side interface consists of small inline wrappers defined in
-\texttt{syslib.h}.  
-These issue the correct system-call number and execute \texttt{ecall}.
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Inline user-level system call stubs, \texttt{syslib.h}},
-  label={lst:syslib_h}
-]{../code/chapter6/syslib.h}
+  caption={Scheduler with integrated cleanup, \texttt{sched.c}},
+  label={lst:sched_c}
+]{../code/chapter6/sched.c}
 \end{figure}
 
 \section{Demonstration Program}
 
-The new demonstration (\texttt{hello.c}) creates several tasks that run in user
-mode.  
-Task~A repeatedly calls \texttt{user\_put()} to draw characters, while
-Task~B uses \texttt{user\_get()} to echo typed input.
-Each \texttt{ecall} traps into the kernel, which performs the corresponding
-service and returns to user mode.
+The updated demonstration program, shown below, now allows processes to
+terminate and new ones to be created dynamically.  The function
+\texttt{taskB()} waits for keyboard input; when you type an exclamation mark~(!),
+it spawns a new instance of \texttt{taskA()}, and when you type a period~(.),
+it calls \texttt{proc\_exit()} to terminate itself.
+
+This marks the first step toward a command shell: user input can now launch
+and end programs interactively.
 
 \begin{figure}[H]
 \centering
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={Multitasking demonstration with system calls, \texttt{hello.c}},
+  caption={Interactive demonstration with process creation and termination, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter6/hello.c}
 \end{figure}
 
-\section{Control Flow Summary}
+\section{Discussion}
 
-\begin{enumerate}
-  \item The kernel initializes interrupt vectors and system-call handling via
-        \texttt{syscall\_init()} and \texttt{intr\_set\_handler(INTR\_SYSCALL,\dots)}.
-  \item \texttt{ctx\_user\_setup()} programs PMP registers to permit user access.
-  \item A thread enters user mode through \texttt{ctx\_start()}, which sets
-        \texttt{mepc} to the entry function and executes \texttt{mret}.
-  \item When user code executes \texttt{ecall}, the CPU traps into
-        \texttt{syscall\_handler()}, which performs the requested service.
-  \item On return, \texttt{mret} restores user mode and resumes at the next
-        instruction.
-\end{enumerate}
+\paragraph{Safety.}
+A process never frees its own stack; cleanup happens only after a context switch
+to another stack.  This guarantees that no code executes on freed memory.
+
+\paragraph{Progress.}
+Because cleanup occurs after every switch, memory is reclaimed even when the
+system is busy and never idles.
+
+\paragraph{Toward a shell.}
+Dynamic process creation and termination provide the essential building blocks
+for a shell or command interpreter, where input can start new processes and
+existing processes can exit.
 
 \section*{Projects}
 
 \begin{enumerate}
-  \item Extend the syscall interface with \texttt{SYS\_TIME} returning the current
-        timer value, or \texttt{SYS\_YIELD} for explicit cooperative scheduling.
-  \item Modify the user library to provide standard I/O functions like
-        \texttt{putchar()} and \texttt{getchar()} using these system calls.
-  \item Add simple error reporting: reserve negative return values for errors.
+  \item Extend the system with a \texttt{join()} function that allows one
+        process to wait for another to finish.
+  \item Add a \texttt{kill()} function that removes another process from its
+        run queue asynchronously.
+  \item Modify the demo to track the number of running processes and display it
+        in the corner of the screen.
 \end{enumerate}
