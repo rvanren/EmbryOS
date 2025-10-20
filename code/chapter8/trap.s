@@ -1,9 +1,8 @@
     .equ TRAP_FRAME_SIZE, 144
 
     .section .text
-    .globl trap_entry
-    .align 2
-trap_entry:
+    .globl _trap_handler                                                            .align 2
+_trap_handler:
     /* If trap came from user mode (MPP==0), swap sp with mscratch. */
     csrr   t0, mstatus
     li     t1, (3 << 11)       /* mask for MPP bits */
@@ -70,7 +69,7 @@ trap_entry:
 
     /* call C handler: a0 = &trap_frame */
     mv     a0, sp
-    call   trap_handler_c
+    call   software_trap_handler
 
     /* --- restore registers --- */
     lw     ra,   0(sp)

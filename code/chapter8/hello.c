@@ -19,24 +19,24 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 __attribute__((noreturn))
-static inline void enter_user(uintptr_t mepc, uintptr_t gp, uintptr_t usp, uintptr_t ksp) {
-    asm volatile(
-        // set per-process kernel stack for trap entry
-        "csrw mscratch, %[ksp]\n"
-        // set gp and sp for user context
+void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp) {
+    asm volatile (
+        "csrw mscratch, %[ksp]\n"   /* kernel stack for traps */
         "mv   gp, %[gp]\n"
         "mv   sp, %[usp]\n"
-        // set mepc to user entry
-        "csrw mepc, %[pc]\n"
-        // set MPP = U so mret goes to user mode
         "csrr t0, mstatus\n"
-        "li   t1, 0x1800        \n"   // MSTATUS_MPP mask (bits 12..11)
-        "andn t0, t0, t1        \n"   // clear MPP
-        "csrw mstatus, t0       \n"
-        "mret\n"
+        "li   t1, 0x1800\n"         /* MSTATUS_MPP bits */
+        "not  t2, t1\n"
+        "and  t0, t0, t2\n"         /* clear MPP */
+        "csrw mstatus, t0\n"
+        "csrw mepc, %[pc]\n"
+        "mret\n"                    /* drop to user mode */
         :
-        : [ksp]"r"(ksp), [gp]"r"(gp), [usp]"r"(usp), [pc]"r"(mepc)
-        : "t0","t1","gp","sp","memory"
+        : [gp]"r"(gp_val),
+          [usp]"r"(user_sp),
+          [ksp]"r"(ksp),
+          [pc]"r"(entry)
+        : "t0","t1","t2","gp","memory"
     );
     __builtin_unreachable();
 }
