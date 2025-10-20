@@ -1,24 +1,31 @@
 #include <stdint.h>
 #include "frame.h"
 
-extern struct page __frames_end[];
-static int free_head = 0;
+// This is type of unallocated frames.  They point to the next unallocated frame.
+union free_frame {
+    union free_frame *next;
+    char bytes[PAGE_SIZE];
+};
+
+extern union free_frame frames[], __frames_end[];
+static union free_frame *free_list = frames;
 
 void frame_init(void) {
     int nframes = __frames_end - frames;
     for (int i = 0; i < nframes - 1; i++)
-        FRAME(struct free_frame, i)->next = i + 1;
-    FRAME(struct free_frame, nframes - 1)->next = -1;
+        frames[i].next = &frames[i + 1];
+    frames[nframes - 1].next = 0;
 }
 
-int frame_alloc(void) {
-    if (free_head < 0) return -1;
-    int f = free_head;
-    free_head = FRAME(struct free_frame, f)->next;
+void *frame_alloc(void) {
+    if (free_list == 0) return 0;
+    union free_frame *f = free_list;
+    free_list = f->next;
     return f;
 }
 
-void frame_release(int f) {
-    FRAME(struct free_frame, f)->next = free_head;
-    free_head = f;
+void frame_release(void *frame) {
+    union free_frame *f = frame;
+    f->next = free_list;
+    free_list = f;
 }
