@@ -1,5 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
+#include <string.h>
 #include "frame.h"
 #include "sched.h"
 
@@ -32,6 +33,8 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
 
     self->base = frame_alloc();
     self->stack = frame_alloc();
+    memset(self->base, 0, PAGE_SIZE);
+    memset(self->stack, 0, PAGE_SIZE);
     for (size_t i = 0; i < size; i++) self->base[i] = start[i];
     enter_user(self->base, (uintptr_t) (self->base + gp_offset),
                             (uintptr_t) self->stack + PAGE_SIZE,
