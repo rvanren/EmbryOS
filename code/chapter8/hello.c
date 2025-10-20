@@ -19,38 +19,40 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 __attribute__((noreturn))
-void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp) {
-    asm volatile (
-        "mv gp, %[gp]\n"        // set global pointer
-        "mv sp, %[sp]\n"        // set stack pointer
-        "jalr zero, %[entry], 0\n" // jump to user code, never returns
+static inline void enter_user(uintptr_t mepc, uintptr_t gp, uintptr_t usp, uintptr_t ksp) {
+    asm volatile(
+        // set per-process kernel stack for trap entry
+        "csrw mscratch, %[ksp]\n"
+        // set gp and sp for user context
+        "mv   gp, %[gp]\n"
+        "mv   sp, %[usp]\n"
+        // set mepc to user entry
+        "csrw mepc, %[pc]\n"
+        // set MPP = U so mret goes to user mode
+        "csrr t0, mstatus\n"
+        "li   t1, 0x1800        \n"   // MSTATUS_MPP mask (bits 12..11)
+        "andn t0, t0, t1        \n"   // clear MPP
+        "csrw mstatus, t0       \n"
+        "mret\n"
         :
-        : [gp]"r"(gp_val), [sp]"r"(user_sp), [entry]"r"(entry)
-        : "gp", "memory"        // note: no "sp" here
+        : [ksp]"r"(ksp), [gp]"r"(gp), [usp]"r"(usp), [pc]"r"(mepc)
+        : "t0","t1","gp","sp","memory"
     );
     __builtin_unreachable();
 }
 
 void taskA(void) {
+    struct pcb *self = run_queue[proc_current]->next;
     extern char _binary_user_bin_start[], _binary_user_bin_end[];
     size_t size = _binary_user_bin_end - _binary_user_bin_start;
     char *base = frame_alloc(), *stack = frame_alloc();
     for (int i = 0; i < size; i++) base[i] = _binary_user_bin_start[i];
     enter_user(base, (uintptr_t) (base + USER_GP_OFFSET),
-                            (uintptr_t) stack + PAGE_SIZE);
+                            (uintptr_t) stack + PAGE_SIZE,
+                            (uintptr_t) self + PAGE_SIZE);
 }
 
-void taskB(void) {
-    user_put(10, 3, '$', 2, 0);
-    for (int counter = 0;; counter++) {
-        char c = user_get();
-        user_put(10, 5 + counter % 10, c, 2, 0);
-        if (c == '!') user_spawn(0, 40, 12, 40, 12);
-        if (c == '.') user_exit();
-    }
-}
-
-void (*applications[])() = { taskA, taskB };
+void (*applications[])() = { taskA };
 int n_applications = sizeof(applications) / sizeof(applications[0]);
 
 int main(void) {
@@ -64,8 +66,6 @@ int main(void) {
     ctx_user_setup();
 
     sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
-    sched_run(taskB, (struct rect){ 40,  0,  40, 12 });  // upper-right
-    sched_run(taskA, (struct rect){ 0,  12,  40, 12 });  // lower-left
 
     sched_idle();
 }
