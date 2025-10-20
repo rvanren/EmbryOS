@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "user_gp.h"
+#include "apps.h"
 
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp) {
@@ -39,14 +39,8 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
                             (uintptr_t) self + PAGE_SIZE);
 }
 
-void taskA(void) {
-    extern char _binary_user_bin_start[], _binary_user_bin_end[];
-    run_user(_binary_user_bin_start, _binary_user_bin_end, USER_GP_OFFSET);
-}
-
-void (*applications[])() = { taskA };
-int n_applications = sizeof(applications) / sizeof(applications[0]);
+extern void (*applications[])();
 
 void apps_init(){
-    sched_run(taskA, (struct rect){ 0,   0,  40, 12 });  // upper-left
+    sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });  // upper-left
 }
