@@ -24,6 +24,8 @@ void taskA(void) {
     uintptr_t base = (uintptr_t)_binary_user_bin_start;
     uintptr_t gp_value = base + 0x888;
 
+    printf("BASE: %x\n", (int) base);
+
     register uintptr_t gp asm("gp") = gp_value;
     asm volatile ("mv gp, %0" :: "r"(gp_value));
 
