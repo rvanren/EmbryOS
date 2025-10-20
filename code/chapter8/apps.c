@@ -1,14 +1,7 @@
 #include <stddef.h>
+#include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "stdio.h"
-#include "interrupt.h"
-#include "ctx.h"
-#include "mtime.h"
-#include "syscall.h"
-#include "syslib.h"
-#include "uart.h"
-#include "plic.h"
 #include "user_gp.h"
 
 __attribute__((noreturn))
