@@ -10,4 +10,4 @@
 void interrupt_handler(struct trap_frame *tf);
 
 // Initializes the plic module
-int plic_init();
+void plic_init();
