@@ -1,94 +1,34 @@
-# ============================================================
-# RISC-V Toolchain
-# ============================================================
-CC      = riscv64-unknown-elf-gcc
-OBJCOPY = riscv64-unknown-elf-objcopy
-OBJDUMP = riscv64-unknown-elf-objdump
+QEMU        = qemu-system-riscv32
+RISCV_CC    = riscv-none-elf-gcc
+OBJDUMP     = riscv-none-elf-objdump
+OBJCOPY     = riscv-none-elf-objcopy
+YELLOW      = \033[1;33m
+END         = \033[0m
 
-# ============================================================
-# Kernel build configuration
-# ============================================================
-KERNEL_CSRC   = hello.c uart.c trap.c sched.c process.c frame.c interrupt.c \
-                plic.c mtime.c proc_clean.c
-KERNEL_ASMSRC = start.s ctx.s                    # kernel assembly sources
+LDFLAGS     = -nostdlib
+CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin
+DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-KERNEL_CFLAGS = -Wall -O2 -g \
-  -march=rv32i -mabi=ilp32 \
-  -ffreestanding -nostdlib -nostartfiles
+all: user.o
+	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
+	$(RISCV_CC) $(CFLAGS) start.s ctx.s trap.s hello.c frame.c stdio.c sched.c screen.c process.c interrupt.c plic.c syscall.c mtime.c mmu.c uart.c user.o -Thello.lds $(LDFLAGS) -o hello.elf
+	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
+	$(OBJCOPY) -O binary hello.elf hello.bin
 
-KERNEL_ASFLAGS = -march=rv32i -mabi=ilp32
+qemu: all
+	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
+	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
 
-KERNEL_LDFLAGS = -T kernel.lds -nostdlib -nostartfiles
+# --- Build user binary ---
 
-KERNEL_COBJS   = $(KERNEL_CSRC:.c=.o)
-KERNEL_AOBJS   = $(KERNEL_ASMSRC:.s=.o)
-KERNEL_OBJS    = $(KERNEL_COBJS) $(KERNEL_AOBJS)
-
-# ============================================================
-# User build configuration (position-independent binary)
-# ============================================================
-USER_CSRC   = user.c
-USER_ASMSRC = crt0.s
-
-USER_CFLAGS = -Wall -O2 -g \
-  -march=rv32i -mabi=ilp32 \
-  -fpie -ffreestanding -nostdlib -nostartfiles
-
-USER_ASFLAGS = -march=rv32i -mabi=ilp32
-
-USER_LDFLAGS = -pie -nostdlib -nostartfiles -T user.lds
-
-USER_COBJS   = $(USER_CSRC:.c=.o)
-USER_AOBJS   = $(USER_ASMSRC:.s=.o)
-USER_OBJS    = $(USER_COBJS) $(USER_AOBJS)
-
-# ============================================================
-# Targets
-# ============================================================
-.PHONY: all clean dump
-
-all: kernel.elf user.bin
-
-# ------------------------------------------------------------
-# Kernel build
-# ------------------------------------------------------------
-kernel.elf: $(KERNEL_OBJS)
-	$(CC) $(KERNEL_CFLAGS) $(KERNEL_LDFLAGS) -o $@ $^
-
-# ------------------------------------------------------------
-# User build (PIC)
-# ------------------------------------------------------------
-user.elf: $(USER_OBJS)
-	$(CC) $(USER_CFLAGS) $(USER_LDFLAGS) -o $@ $^
+user.elf: user.c user.lds
+	$(RISCV_CC) $(CFLAGS) -fpie -ffreestanding -nostdlib -nostartfiles -march=rv32i -nostdlib -T user.lds -o $@ crt0.s user.c
 
 user.bin: user.elf
 	$(OBJCOPY) -O binary $< $@
 
-# ------------------------------------------------------------
-# Utility targets
-# ------------------------------------------------------------
-dump: kernel.elf user.elf
-	$(OBJDUMP) -d kernel.elf > kernel.dump
-	$(OBJDUMP) -d user.elf   > user.dump
+user.o: user.bin
+	$(OBJCOPY) -I binary -O elf32-littleriscv -B riscv $< $@
 
 clean:
-	rm -f $(KERNEL_OBJS) $(USER_OBJS) kernel.elf user.elf user.bin *.dump
-
-# ============================================================
-# Compile rules
-# ============================================================
-# Kernel C
-$(KERNEL_COBJS): %.o: %.c
-	$(CC) -c $(KERNEL_CFLAGS) $< -o $@
-
-# Kernel assembly
-$(KERNEL_AOBJS): %.o: %.s
-	$(CC) -c $(KERNEL_ASFLAGS) $< -o $@
-
-# User C
-$(USER_COBJS): %.o: %.c
-	$(CC) -c $(USER_CFLAGS) $< -o $@
-
-# User assembly
-$(USER_AOBJS): %.o: %.s
-	$(CC) -c $(USER_ASFLAGS) $< -o $@
+	rm -f hello.bin hello.lst hello.elf
