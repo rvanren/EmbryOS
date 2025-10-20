@@ -27,18 +27,22 @@ void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp)
     __builtin_unreachable();
 }
 
-void taskA(void) {
+void run_user(char start[], char end[], unsigned int gp_offset) {
     struct pcb *self = run_queue[proc_current]->next;
-    extern char _binary_user_bin_start[], _binary_user_bin_end[];
-    size_t size = _binary_user_bin_end - _binary_user_bin_start;
+    size_t size = end - start;
 
     self->base = frame_alloc();
     self->stack = frame_alloc();
-    for (int i = 0; i < size; i++)
+    for (size_t i = 0; i < size; i++)
         self->base[i] = _binary_user_bin_start[i];
-    enter_user(self->base, (uintptr_t) (self->base + USER_GP_OFFSET),
+    enter_user(self->base, (uintptr_t) (self->base + gp_offset),
                             (uintptr_t) self->stack + PAGE_SIZE,
                             (uintptr_t) self + PAGE_SIZE);
+}
+
+void taskA(void) {
+    extern char _binary_user_bin_start[], _binary_user_bin_end[];
+    run_user(_binary_user_bin_start, _binary_user_bin_end[], USER_GP_OFFSET);
 }
 
 void (*applications[])() = { taskA };
