@@ -35,9 +35,9 @@ void taskA(void) {
     self->base = frame_alloc();
     self->stack = frame_alloc();
     for (int i = 0; i < size; i++)
-        base[i] = _binary_user_bin_start[i];
-    enter_user(base, (uintptr_t) (base + USER_GP_OFFSET),
-                            (uintptr_t) stack + PAGE_SIZE,
+        self->base[i] = _binary_user_bin_start[i];
+    enter_user(self->base, (uintptr_t) (self->base + USER_GP_OFFSET),
+                            (uintptr_t) self->stack + PAGE_SIZE,
                             (uintptr_t) self + PAGE_SIZE);
 }
 
