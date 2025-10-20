@@ -1,6 +1,5 @@
 #include <stddef.h>
 #include <stdint.h>
-#include <string.h>
 #include "frame.h"
 #include "sched.h"
 
@@ -31,11 +30,16 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
     struct pcb *self = run_queue[proc_current]->next;
     size_t size = end - start;
 
+    if (size > PAGE_SIZE) {
+        printf("run_user: executable too large\n");
+        proc_exit();
+    }
+
     self->base = frame_alloc();
     self->stack = frame_alloc();
-    memset(self->base, 0, PAGE_SIZE);
-    memset(self->stack, 0, PAGE_SIZE);
     for (size_t i = 0; i < size; i++) self->base[i] = start[i];
+    for (size_t i = size; i < PAGE_SIZE; i++) self->base[i] = 0;
+    for (size_t i = 0; i < PAGE_SIZE; i++) self->stack[i] = 0;
     enter_user(self->base, (uintptr_t) (self->base + gp_offset),
                             (uintptr_t) self->stack + PAGE_SIZE,
                             (uintptr_t) self + PAGE_SIZE);
