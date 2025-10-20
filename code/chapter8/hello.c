@@ -18,18 +18,23 @@ void timer_handler(struct trap_frame *tf) {
     mtime_reset(QUANTUM); // add another quantum
 }
 
-extern char _binary_user_bin_start[], _binary_user_bin_end[];
-
 void taskA(void) {
+    extern char _binary_user_bin_start[], _binary_user_bin_end[];
     size_t size = _binary_user_bin_end - _binary_user_bin_start;
-    char *code = frame_alloc();
-    for (int i = 0; i < size; i++) code[i] = _binary_user_bin_start[i];
+    char *base = frame_alloc(), *stack = frame_alloc();
+    for (int i = 0; i < size; i++) base[i] = _binary_user_bin_start[i];
 
-    uintptr_t gp_value = (uintptr_t) (code + USER_GP_OFFSET);
-    register uintptr_t gp asm("gp") = gp_value;
-    asm volatile ("mv gp, %0" :: "r"(gp_value));
+    uintptr_t gp_val = (uintptr_t) (base + USER_GP_OFFSET);
+    uintptr_t user_sp = (uintptr_t)stack_frame + PAGE_SIZE;
 
-    ((void (*)(void)) code)();   // jump into user code
+    asm volatile (
+        "mv gp, %[gp]\n"
+        "mv sp, %[sp]\n"
+        "jalr zero, %[entry], 0\n"
+        :
+        : [gp]"r"(gp_val), [sp]"r"(user_sp), [entry]"r"(base)
+        : "gp", "sp", "memory"
+    );
 }
 
 void taskB(void) {
