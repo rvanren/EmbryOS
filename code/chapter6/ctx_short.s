@@ -4,7 +4,7 @@
 # void ctx_switch(void **old_sp, void *new_sp)
     ...
 
-# void ctx_start(void **save_sp, void *new_sp, void (*entry)(void))
+# void ctx_start(void **old_sp, void *new_sp, void (*entry)(void))
 # Switch to a new stack and start running entry() in user mode.
 
     .section .text
