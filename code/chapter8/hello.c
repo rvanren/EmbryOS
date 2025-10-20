@@ -1,3 +1,4 @@
+#include <stddef.h>
 #include "frame.h"
 #include "sched.h"
 #include "stdio.h"
@@ -18,13 +19,16 @@ void timer_handler(struct trap_frame *tf) {
 
 void taskA(void) {
     extern char _binary_user_bin_start[], _binary_user_bin_end[];
-    size_t size = _binary_user_bin_end - _binary_user_bin_start;
+    extern char __global_pointer$[];
 
-    char *code_page = frame_alloc();
-    for (int i = 0; i < size; i++) {
-        code_page[i] = _binary_user_bin_start[i];
-    }
-    (* (void (*)()) code_page)();
+    uintptr_t base = (uintptr_t)_binary_user_bin_start;
+    uintptr_t gp_offset = (uintptr_t)&__global_pointer$ - base;
+    uintptr_t gp_value = base + gp_offset;
+
+    register uintptr_t gp asm("gp") = gp_value;
+    asm volatile ("mv gp, %0" :: "r"(gp_value));
+
+    ((void (*)(void)) base)();   // jump into user code
 }
 
 void taskB(void) {
