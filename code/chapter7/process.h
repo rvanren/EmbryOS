@@ -33,3 +33,9 @@ void proc_enqueue(struct pcb **q, struct pcb *pcb);
 
 // Remove and return the current process from the given circular queue q.
 struct pcb *proc_dequeue(struct pcb **q);
+
+// Terminate the currently running process (never returns).
+void proc_exit(void);
+
+// Free all processes previously marked for exit.
+void proc_reap_zombies(void);
