@@ -41,7 +41,7 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
 
 void taskA(void) {
     extern char _binary_user_bin_start[], _binary_user_bin_end[];
-    run_user(_binary_user_bin_start, _binary_user_bin_end[], USER_GP_OFFSET);
+    run_user(_binary_user_bin_start, _binary_user_bin_end, USER_GP_OFFSET);
 }
 
 void (*applications[])() = { taskA };
