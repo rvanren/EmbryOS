@@ -1,192 +1,159 @@
-\chapter{User Mode and a First System Call}
+\chapter{Blocking I/O, Interrupts, and Sleep/Wake}
+\label{chap:blocking-io}
 
-Up to now, all of EmbryOS has run in machine mode.  Processes, the scheduler,
-and even \texttt{taskA()} all shared the same privilege.  This makes for simple
-code, but it also means that a faulty process could scribble over the kernel or
-hang the entire system.  Real operating systems prevent this by running
-applications in \emph{user mode}, a restricted environment.  The kernel, still
-in machine mode, exposes a controlled set of entry points called
-\emph{system calls}.  This chapter makes that transition.
+In Chapter~\ref{chap:contexts} we built a preemptive kernel with priorities and a timer interrupt.
+This chapter moves from polling to \emph{interrupt-driven, blocking I/O}. Concretely, we connect the
+platform-level interrupt controller (PLIC) to the UART so that arriving input data can \emph{wake}
+threads that are blocked waiting for characters. This requires a simple device driver, a safe
+sleep/wake interface into the scheduler, and a bounded buffer to decouple device bursts from thread
+consumers.
 
-\section{Why User Mode?}
-
-A privilege boundary gives us two essential properties:
+\section{Learning Goals}
 
 \begin{itemize}
-  \item \textbf{Isolation.} User code cannot modify kernel memory or device
-        registers directly.  Faults in user programs become recoverable errors,
-        not kernel panics.
-  \item \textbf{Mediation.} All access to hardware---printing to the screen,
-        reading input, allocating memory---goes through the kernel.  This lets
-        the OS decide who can do what.
+  \item Understand the role of the PLIC in claiming and completing external interrupts.
+  \item Implement a UART receive path that uses interrupts instead of polling.
+  \item Provide a blocking API \texttt{uart\_get()} that sleeps the calling thread and is later
+        awakened by the device interrupt handler.
+  \item Connect device ISRs to scheduler data structures (wait queues, run queues) safely.
 \end{itemize}
 
-RISC-V defines three privilege levels: Machine~(M), Supervisor~(S), and
-User~(U).  EmbryOS uses only two of them: M-mode for the kernel, and U-mode for
-processes.  The CPU switches between them automatically whenever a \emph{trap}
-occurs.
+\section{Big Picture}
 
-\section{How Traps Work}
-
-When an interrupt or exception happens, the CPU saves the program counter in
-\texttt{mepc}, records the cause in \texttt{mcause}, disables further
-interrupts, and jumps to the address stored in \texttt{mtvec}.  Our assembly
-handler \texttt{\_trap\_handler} (from earlier chapters) saves all registers on
-the current stack and calls the C function
-\texttt{software\_trap\_handler()}.  When that function returns, the assembly
-code restores registers and executes \texttt{mret}.  The instruction
-\texttt{mret} is what actually performs the privilege transition: it sets the
-CPU's mode to whatever value is stored in the \texttt{mstatus.MPP} field and
-resumes execution at \texttt{mepc}.
-
-If the kernel clears \texttt{mstatus.MPP} to zero before executing
-\texttt{mret}, control returns in user mode.  That is the key to launching user
-programs.
-
-\section{Dropping to User Mode}
-
-The entry function \texttt{ctx\_user()} in Listing~\ref{lst:user_s} saves the
-caller’s registers, stores the resulting stack pointer through its argument,
-switches to the new process stack, sets \texttt{mepc} to the user entry
-address, clears \texttt{mstatus.MPP} to select U-mode, and executes
-\texttt{mret}.  The new process begins in user mode; the kernel remains dormant
-until the next trap.
-
-Because RISC-V does not provide memory protection by default, we use Physical
-Memory Protection (PMP) to define which addresses user code may access.
-\texttt{ctx\_user\_setup()} installs a NAPOT PMP region that starts at
-0x80000000 and ends at 0x80400000, granting read, write, and execute
-permissions within that 4\,MiB window.  Attempts to fetch or access memory
-outside that range will cause an access fault.
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language={[x86masm]Assembler},
-  caption={Entering user mode and configuring PMP, \texttt{user.s}},
-  label={lst:user_s}
-]{../code/chapter5/ctx.s}
-\end{figure}
-
-\section{System Calls and ECALL}
-
-Once in user mode, a process can no longer reach kernel symbols like
-\texttt{proc\_put()}.  Instead it executes \texttt{ecall}, the
-\emph{environment call} instruction.  This traps back into the kernel with
-\texttt{mcause}=8 (ECALL from U-mode).  The handler runs in machine mode and
-decides what to do.  The CPU then executes \texttt{mret} and the process
-resumes where it left off.
-
-\subsection*{A First Call: \texttt{SYS\_PUT}}
-
-EmbryOS begins with just one system call: \texttt{SYS\_PUT}, which draws a
-character in the process’s screen rectangle.  It takes five arguments:
-row, column, character, foreground, and background color.
-
-Listing~\ref{lst:syslib_h} shows the user stub \texttt{user\_put()}, which
-places arguments in \texttt{a0--a4}, the system call number in \texttt{a7}, and
-executes \texttt{ecall}.  Listing~\ref{lst:syscall_c} is the kernel’s handler.
-It inspects \texttt{a7} to identify the system call, reads arguments from
-\texttt{a0--a4}, finds the current process’s \texttt{pcb}, and calls
-\texttt{proc\_put()} on its behalf.
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={User-mode wrapper for \texttt{SYS\_PUT}, \texttt{syslib.h}},
-  label={lst:syslib_h}
-]{../code/chapter5/syslib.h}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={System call implementation (one call), \texttt{syscall.c}},
-  label={lst:syscall_c}
-]{../code/chapter5/syscall.c}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={System call numbers, \texttt{syscall.h}},
-  label={lst:syscall_h}
-]{../code/chapter5/syscall.h}
-\end{figure}
-
-\section{Traps Revisited: Timer and ECALL}
-
-The trap dispatcher from Chapter~\ref{chap:preemption} now handles both
-interrupts and exceptions.  A timer interrupt (\texttt{mcause}=0x80000007)
-causes a preemption; the kernel resets the timer and calls the scheduler.
-An ECALL from user mode (\texttt{mcause}=8) invokes the system call handler and
-then increments \texttt{mepc} by~4 to skip the \texttt{ecall} instruction.
-This prevents the process from re-trapping immediately upon return.
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Trap dispatcher with ECALL and timer handling, \texttt{interrupt.c}},
-  label={lst:interrupt_c}
-]{../code/chapter5/interrupt.c}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Interrupt interface, \texttt{interrupt.h}},
-  label={lst:interrupt_h}
-]{../code/chapter5/interrupt.h}
-\end{figure}
-
-\section{Putting It All Together}
-
-The demonstration program (Listing~\ref{lst:hello_c}) initializes the timer and
-interrupt subsystem, installs the ECALL handler, sets up PMP, and launches four
-user-mode processes.  Each user process runs a loop that calls
-\texttt{user\_put()} to draw moving letters in its window.  None of these
-processes can access kernel data directly; all interaction goes through the
-system call path:
-
+The data path for receive (RX) is:
 \begin{enumerate}
-  \item User executes \texttt{ecall}.
-  \item CPU traps to machine mode, jumps to \texttt{\_trap\_handler}.
-  \item \texttt{software\_trap\_handler()} calls \texttt{syscall\_handler()}.
-  \item The kernel performs the service (here, \texttt{proc\_put()}).
-  \item Kernel returns with \texttt{mret}; user resumes.
+  \item The UART asserts an external interrupt when a byte arrives.
+  \item The PLIC presents that interrupt to the hart; the trap handler \emph{claims} the interrupt ID.
+  \item The kernel dispatches to the UART ISR, which drains the device RX FIFO into a ring buffer and
+        moves threads waiting for input from a UART wait queue onto a run queue.
+  \item Blocked callers of \texttt{uart\_get()} resume and consume bytes from the buffer.
 \end{enumerate}
 
-This is the same basic sequence used by Unix, Linux, and every modern
-operating system: a privilege change, a well-defined kernel entry, and a return
-to user space.
+Two invariants are central:
+\begin{itemize}
+  \item If the buffer is non-empty, \texttt{uart\_get()} must not block.
+  \item If new data arrive, then any threads waiting for input are eventually made runnable.
+\end{itemize}
 
-\begin{figure}[H]
-\centering
+\section{PLIC Top-Half}
+\label{sec:plic}
+
+The PLIC collects, prioritizes, masks, and routes external interrupts to harts. The top-half logic
+is minimal: read the \emph{claim/complete} register to obtain the pending interrupt ID, dispatch to
+the corresponding ISR, then write the same ID back to \emph{complete} it so the source can re-assert
+future interrupts. We program a non-zero priority for the UART interrupt, enable it for the hart,
+and leave the threshold at~0 so all positive-priority interrupts are deliverable.
+
 \lstinputlisting[
   style=oscode,
   language=C,
-  caption={User-mode demo with preemption and \texttt{SYS\_PUT}, \texttt{hello.c}},
+  caption={PLIC glue: claim, dispatch (UART), and completion, \texttt{plic.c}},
+  label={lst:plic_c}
+]{../code/chapter5/plic.c}
+
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={PLIC interface, \texttt{plic.h}},
+  label={lst:plic_h}
+]{../code/chapter5/plic.h}
+
+\section{UART Driver (Bottom-Half)}
+\label{sec:uart}
+
+The UART driver exposes three routines:
+\begin{itemize}
+  \item \texttt{putchar(c)}: a polled transmit used for printing (busy-waits on TX not-full).
+  \item \texttt{uart\_init()}: enables receive and the RX interrupt in the device.
+  \item \texttt{uart\_get()}: a blocking call that returns the next received character.
+\end{itemize}
+
+Internally, the driver maintains:
+\begin{itemize}
+  \item a fixed-size ring buffer storing bytes drained by the ISR,
+  \item a wait queue of PCBs sleeping for input.
+\end{itemize}
+
+The ISR runs in interrupt context. It repeatedly reads \texttt{rxdata} until the device indicates
+“no byte available”, enqueues each received byte into the ring buffer (if not full), and finally
+moves any sleepers from the UART wait queue to a CPU run queue so they can resume.
+
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={UART driver and ISR (receive path), \texttt{uart.c}},
+  label={lst:uart_c}
+]{../code/chapter5/uart.c}
+
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={UART interface, \texttt{uart.h}},
+  label={lst:uart_h}
+]{../code/chapter5/uart.h}
+
+\section{Control Flow}
+
+Putting the pieces together:
+\begin{enumerate}
+  \item \textbf{Initialization.} \texttt{plic\_init()} programs the UART interrupt priority/enable/
+        threshold; \texttt{uart\_init()} turns on RX and RX interrupts in the device.
+  \item \textbf{Blocking call.} A thread calls \texttt{uart\_get()}. If the buffer is empty, the
+        thread is appended to the UART wait queue, marked blocked, and the scheduler runs another
+        thread.
+  \item \textbf{Interrupt.} When a byte arrives, the trap handler claims the UART interrupt and
+        calls the UART ISR, which drains bytes into the ring buffer and enqueues all sleepers onto
+        a run queue.
+  \item \textbf{Resume.} Woken threads return from \texttt{uart\_get()} with available bytes.
+\end{enumerate}
+
+\section{Demonstration: Multitasking and Interrupts}
+
+The following demonstration program, \texttt{hello.c}, combines timer interrupts, the scheduler,
+and UART initialization to show multiple concurrent tasks updating regions of the display.
+Each task repeatedly writes characters to its own rectangle, yielding on timer interrupts.
+The UART driver remains active and interrupt-driven while the tasks run.
+
+\lstinputlisting[
+  style=oscode,
+  language=C,
+  caption={Multitasking demo using timer and UART, \texttt{hello.c}},
   label={lst:hello_c}
 ]{../code/chapter5/hello.c}
-\end{figure}
+
+\section{Correctness and Common Pitfalls}
+
+\paragraph{Completing interrupts.}
+Always write the claimed ID back to the PLIC claim/complete register after servicing; otherwise the
+source remains in-service and further interrupts will not be delivered.
+
+\paragraph{Wake semantics.}
+A simple policy is to wake all sleepers whenever new data arrive. This is easy to reason about, but
+may cause extra context switches if many threads compete for few bytes. An optimization (left as an
+exercise) is to wake exactly $N$ sleepers when $N$ new bytes were enqueued.
+
+\paragraph{Bounded ISR time.}
+The ISR drains the RX FIFO until the device reports “no data”; this bounds the interrupt work while
+avoiding livelock under bursts.
 
 \section*{Projects}
+
 \begin{enumerate}
-  \item \textbf{Add a second system call.}  Implement \texttt{SYS\_YIELD()} that
-        calls the scheduler’s \texttt{yield()}.
-  \item \textbf{Report errors.}  Make \texttt{SYS\_PUT()} return an error code in
-        \texttt{a0} if the coordinates are outside the process’s rectangle.
-  \item \textbf{Run-time privilege check.}  Print the value of
-        \texttt{mstatus.MPP} at key points to verify the mode transitions.
+  \item \textbf{Wake-$N$ policy.} Modify the ISR to wake exactly as many sleepers as bytes enqueued.
+        Compare context-switch counts with the “wake-all” baseline.
+  \item \textbf{Non-blocking variant.} Add \texttt{int uart\_tryget(void)} that returns \texttt{-1}
+        if the buffer is empty without blocking.
+  \item \textbf{Interrupt masking.} Add an API to temporarily disable UART RX interrupts in the
+        device while keeping PLIC enablement; show that \texttt{uart\_get()} still works via polling.
+  \item \textbf{Proof sketch.} Argue that \texttt{uart\_get()} does not deadlock assuming interrupts
+        are eventually delivered and the scheduler is fair.
 \end{enumerate}
+
+\section*{Notes and Small Fixes}
+
+\begin{itemize}
+  \item \textbf{Consistent ISR signature.} Ensure the PLIC call site and \texttt{uart\_isr} agree
+        on parameters (either pass none, or update the prototype everywhere).
+  \item \textbf{Init return type.} Make \texttt{plic\_init} either return \texttt{0} or use
+        \texttt{void} for clarity.
+\end{itemize}
