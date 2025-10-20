@@ -31,6 +31,3 @@ void syscall_handler(struct trap_frame *tf) {
         printf("Unknown syscall %d\n", tf->a7);
     }
 }
-
-void syscall_init(void) {
-}

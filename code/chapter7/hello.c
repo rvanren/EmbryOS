@@ -37,7 +37,7 @@ void (*applications[])() = { taskA, taskB };
 int n_applications = sizeof(applications) / sizeof(applications[0]);
 
 int main(void) {
-    frame_init(); intr_init(); plic_init(); syscall_init(); uart_init(); mtime_init();
+    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
     intr_set_handler(INTR_TIMER, timer_handler);

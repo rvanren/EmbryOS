@@ -7,8 +7,5 @@
 
 #include "interrupt.h"
 
-// Initialize the syscall module
-void syscall_init(void);
-
 // This handler is invoked on a system call (ecall).
 void syscall_handler(struct trap_frame *);
