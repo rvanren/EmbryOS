@@ -21,13 +21,15 @@ void timer_handler(struct trap_frame *tf) {
 extern char _binary_user_bin_start[], _binary_user_bin_end[];
 
 void taskA(void) {
-    uintptr_t base = (uintptr_t) _binary_user_bin_start;
-    uintptr_t gp_value = base + USER_GP_OFFSET;
+    size_t size = _binary_user_bin_end - _binary_user_bin_start;
+    char *code = frame_alloc();
+    for (int i = 0; i < size; i++) code[i] = _binary_user_bin_start[i];
 
+    uintptr_t gp_value = (uintptr_t) (code + USER_GP_OFFSET);
     register uintptr_t gp asm("gp") = gp_value;
     asm volatile ("mv gp, %0" :: "r"(gp_value));
 
-    ((void (*)(void)) base)();   // jump into user code
+    ((void (*)(void)) code)();   // jump into user code
 }
 
 void taskB(void) {
