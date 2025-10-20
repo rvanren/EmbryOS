@@ -22,8 +22,7 @@ void taskA(void) {
     extern char __global_pointer$[];
 
     uintptr_t base = (uintptr_t)_binary_user_bin_start;
-    uintptr_t gp_offset = (uintptr_t)&__global_pointer$ - base;
-    uintptr_t gp_value = base + gp_offset;
+    uintptr_t gp_value = base + 0x888;
 
     register uintptr_t gp asm("gp") = gp_value;
     asm volatile ("mv gp, %0" :: "r"(gp_value));
