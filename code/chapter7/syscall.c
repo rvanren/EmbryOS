@@ -2,6 +2,7 @@
 #include "syscall.h"
 #include "process.h"
 #include "stdio.h"
+#include "process.h"
 #include "sched.h"
 #include "uart.h"
 
