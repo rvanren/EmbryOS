@@ -18,23 +18,26 @@ void timer_handler(struct trap_frame *tf) {
     mtime_reset(QUANTUM); // add another quantum
 }
 
+__attribute__((noreturn))
+void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp) {
+    asm volatile (
+        "mv gp, %[gp]\n"        // set global pointer
+        "mv sp, %[sp]\n"        // set stack pointer
+        "jalr zero, %[entry], 0\n" // jump to user code, never returns
+        :
+        : [gp]"r"(gp_val), [sp]"r"(user_sp), [entry]"r"(entry)
+        : "gp", "memory"        // note: no "sp" here
+    );
+    __builtin_unreachable();
+}
+
 void taskA(void) {
     extern char _binary_user_bin_start[], _binary_user_bin_end[];
     size_t size = _binary_user_bin_end - _binary_user_bin_start;
     char *base = frame_alloc(), *stack = frame_alloc();
     for (int i = 0; i < size; i++) base[i] = _binary_user_bin_start[i];
-
-    uintptr_t gp_val = (uintptr_t) (base + USER_GP_OFFSET);
-    uintptr_t user_sp = (uintptr_t) stack + PAGE_SIZE;
-
-    asm volatile (
-        "mv gp, %[gp]\n"
-        "mv sp, %[sp]\n"
-        "jalr zero, %[entry], 0\n"
-        :
-        : [gp]"r"(gp_val), [sp]"r"(user_sp), [entry]"r"(base)
-        : "gp", "sp", "memory"
-    );
+    enter_user(base, (uintptr_t) (base + USER_GP_OFFSET),
+                            (uintptr_t) stack + PAGE_SIZE);
 }
 
 void taskB(void) {
