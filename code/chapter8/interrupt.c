@@ -38,7 +38,7 @@ void software_trap_handler(struct trap_frame *tf) {
             {
                 uint32_t mtval;
                 asm volatile ("csrr %0, mtval" : "=r"(mtval));
-                printf("trap: cause=%d mepc=%x mtval=%x\n", mcause & 0xFFF, tf->epc, mtval);
+                printf("trap: cause=%d mepc=%x mtval=%x\n", mcause & 0xFFF, tf->mepc, mtval);
                 for (;;) ;
             }
         }

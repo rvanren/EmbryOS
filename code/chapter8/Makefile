@@ -2,6 +2,7 @@ QEMU        = qemu-system-riscv32
 RISCV_CC    = riscv-none-elf-gcc
 OBJDUMP     = riscv-none-elf-objdump
 OBJCOPY     = riscv-none-elf-objcopy
+NM          = riscv-none-elf-nm
 YELLOW      = \033[1;33m
 END         = \033[0m
 
@@ -29,6 +30,15 @@ user.bin: user.elf
 
 user.o: user.bin
 	$(OBJCOPY) -I binary -O elf32-littleriscv -B riscv $< $@
+
+# user_gp.h contains:  #define USER_GP_OFFSET 0x<hex>
+user_gp.h: user.elf
+	@gp_off=$$($(NM) user.elf | awk '/ __global_pointer\$$/ {print $$1}'); \
+	echo "#pragma once"              >  $@; \
+	echo "#define USER_GP_OFFSET 0x$${gp_off}" >> $@
+
+# make kernel objects recompile if gp offset changes
+$(KERNEL_COBJS): user_gp.h
 
 clean:
 	rm -f hello.bin hello.lst hello.elf
