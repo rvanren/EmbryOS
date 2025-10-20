@@ -31,8 +31,11 @@ void taskA(void) {
     struct pcb *self = run_queue[proc_current]->next;
     extern char _binary_user_bin_start[], _binary_user_bin_end[];
     size_t size = _binary_user_bin_end - _binary_user_bin_start;
-    char *base = frame_alloc(), *stack = frame_alloc();
-    for (int i = 0; i < size; i++) base[i] = _binary_user_bin_start[i];
+
+    self->base = frame_alloc();
+    self->stack = frame_alloc();
+    for (int i = 0; i < size; i++)
+        base[i] = _binary_user_bin_start[i];
     enter_user(base, (uintptr_t) (base + USER_GP_OFFSET),
                             (uintptr_t) stack + PAGE_SIZE,
                             (uintptr_t) self + PAGE_SIZE);

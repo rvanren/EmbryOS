@@ -9,6 +9,7 @@ struct pcb *proc_init(struct rect area){
     pcb->priority = 0;
     pcb->area = area;
     pcb->next = 0;
+    pcb->base = pcb->stack = 0;
     return pcb;
 }
 
@@ -17,6 +18,7 @@ struct pcb *proc_create(struct rect area) {
     pcb->priority = 0;
     pcb->area = area;
     pcb->next = 0;
+    pcb->base = pcb->stack = 0;
     return pcb;
 }
 
