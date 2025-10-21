@@ -72,4 +72,5 @@ apps_gen.c: $(APP_ELFS)
 	echo "Generated $@"
 
 clean:
+	@printf "$(YELLOW)-------- clean --------$(END)\n"
 	rm -f hello.bin hello.lst hello.elf
