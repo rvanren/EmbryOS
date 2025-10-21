@@ -4,7 +4,7 @@
 #define NCOLS 40
 
 struct cell { char c, fg, bg; };
-struct cell screen[NROWS]{NCOLS];
+struct cell screen[NROWS][NCOLS];
 int cur_col = 0, cur_fg = 0, cur_bg = 7;
 
 void screen_init(){
@@ -24,7 +24,7 @@ void screen_sync(){
 }
 
 void scroll(){
-    for (row = 0; row < NROWS - 1; row++) {
+    for (int row = 0; row < NROWS - 1; row++) {
         for (int col = 0; col < NCOLS; col++) {
             screen[row][col] = screen[row + 1][col];
         }
@@ -36,11 +36,11 @@ void scroll(){
 }
 
 void putchar(char c){
-    if (c == '\n' || cur_col == NCOLS) {
+    if (c == '\r' || cur_col == NCOLS) {
         scroll();
         cur_col = 0;
     }
-    if (c != '\n') {
+    if (c != '\r') {
         user_put(NROWS - 1, cur_col, c, cur_fg, cur_bg);
         screen[NROWS - 1][cur_col] = (struct cell) { c, cur_fg, cur_bg };
         cur_col++;
@@ -48,6 +48,8 @@ void putchar(char c){
 }
 
 void main(void) {
+    screen_init();
+    screen_sync();
     putchar('$'); putchar(' ');
     for (;;) {
         char c = user_get();
