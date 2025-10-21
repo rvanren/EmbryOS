@@ -36,6 +36,13 @@ void scroll(){
 }
 
 void putchar(char c){
+    if (c == '\b') {
+        if (cur_col > 0) {
+            cur_col--;
+            user_put(NROWS - 1, cur_col, ' ', cur_fg, cur_bg);
+        }
+        return;
+    }
     if (c == '\n' || cur_col == NCOLS) {
         scroll();
         cur_col = 0;
