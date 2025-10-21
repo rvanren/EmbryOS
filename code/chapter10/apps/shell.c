@@ -46,7 +46,7 @@ void putchar(char c) {
             user_put(NROWS - 1, cur_col, ' ', cur_fg, cur_bg);
             screen[NROWS - 1][cur_col] = (struct cell) { ' ', cur_fg, cur_bg };
             if (cur_col > 0)
-                screen_put(NROWS - 1, cur_col - 1, screen[NROWS - 1, cur_col - 1]);
+                screen_put(NROWS - 1, cur_col - 1, screen[NROWS - 1][cur_col - 1]);
         }
         return;
     }
