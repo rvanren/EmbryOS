@@ -1,12 +1,12 @@
-    .equ TRAP_FRAME_SIZE, 128
+    .equ TRAP_FRAME_SIZE, 144   # 36 words × 4 bytes
 
     .section .text
     .globl _trap_handler
 _trap_handler:
-    # make space for trap frame
-    addi sp, sp, -TRAP_FRAME_SIZE  # 31 regs * 4 + mepc = 128 bytes (align as needed)
+    # allocate space for trap frame
+    addi sp, sp, -TRAP_FRAME_SIZE
 
-    # save caller-saved + callee-saved registers
+    # --- save all general registers ---
     sw ra,   0(sp)
     sw sp,   4(sp)
     sw gp,   8(sp)
@@ -39,13 +39,30 @@ _trap_handler:
     sw t5,  116(sp)
     sw t6,  120(sp)
 
+    # --- save machine CSRs ---
     csrr t0, mepc
-    sw t0, 124(sp)      # save trap PC
+    sw t0, 124(sp)
+    csrr t0, mstatus
+    sw t0, 128(sp)
+    csrr t0, mcause
+    sw t0, 132(sp)
+    csrr t0, mtval
+    sw t0, 136(sp)
 
-    mv a0, sp           # a0 = &trap_frame
+    # usp (user sp) unused for now, set 0 for symmetry
+    sw zero, 140(sp)
+
+    # call C-level handler
+    mv a0, sp                   # a0 = &trap_frame
     call software_trap_handler
 
-    # restore registers
+    # --- restore machine CSRs ---
+    lw t0, 124(sp)
+    csrw mepc, t0
+    lw t0, 128(sp)
+    csrw mstatus, t0
+
+    # --- restore registers ---
     lw ra,   0(sp)
     lw sp,   4(sp)
     lw gp,   8(sp)
@@ -78,8 +95,6 @@ _trap_handler:
     lw t5,  116(sp)
     lw t6,  120(sp)
 
-    lw t0, 124(sp)
-    csrw mepc, t0       # restore mepc
-
+    # free trap frame and return
     addi sp, sp, TRAP_FRAME_SIZE
     mret
