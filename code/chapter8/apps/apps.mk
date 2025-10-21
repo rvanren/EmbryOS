@@ -1,1 +1,1 @@
-APPS = shell
+APPS = shell pretty
