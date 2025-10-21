@@ -84,6 +84,7 @@ void main(void) {
             putchar('\n');
             line[n] = 0;
             exec(line);
+            n = 0;
             putchar('$');
             putchar(' ');
         }
