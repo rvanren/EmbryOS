@@ -36,11 +36,11 @@ void scroll(){
 }
 
 void putchar(char c){
-    if (c == '\r' || cur_col == NCOLS) {
+    if (c == '\n' || cur_col == NCOLS) {
         scroll();
         cur_col = 0;
     }
-    if (c != '\r') {
+    if (c != '\n') {
         user_put(NROWS - 1, cur_col, c, cur_fg, cur_bg);
         screen[NROWS - 1][cur_col] = (struct cell) { c, cur_fg, cur_bg };
         cur_col++;
@@ -53,7 +53,14 @@ void main(void) {
     putchar('$'); putchar(' ');
     for (;;) {
         char c = user_get();
-        putchar(c);
+        if (c == '\r') {
+            putchar('\n');
+            putchar('$ ');
+            putchar(' ');
+        }
+        else {
+            putchar(c);
+        }
         if (c == '1') user_spawn(1, 40,  0, 40, 12);
         if (c == '2') user_spawn(1, 40, 12, 40, 12);
         if (c == '!') user_spawn(2,  0, 12, 40, 12);
