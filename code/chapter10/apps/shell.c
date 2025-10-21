@@ -61,14 +61,33 @@ void putchar(char c) {
     }
 }
 
+int strcmp(char *p, char *q) {
+    while (*p != 0 && *q != 0 && *p == *q) { p++; q++ }
+    if (*p == *q) { return 0; }
+    if (*p == 0) { return -1; }
+    if (*q == 0) { return 1; }
+    return *p - *q;
+}
+
 void exec(char *line) {
-    while (*line != 0) {
-        if (*line == '1') user_spawn(1, 40,  0, 40, 12);
-        if (*line == '2') user_spawn(1, 40, 12, 40, 12);
-        if (*line == '!') user_spawn(2,  0, 12, 40, 12);
-        if (*line == '.') user_exit();
-        line++;
+    char *argv[64];
+    int argc = 0;
+
+    for (;;) {
+        while (*line == ' ' || *line == '\t') line++;
+        if (*line == 0) break;
+        argv[argc++] = line;
+        while (*line != ' ' && *line != '\t' && *line != 0) line++;
+        if (*line == 0) break;
+        *line++ = 0;
     }
+    if (argc == 0) return;
+
+    if (strcmp(argv[0], "quit") == 0) user_exit();
+    if (strcmp(argv[0], "exit") == 0) user_exit();
+    if (strcmp(argv[0], "ur") == 0) user_spawn(1, 40,  0, 40, 12);
+    if (strcmp(argv[0], "lr") == 0) user_spawn(1, 40, 12, 40, 12);
+    if (strcmp(argv[0], "crash") == 0) user_spawn(2,  0, 12, 40, 12);
 }
 
 void main(void) {
