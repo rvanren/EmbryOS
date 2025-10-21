@@ -19,6 +19,8 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
+    extern void user_setup(void);
+
     frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);

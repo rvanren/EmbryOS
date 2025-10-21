@@ -62,15 +62,3 @@ ctx_start:
     sw sp, 0(a0)
     mv sp, a1
     jalr a2
-
-
-    .globl ctx_user_setup
-ctx_user_setup:
-    # pmp0: 4 MiB region from 0x80000000-0x803FFFFF
-    li t0, 0x2003FFFF
-    csrw pmpaddr0, t0
-
-    # 0x1F = R/W/X, A=NAPOT (11), L=0
-    li t0, 0x1F
-    csrw pmpcfg0, t0
-    ret
