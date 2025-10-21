@@ -20,24 +20,24 @@ void printf(const char *fmt, ...) {
         if (*fmt != '%') { putchar(*fmt); continue; }
         fmt++;
         switch (*fmt) {
-        case 'd': {
-            int x = va_arg(ap, int);
+        case 'd': { int x = va_arg(ap, int);
             if (x < 0) { putchar('-'); x = -x; }
             print_unsigned((unsigned int) x, 10);
             break;
         }
-        case 'x': {
-            unsigned int x = va_arg(ap, unsigned int);
+        case 'u': { unsigned int x = va_arg(ap, unsigned int);
+            print_unsigned(x, 10);
+            break;
+        }
+        case 'x': { unsigned int x = va_arg(ap, unsigned int);
             print_unsigned(x, 16);
             break;
         }
-        case 's': {
-            char *s = va_arg(ap, char *);
+        case 's': { char *s = va_arg(ap, char *);
             while (*s) putchar(*s++);
             break;
         }
-        case 'c': {
-            int c = va_arg(ap, int);
+        case 'c': { int c = va_arg(ap, int);
             putchar(c);
             break;
         }
