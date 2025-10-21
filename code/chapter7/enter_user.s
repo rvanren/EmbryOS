@@ -10,7 +10,7 @@ enter_user:
 
     # Clear MPP bits in mstatus so mret goes to U-mode
     csrr  t0, mstatus
-    li    t1, ~(3 << 11)      # clear bits 12–11 (MPP)
+    li    t1, ~(3 << 11)      # clear bits 12-11 (MPP)
     and   t0, t0, t1
     csrw  mstatus, t0
 

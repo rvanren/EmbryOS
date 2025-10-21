@@ -1,143 +1,138 @@
 \chapter{User Mode and System Calls}
-\label{chap:user-mode}
 
-In Chapter~\ref{chap:termination}, processes could already create new processes
-and terminate using the \texttt{!} and \texttt{.} keys, but all of that still
-happened entirely in \emph{kernel mode}.  In this chapter, we introduce
-\emph{user mode} and move process management behind a \emph{system-call}
-interface.  The same commands now work by trapping into the kernel through
-\texttt{ecall}, marking the transition from a monolithic kernel to one that
-supports protected user processes.
+This chapter introduces \textbf{User mode} and a minimal \textbf{system call interface} while intentionally keeping the execution model simple: we reuse the same stack for both kernel and user code.  This provides a smooth conceptual transition from Chapter~6 (kernel threads only) to Chapter~8 (full user stacks, register hygiene, and trap stack swapping).
 
-\section{Learning Goals}
+\section{Goals}
 
 \begin{itemize}
-  \item Understand RISC-V privilege levels and the trap mechanism between
-        user and kernel mode.
-  \item Implement system calls for process creation, termination, and I/O.
-  \item Observe how user code invokes kernel services using the \texttt{ecall}
-        instruction.
+  \item Enter \textbf{U-mode} from the kernel using a tiny \texttt{enter\_user()} stub.
+  \item Provide a \textbf{system call ABI} using \texttt{ecall}, with arguments in \texttt{a0..a4} and the syscall number in \texttt{a7}.
+  \item Offer a small \textbf{user library} (\texttt{syslib.h}) so user code can call \texttt{user\_put}, \texttt{user\_get}, \texttt{user\_spawn}, and \texttt{user\_exit}.
+  \item Keep the model deliberately simple: the kernel and user share the same stack in this chapter.
 \end{itemize}
 
-\section{Overview}
+In Chapter~8 we will expand this entry path to set up a separate user stack, clear registers before entering U-mode, and use \texttt{mscratch} to switch to a per-process kernel stack during traps.
 
-User code now runs in a lower privilege level.  When it needs to interact with
-the kernel—printing to the screen, reading a key, spawning a new process, or
-exiting—it executes an \texttt{ecall} instruction.  
-The hardware traps into the kernel, which inspects register~\texttt{a7} to
-identify the requested service and executes it safely on behalf of the user.
+\section{Entering User Mode}
 
-From the user's perspective, nothing changes: typing \texttt{!} still spawns a
-new process and typing \texttt{.} still exits.  What has changed is that these
-actions now go through a carefully controlled user–kernel boundary.
-
-\section{Context Setup for User Mode}
-
-The assembly file \texttt{ctx.s} defines context switching and user-mode entry.
-The function \texttt{ctx\_user\_setup()} configures Physical Memory Protection
-(PMP) to allow user code to run within a limited memory region.  The
-\texttt{mret} instruction then switches to user mode.
+We replace the one-off \texttt{ctx\_start} from earlier chapters with a minimal, reusable \texttt{enter\_user()} routine.  It loads the user entry point into \texttt{mepc}, clears \texttt{mstatus.MPP} to select U-mode, and executes \texttt{mret}.  There is no stack change yet.
 
 \begin{figure}[H]
 \centering
-\lstinputlisting[
-  style=oscode,
-  language={[x86masm]Assembler},
-  caption={Context management and user-mode entry, \texttt{ctx.s}},
-  label={lst:ctx_s}
-]{../code/chapter7/ctx_short.s}
+\lstinputlisting[language={[x86masm]Assembler},
+  caption={Minimal user entry stub: reuse the current stack; switch privilege only.},
+  label={fig:enter_user}]{../code/chapter7/enter_user.s}
 \end{figure}
 
-\section{System Calls}
+For convenience, we also include a \texttt{user\_setup()} helper here that (for now) configures a permissive PMP region so U-mode can execute without faults.  It is intentionally broad and will be tightened in Chapter~9 when we add true isolation.
 
-The system-call handler dispatches requests based on the call number in
-register~\texttt{a7}.  Two new calls, \texttt{SYS\_EXIT} and
-\texttt{SYS\_SPAWN}, provide process control, while \texttt{SYS\_GET} and
-\texttt{SYS\_PUT} handle I/O.
+\section{System Call ABI}
+
+System calls use the RISC-V \texttt{ecall} instruction:
+
+\begin{itemize}
+  \item \textbf{Number} in \texttt{a7}
+  \item \textbf{Arguments} in \texttt{a0..a4}
+  \item \textbf{Return value} in \texttt{a0}
+\end{itemize}
+
+We define four calls for this chapter:
+
+\begin{center}
+\begin{tabular}{lll}
+\toprule
+Name & Number & Purpose \\
+\midrule
+\texttt{SYS\_EXIT}  & 0 & Terminate the current process \\
+\texttt{SYS\_SPAWN} & 1 & Start a new process from the app table \\
+\texttt{SYS\_GET}   & 2 & Get a character from UART (blocking) \\
+\texttt{SYS\_PUT}   & 3 & Draw a character onto the process window \\
+\bottomrule
+\end{tabular}
+\end{center}
 
 \begin{figure}[H]
 \centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={System-call handler with user-mode process control, \texttt{syscall.c}},
-  label={lst:syscall_c}
-]{../code/chapter7/syscall.c}
+\lstinputlisting[language=C,
+  caption={System call numbers and handler signature.},
+  label={fig:syscall_h}]{../code/chapter7/syscall.h}
 \end{figure}
 
-Their numeric assignments appear in \texttt{syscall.h}.
+The kernel’s syscall handler reads \texttt{a7} to branch to the appropriate operation, grabs arguments from \texttt{a0..a4}, writes a return value back to \texttt{a0} when needed, and returns to U-mode through the regular trap return path.
 
 \begin{figure}[H]
 \centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={System-call numbers and prototypes, \texttt{syscall.h}},
-  label={lst:syscall_h}
-]{../code/chapter7/syscall.h}
+\lstinputlisting[language=C,
+  caption={Kernel syscall handler.},
+  label={fig:syscall_c}]{../code/chapter7/syscall.c}
 \end{figure}
 
-\section{User Library}
+\section{User-side Convenience Wrappers}
 
-The user library \texttt{syslib.h} provides inline wrappers that hide the raw
-\texttt{ecall} instructions.  Applications can now call functions such as
-\texttt{user\_get()}, \texttt{user\_put()}, \texttt{user\_spawn()}, and
-\texttt{user\_exit()} as ordinary C functions.  Each wrapper places arguments in
-the appropriate registers and executes \texttt{ecall}.
+To make user code pleasant to write, \texttt{syslib.h} provides thin inline wrappers that load registers and issue \texttt{ecall}.  This keeps user code in~C while preserving a precise ABI.
 
 \begin{figure}[H]
 \centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={User-level system-call stubs, \texttt{syslib.h}},
-  label={lst:syslib_h}
-]{../code/chapter7/syslib.h}
+\lstinputlisting[language=C,
+  caption={User library: syscall wrappers.},
+  label={fig:syslib_h}]{../code/chapter7/syslib.h}
 \end{figure}
 
-\section{Demonstration Program}
+\section{Demo Applications}
 
-The demonstration (\texttt{hello.c}) is structurally similar to the previous
-chapter but now runs its tasks entirely in user mode.  Both \texttt{taskA()} and
-\texttt{taskB()} use user-level system-call wrappers to perform I/O and manage
-processes.
+For this chapter, “applications” are simply functions compiled with the kernel that we jump into via \texttt{enter\_user()}.  They remain PIC-agnostic here (we are still sharing the kernel stack); full PIC loading arrives in Chapter~8.
 
-When running, typing an exclamation mark~(\texttt{!}) spawns a new
-\texttt{taskA()} process by invoking \texttt{user\_spawn()}, while typing a
-period~(\texttt{.}) calls \texttt{user\_exit()} to terminate the current task.
-The kernel mediates all of these requests through the system-call interface.
+\begin{itemize}
+  \item \texttt{codeA}: animated letters that wander and repaint.
+  \item \texttt{codeB}: reads keyboard input and echoes it into its window.  Typing \texttt{!} spawns another app instance; typing \texttt{.} exits.
+\end{itemize}
 
 \begin{figure}[H]
 \centering
-\lstinputlisting[
-  style=oscode,
-  language=C,
-  caption={Interactive demo in user mode using system calls, \texttt{hello.c}},
-  label={lst:hello_c}
-]{../code/chapter7/hello.c}
+\lstinputlisting[language=C,
+  caption={Application table and two demo apps.},
+  label={fig:apps_c}]{../code/chapter7/apps.c}
 \end{figure}
 
-\section{Discussion}
+Each entry point (\texttt{taskA}, \texttt{taskB}) calls \texttt{enter\_user()} with the user function symbol.  There is no user stack yet; this step changes privilege first and keeps stack management for later.
 
-\paragraph{Continuity.}
-The system behaves the same as in Chapter~\ref{chap:termination}, but the
-architecture has changed fundamentally: user tasks now operate at a lower
-privilege level, and all I/O or process management crosses into the kernel via
-system calls.
+\section{Kernel Setup and Scheduling}
 
-\paragraph{Protection.}
-While memory is still shared, privilege separation ensures that user code cannot
-execute kernel instructions directly.  This is the first step toward true
-isolation.
+\texttt{main()} initializes memory, interrupts, UART, and the timer, installs the syscall handler, calls \texttt{user\_setup()} (permissive PMP for now), and then schedules a few app instances into non-overlapping windows.  The scheduler stays preemptive as in Chapter~6, but now tasks run in U-mode.
 
-\paragraph{Toward per-process user stacks.}
-Currently, user programs execute on kernel stacks for simplicity.  In the next
-chapter, we will allocate separate user stacks to give each process its own
-complete user context.
+\begin{figure}[H]
+\centering
+\lstinputlisting[language=C,
+  caption={Kernel initialization and launching demo apps.},
+  label={fig:hello_c}]{../code/chapter7/hello.c}
+\end{figure}
 
-\section*{Projects}
+\subsection*{Timer Quantum}
 
-\begin{enumerate}
-  \item Add a new system call \texttt{SYS\_TIME} that returns the current timer
-        value from user mode.
-\end{enumerate}
+We use a 50~ms quantum (\texttt{mtime\_reset(QUANTUM)} in the timer ISR) to time-slice between runnable user tasks.  Preemption is unchanged from Chapter~6, but now tasks execute in user mode.
+
+\section{What to Expect When Running}
+
+\begin{itemize}
+  \item One app animates characters (\texttt{codeA}); another echoes keyboard input (\texttt{codeB}) in a separate screen region.
+  \item Typing \texttt{!} in the input window spawns a new process (another app instance).
+  \item Typing \texttt{.} exits that process (\texttt{SYS\_EXIT}).
+\end{itemize}
+
+If you disassemble the kernel, you’ll see that \texttt{enter\_user()} performs exactly three operations: set \texttt{mepc}, clear \texttt{mstatus.MPP}, and \texttt{mret}.  That’s the entire privilege switch for now.
+
+\section{Design Notes and Forward Path}
+
+\begin{itemize}
+  \item \textbf{Why same stack?}  This keeps Chapter~7 focused on the privilege model and the syscall ABI without introducing the complexity of dual stacks or register sanitization.
+  \item \textbf{Why the permissive PMP in \texttt{user\_setup}?}  It ensures U-mode can run without permission faults while we are still sharing stacks and kernel text/data.  In Chapter~9 we will apply real PMP isolation that restricts each process to its code+data page and its stack page.
+  \item \textbf{Next:}  In Chapter~8 we will add:
+    \begin{enumerate}
+      \item a separate user stack,
+      \item register clearing before \texttt{mret},
+      \item use of \texttt{mscratch} for per-process kernel stacks during traps,
+      \item and support for position-independent user binaries.
+    \end{enumerate}
+\end{itemize}
+
+With these additions, the system calls and scheduling logic from this chapter continue to work unchanged; we just harden the boundary and the calling convention.
