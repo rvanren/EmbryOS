@@ -40,10 +40,11 @@ void scroll() {
 }
 
 void putchar(char c) {
-    if (c == '\b') {
+    if (c == '\b' || c == '\177') {
         if (cur_col > 0) {
             cur_col--;
             user_put(NROWS - 1, cur_col, ' ', cur_fg, cur_bg);
+            screen[NROWS - 1][cur_col] = (struct cell) { ' ', cur_fg, cur_bg };
             if (cur_col > 0)
                 screen_put(NROWS - 1, cur_col - 1, screen[NROWS - 1, cur_col - 1]);
         }
