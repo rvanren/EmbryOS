@@ -1,42 +1,61 @@
-# ---------------------------------------------------------------------
-# void to_user(struct trap_frame *tf);
-# Restores all general registers and mret's to tf->mepc.
-# ---------------------------------------------------------------------
-    .globl to_user
-to_user:
-    lw ra,  0*4(a0)
-    lw sp,  1*4(a0)
-    lw gp,  2*4(a0)
-    lw tp,  3*4(a0)
-    lw t0,  4*4(a0)
-    lw t1,  5*4(a0)
-    lw t2,  6*4(a0)
-    lw s0,  7*4(a0)
-    lw s1,  8*4(a0)
-    lw a0,  9*4(a0)
-    lw a1, 10*4(a0)
-    lw a2, 11*4(a0)
-    lw a3, 12*4(a0)
-    lw a4, 13*4(a0)
-    lw a5, 14*4(a0)
-    lw a6, 15*4(a0)
-    lw a7, 16*4(a0)
-    lw s2, 17*4(a0)
-    lw s3, 18*4(a0)
-    lw s4, 19*4(a0)
-    lw s5, 20*4(a0)
-    lw s6, 21*4(a0)
-    lw s7, 22*4(a0)
-    lw s8, 23*4(a0)
-    lw s9, 24*4(a0)
-    lw s10,25*4(a0)
-    lw s11,26*4(a0)
-    lw t3, 27*4(a0)
-    lw t4, 28*4(a0)
-    lw t5, 29*4(a0)
-    lw t6, 30*4(a0)
-    lw t1, 31*4(a0)       # mepc
-    csrw mepc, t1
-    lw t1, 32*4(a0)       # mstatus
-    csrw mstatus, t1
+    .section .text
+    .globl enter_user
+    .type  enter_user,@function
+# void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp)
+# a0=entry, a1=gp_val, a2=user_sp, a3=ksp
+enter_user:
+    # Save incoming args into temps BEFORE clobbering aX
+    mv   t3, a0           # entry
+    mv   t4, a1           # gp_val
+    mv   t5, a2           # user_sp
+    mv   t6, a3           # ksp
+
+    # Program per-process kernel stack for future traps
+    csrw mscratch, t6
+
+    # (Optional but recommended) briefly disable M-mode interrupts during handoff
+    # so we can't trap in M while gp=USER:
+    csrrc t0, mstatus,  (1 << 3)     # clear MIE
+
+    # Zero all integer regs EXCEPT gp/sp and the temps we still need (t3..t6)
+    li   t0, 0
+    mv   ra, t0
+    mv   tp, t0
+    mv   t1, t0
+    mv   t2, t0
+    mv   s0, t0
+    mv   s1, t0
+    mv   a0, t0
+    mv   a1, t0
+    mv   a2, t0
+    mv   a3, t0
+    mv   a4, t0
+    mv   a5, t0
+    mv   a6, t0
+    mv   a7, t0
+    mv   s2, t0
+    mv   s3, t0
+    mv   s4, t0
+    mv   s5, t0
+    mv   s6, t0
+    mv   s7, t0
+    mv   s8, t0
+    mv   s9, t0
+    mv   s10, t0
+    mv   s11, t0
+    # DO NOT clobber t3,t4,t5,t6 (they hold entry,gp,sp,ksp)
+
+    # Load USER gp/sp from saved temps
+    mv   gp, t4
+    mv   sp, t5
+
+    # Set return target and privilege: MPP=U, mepc=entry
+    csrr t0, mstatus
+    li   t1, 0x1800                 # MSTATUS_MPP_MASK (bits 12..11)
+    not  t2, t1
+    and  t0, t0, t2                 # clear MPP -> U
+    csrw mstatus, t0
+    csrw mepc, t3
+
+    # mret to user
     mret
