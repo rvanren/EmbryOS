@@ -61,8 +61,57 @@ void putchar(char c) {
     }
 }
 
+static void print_unsigned(unsigned int x, unsigned int base) {
+    char buf[16];
+    int i = 0;
+    do {
+        int digit = x % base;
+        buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
+        x /= base;
+    } while (x != 0);
+    while (--i >= 0) putchar(buf[i]);
+}
+
+void printf(const char *fmt, ...) {
+    va_list ap;
+    va_start(ap, fmt);
+    for (; *fmt; fmt++) {
+        if (*fmt != '%') { putchar(*fmt); continue; }
+        fmt++;
+        switch (*fmt) {
+        case 'd': { int x = va_arg(ap, int);
+            if (x < 0) { putchar('-'); x = -x; }
+            print_unsigned((unsigned int) x, 10);
+            break;
+        }
+        case 'u': { unsigned int x = va_arg(ap, unsigned int);
+            print_unsigned(x, 10);
+            break;
+        }
+        case 'x': { unsigned int x = va_arg(ap, unsigned int);
+            print_unsigned(x, 16);
+            break;
+        }
+        case 's': { char *s = va_arg(ap, char *);
+            while (*s) putchar(*s++);
+            break;
+        }
+        case 'c': { int c = va_arg(ap, int);
+            putchar(c);
+            break;
+        }
+        case '%':
+            putchar('%');
+            break;
+        default:
+            putchar('%'); putchar(*fmt);
+        }
+    }
+    va_end(ap);
+}
+
 int strcmp(char *p, char *q) {
-    while (*p != 0 && *q != 0 && *p == *q) { p++; q++ }
+    while (*p != 0 && *q != 0 && *p == *q) { p++; q++; }
     if (*p == *q) { return 0; }
     if (*p == 0) { return -1; }
     if (*q == 0) { return 1; }
@@ -84,10 +133,11 @@ void exec(char *line) {
     if (argc == 0) return;
 
     if (strcmp(argv[0], "quit") == 0) user_exit();
-    if (strcmp(argv[0], "exit") == 0) user_exit();
-    if (strcmp(argv[0], "ur") == 0) user_spawn(1, 40,  0, 40, 12);
-    if (strcmp(argv[0], "lr") == 0) user_spawn(1, 40, 12, 40, 12);
-    if (strcmp(argv[0], "crash") == 0) user_spawn(2,  0, 12, 40, 12);
+    else if (strcmp(argv[0], "exit") == 0) user_exit();
+    else if (strcmp(argv[0], "ur") == 0) user_spawn(1, 40,  0, 40, 12);
+    else if (strcmp(argv[0], "lr") == 0) user_spawn(1, 40, 12, 40, 12);
+    else if (strcmp(argv[0], "crash") == 0) user_spawn(2,  0, 12, 40, 12);
+    else printf("Unknown command: '%s'\n", argv[0]);
 }
 
 void main(void) {
