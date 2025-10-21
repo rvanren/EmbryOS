@@ -11,12 +11,12 @@
 
 #define QUANTUM          50000         // 50 milliseconds
 
+extern void (*applications[])();
+
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
     mtime_reset(QUANTUM); // add another quantum
 }
-
-extern void (*applications[])();
 
 int main(void) {
     frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
