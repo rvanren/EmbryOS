@@ -14,7 +14,7 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
 
     if (size > PAGE_SIZE) {
         proc_put(self, 0, 0, '>', 0, 1);
-        printf("run_user: executable too large");
+        printf("run_user: executable too large<");
         proc_exit();
     }
 
