@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include "syslib.h"
 
 #define NROWS 12
