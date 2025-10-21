@@ -61,7 +61,19 @@ void putchar(char c) {
     }
 }
 
+void exec(char *line) {
+    while (*line != 0) {
+        if (*line == '1') user_spawn(1, 40,  0, 40, 12);
+        if (*line == '2') user_spawn(1, 40, 12, 40, 12);
+        if (*line == '!') user_spawn(2,  0, 12, 40, 12);
+        if (*line == '.') user_exit();
+    }
+}
+
 void main(void) {
+    char line[128];
+    unsigned int n;
+
     screen_init();
     screen_sync();
     putchar('$'); putchar(' ');
@@ -69,15 +81,14 @@ void main(void) {
         char c = user_get();
         if (c == '\r') {
             putchar('\n');
+            line[n] = 0;
+            exec(line);
             putchar('$');
             putchar(' ');
         }
         else {
             putchar(c);
+            if (n < sizeof(line) - 1) line[n++] = c;
         }
-        if (c == '1') user_spawn(1, 40,  0, 40, 12);
-        if (c == '2') user_spawn(1, 40, 12, 40, 12);
-        if (c == '!') user_spawn(2,  0, 12, 40, 12);
-        if (c == '.') user_exit();
     }
 }
