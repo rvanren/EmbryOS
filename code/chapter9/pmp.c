@@ -31,6 +31,6 @@ void pmp_config(struct pcb *pcb) {
 void pmp_load(struct pcb *pcb) {
     write_csr(pmpaddr0, pcb->pmp.addr[0]);
     write_csr(pmpaddr1, pcb->pmp.addr[1]);
-    write_csr(pmpcfg0, cfg = ((uintptr_t) pcb->pmp.cfg[0]) |
+    write_csr(pmpcfg0, ((uintptr_t) pcb->pmp.cfg[0]) |
                         ((uintptr_t) pcb->pmp.cfg[1] << 8));
 }
