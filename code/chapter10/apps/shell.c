@@ -7,7 +7,7 @@ struct cell { char c, fg, bg; };
 struct cell screen[NROWS][NCOLS];
 int cur_col = 0, cur_fg = 0, cur_bg = 7;
 
-void screen_init(){
+void screen_init() {
     for (int row = 0; row < NROWS; row++) {
         for (int col = 0; col < NCOLS; col++) {
             screen[row][col] = (struct cell) { ' ', 0, 7 };
@@ -15,15 +15,19 @@ void screen_init(){
     }
 }
 
-void screen_sync(){
+void screen_put(int row, int col, struct cell cell) {
+    user_put(row, col, cell.c, cell.fg, cell.bg);
+}
+
+void screen_sync() {
     for (int row = 0; row < NROWS; row++) {
         for (int col = 0; col < NCOLS; col++) {
-            user_put(row, col, screen[row][col].c, screen[row][col].fg, screen[row][col].bg);
+            screen_put(row, col, screen[row][col]);
         }
     }
 }
 
-void scroll(){
+void scroll() {
     for (int row = 0; row < NROWS - 1; row++) {
         for (int col = 0; col < NCOLS; col++) {
             screen[row][col] = screen[row + 1][col];
@@ -35,11 +39,13 @@ void scroll(){
     screen_sync();
 }
 
-void putchar(char c){
+void putchar(char c) {
     if (c == '\b') {
         if (cur_col > 0) {
             cur_col--;
             user_put(NROWS - 1, cur_col, ' ', cur_fg, cur_bg);
+            if (cur_col > 0)
+                screen_put(NROWS - 1, cur_col - 1, screen[NROWS - 1, cur_col - 1]);
         }
         return;
     }
