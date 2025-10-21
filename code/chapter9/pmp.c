@@ -1,3 +1,8 @@
+#include <stddef.h>
+#include <stdint.h>
+#include "frame.h"
+#include "process.h"
+
 // CSR helpers (if you don’t already have them)
 #define read_csr(reg) ({ unsigned long __tmp; \
   __asm__ volatile ("csrr %0, " #reg : "=r"(__tmp)); __tmp; })
