@@ -67,6 +67,7 @@ void exec(char *line) {
         if (*line == '2') user_spawn(1, 40, 12, 40, 12);
         if (*line == '!') user_spawn(2,  0, 12, 40, 12);
         if (*line == '.') user_exit();
+        line++;
     }
 }
 
