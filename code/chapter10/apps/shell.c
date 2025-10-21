@@ -32,6 +32,7 @@ void scroll(){
     for (int col = 0; col < NCOLS; col++) {
         screen[NROWS - 1][col] = (struct cell) { ' ', 0, 7 };
     }
+    screen_sync();
 }
 
 void putchar(char c){
@@ -39,7 +40,8 @@ void putchar(char c){
         scroll();
         cur_col = 0;
     }
-    else {
+    if (c != '\n') {
+        user_put(NROWS - 1, cur_col, c, cur_fg, cur_bg);
         screen[NROWS - 1][cur_col] = (struct cell) { c, cur_fg, cur_bg };
         cur_col++;
     }
