@@ -56,8 +56,7 @@ void main(void) {
         putchar(c);
         if (c == '1') user_spawn(1, 40,  0, 40, 12);
         if (c == '2') user_spawn(1, 40, 12, 40, 12);
-        if (c == '3') user_spawn(1,  0, 12, 40, 12);
-        if (c == '!') user_spawn(2,  0,  0, 40, 12);
+        if (c == '!') user_spawn(2,  0, 12, 40, 12);
         if (c == '.') user_exit();
     }
 }

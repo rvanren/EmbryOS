@@ -20,7 +20,7 @@ void timer_handler(struct trap_frame *tf) {
 
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
-    proc_put(self, 0, 0, '>', 0, 1) {
+    proc_put(self, 0, 0, '>', 0, 1);
     printf("trap: cause=%d mepc=%x mtval=%x   \n",
                             mcause & 0xFFF, tf->mepc, tf->mtval);
     proc_exit();
