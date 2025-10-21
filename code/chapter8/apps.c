@@ -4,6 +4,7 @@
 #include "sched.h"
 #include "stdio.h"
 
+#ifdef notdef
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp) {
     asm volatile (
@@ -25,6 +26,20 @@ void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp)
         : "t0","t1","t2","gp","memory"
     );
     __builtin_unreachable();
+}
+#endif
+
+void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp) {
+    extern void to_user(struct trap_frame *tf);
+    struct trap_frame tf = {0};       // zero all fields
+
+    tf.gp      = gp_val;
+    tf.sp      = user_sp;
+    tf.mepc    = (uintptr_t)entry;
+    tf.mstatus = read_csr(mstatus) & ~MSTATUS_MPP_MASK;  // set MPP=U
+    write_csr(mscratch, ksp);         // kernel stack for traps
+
+    to_user(&tf);            // never returns
 }
 
 void run_user(char start[], char end[], unsigned int gp_offset) {
