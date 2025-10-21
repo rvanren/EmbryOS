@@ -1,5 +1,5 @@
 #include "syslib.h"
 
 void main(void) {
-    * (int *) 666 = 666;
+    * (int *) 0x666 = 0x666;
 }
