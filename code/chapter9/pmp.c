@@ -35,21 +35,21 @@ static inline void pmpcfg0_set_byte(int i, unsigned char cfg) {
 #endif
 
 // Compute the PMP configuration for a process
-void pmp_config(struct pcb *p, void *base, void *stack) {
-    p->pmp.addr[0] = pmp_napot_addr((uintptr_t) base, PAGE_SIZE);
-    p->pmp.addr[1] = pmp_napot_addr((uintptr_t) stack, PAGE_SIZE);
-    p->pmp.cfg[0]  = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
-    p->pmp.cfg[1]  = PMP_A_NAPOT | PMP_R | PMP_W;
+void pmp_config(struct pcb *pcb) {
+    pcb->pmp.addr[0] = pmp_napot_addr((uintptr_t) pcb->base, PAGE_SIZE);
+    pcb->pmp.addr[1] = pmp_napot_addr((uintptr_t) pcb->stack, PAGE_SIZE);
+    pcb->pmp.cfg[0]  = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
+    pcb->pmp.cfg[1]  = PMP_A_NAPOT | PMP_R | PMP_W;
 }
 
 // Set PMP registers (before each mret)
-void pmp_load(struct pcb *p) {
+void pmp_load(struct pcb *pcb) {
     // write pmpaddr registers
-    write_csr(pmpaddr0, p->pmp.addr[0]);
-    write_csr(pmpaddr1, p->pmp.addr[1]);
+    write_csr(pmpaddr0, pcb->pmp.addr[0]);
+    write_csr(pmpaddr1, pcb->pmp.addr[1]);
 
     // write pmpcfg0 (assume only using entries 0–1)
-    unsigned long cfg = ((unsigned long)p->pmp.cfg[0]) |
-                        ((unsigned long)p->pmp.cfg[1] << 8);
+    unsigned long cfg = ((unsigned long) pcb->pmp.cfg[0]) |
+                        ((unsigned long) pcb->pmp.cfg[1] << 8);
     write_csr(pmpcfg0, cfg);
 }
