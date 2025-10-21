@@ -55,7 +55,7 @@ void main(void) {
         char c = user_get();
         if (c == '\r') {
             putchar('\n');
-            putchar('$ ');
+            putchar('$');
             putchar(' ');
         }
         else {
