@@ -18,6 +18,11 @@ void timer_handler(struct trap_frame *tf) {
     mtime_reset(QUANTUM); // add another quantum
 }
 
+void exception_handler(struct trap_frame *tf) {
+    printf("Exiting process\n");
+    proc_exit();
+}
+
 int main(void) {
     frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
@@ -25,6 +30,7 @@ int main(void) {
     intr_set_handler(INTR_TIMER, timer_handler);
     intr_set_handler(INTR_SYSCALL, syscall_handler);
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
+    intr_set_handler(INTR_EXCEPTION, exception_handler);
     mtime_reset(QUANTUM);
     sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });
     sched_idle();
