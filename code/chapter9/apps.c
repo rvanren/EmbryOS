@@ -24,6 +24,7 @@ void run_user(char start[], char end[], unsigned int gp_offset) {
     for (size_t i = 0; i < PAGE_SIZE; i++) self->stack[i] = 0;
 
     pmp_config(self);
+    pmp_load(self);
 
     enter_user(self->base, (uintptr_t) (self->base + gp_offset),
                             (uintptr_t) self->stack + PAGE_SIZE,

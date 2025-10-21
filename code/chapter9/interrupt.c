@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "trap.h"
 #include "interrupt.h"
+#include "pmp.h"
 #include "stdio.h"
 
 #define MIE_MASK (1u << 3)
@@ -40,6 +41,9 @@ void software_trap_handler(struct trap_frame *tf) {
             (*handlers[INTR_EXCEPTION])(tf);
         }
     }
+
+    struct pcb *self = run_queue[proc_current]->next;
+    if (self->base != 0) pmp_load(self);
 }
 
 void intr_set_handler(enum intr_class which, trap_entry_t handler) {
