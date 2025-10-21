@@ -14,6 +14,8 @@ void syscall_handler(struct trap_frame *tf) {
 
     switch (tf->a7) {
     case SYS_EXIT:
+        proc_put(self, 0, 0, '>', 0, 1);
+        printf("process ended");
         proc_exit();
         break;
     case SYS_SPAWN:
