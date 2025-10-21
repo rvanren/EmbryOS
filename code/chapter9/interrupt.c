@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include "trap.h"
 #include "interrupt.h"
+#include "sched.h"
 #include "pmp.h"
 #include "stdio.h"
 
@@ -13,13 +14,8 @@ static void no_handler(struct trap_frame *tf) {
 
 static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
-void intr_enable(void) {
-    __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
-}
-
-void intr_disable(void) {
-    __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
-}
+void intr_enable(void) { __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK)); }
+void intr_disable(void) { __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK)); }
 
 void software_trap_handler(struct trap_frame *tf) {
     int mcause, mepc;
