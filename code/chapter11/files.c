@@ -4,6 +4,8 @@
 #include "bd_simple.h"
 #include "flat.h"
 
+#define MAX_APPS    32
+
 extern struct block ramdisk[], __ramdisk_end[];
 
 int applications[MAX_APPS];
