@@ -153,7 +153,7 @@ void main(void) {
 
     screen_init(&screen);
     screen_sync(&screen);
-    printf(screen, "$ ");
+    printf(&screen, "$ ");
     for (;;) {
         char c = user_get();
         if (c == '\r') {
@@ -161,7 +161,7 @@ void main(void) {
             line[n] = 0;
             exec(&screen, line);
             n = 0;
-            printf(screen, "$ ");
+            printf(&screen, "$ ");
         }
         else {
             putchar(&screen, c);
