@@ -3,6 +3,7 @@
 #include "stdio.h"
 #include "interrupt.h"
 #include "ctx.h"
+#include "files.h"
 #include "mtime.h"
 #include "syscall.h"
 #include "syslib.h"
