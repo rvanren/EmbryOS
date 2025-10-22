@@ -6,7 +6,7 @@
 #define N_APPS  3
 
 struct rect { const char *name; char x, y, w, h; };
-struct app { const char *name; int file; }
+struct app { const char *name; int file; };
 
 struct app apps[N_APPS];        // list of applications
 struct rect rects[N_RECTS];     // list of windows
