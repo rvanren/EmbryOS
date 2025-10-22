@@ -4,10 +4,7 @@
 #include "bd_simple.h"
 #include "flat.h"
 
-#define MAX_APPS      32
-#define RAMDISK_SIZE  64
-
-struct block ramdisk_blocks[BLOCK_SIZE];
+extern struct block ramdisk[], __ramdisk_end[];
 
 int applications[MAX_APPS];
 
@@ -26,7 +23,7 @@ void files_init(void) {
     struct flat flat_fs;
 
     ramdisk_init(&ramdisk_iface, &ramdisk_state,
-                 ramdisk_blocks, RAMDISK_SIZE);
+                 ramdisk, __ramdisk_end - ramdisk);
     simple_init(&simple_iface, &simple_state,
                 &ramdisk_iface, 0, 1);
     flat_init(&flat_fs, &simple_iface, 1);
