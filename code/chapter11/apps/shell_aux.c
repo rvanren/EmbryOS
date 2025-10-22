@@ -6,8 +6,9 @@
 #define N_APPS  3
 
 struct rect { const char *name; char x, y, w, h; };
+struct app { const char *name; int file; }
 
-char *apps[N_APPS];             // list of applications
+struct app apps[N_APPS];        // list of applications
 struct rect rects[N_RECTS];     // list of windows
 
 void printf(struct screen *screen, const char *s) {
@@ -42,8 +43,8 @@ void exec(struct screen *screen, char *line) {
 
     if (argc == 1) { printf(screen, "Too few arguments\n"); return; }
     int a = 0;
-    while (a < N_APPS && strcmp(apps[a], argv[1]) != 0) a++;
+    while (a < N_APPS && strcmp(apps[a].name, argv[1]) != 0) a++;
     if (a == N_APPS) { printf(screen, "Unknown app\n"); return; }
 
-    user_spawn(a, rects[r].x, rects[r].y, rects[r].w, rects[r].h);
+    user_spawn(apps[a].file, rects[r].x, rects[r].y, rects[r].w, rects[r].h);
 }

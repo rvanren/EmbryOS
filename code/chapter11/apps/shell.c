@@ -11,7 +11,9 @@ void main(void) {
     rects[1] = (struct rect){ "ur", 40,  0, 40, 12 };
     rects[2] = (struct rect){ "ll",  0, 12, 40, 12 };
     rects[3] = (struct rect){ "lr", 40, 12, 40, 12 };
-    apps[0] = "shell"; apps[1] = "pretty"; apps[2] = "crash";
+    apps[0] = (struct app){ .name = "shell",  .file = 1 };
+    apps[1] = (struct app){ .name = "pretty", .file = 2 };
+    apps[2] = (struct app){ .name = "crash",  .file = 3 };
 
     // initialize windows
     screen_init(&screen);
