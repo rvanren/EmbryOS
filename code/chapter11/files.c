@@ -34,7 +34,7 @@ void files_init(void) {
     for (int i = 0; i < n_applications; i++) {
         int f = flat_create(&flat_fs);
         applications[i] = f;
-        write_app(&ffs, f, app_table[i].gp,
+        write_app(&flat_fs, f, app_table[i].gp,
                   app_table[i].start, app_table[i].end);
     }
 }
