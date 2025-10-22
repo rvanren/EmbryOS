@@ -75,5 +75,6 @@ void main(void) {
     for (;;) {
         kb_readline(&screen, line, sizeof(line));
         exec(&screen, line);
+        printf(&screen, "$ ");
     }
 }
