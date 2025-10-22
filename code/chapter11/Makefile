@@ -48,15 +48,7 @@ $(APP_OBJS) $(APP_ELFS):
 # --- auto-generate apps_gen.c ---
 apps_gen.c: $(APP_ELFS)
 	@echo "// auto-generated" > $@
-	@echo "#pragma once" >> $@
-	@echo "" >> $@
 	@echo '#include "app_info.h"' >> $@
-	@echo "" >> $@
-	@echo "struct app_info {" >> $@
-	@echo "    const char *start;" >> $@
-	@echo "    const char *end;" >> $@
-	@echo "    uint32_t gp;" >> $@
-	@echo "};" >> $@
 	@echo "" >> $@
 	@for f in $^; do \
 	    name=$$(basename $$f .elf); \

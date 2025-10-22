@@ -3,6 +3,6 @@
 #include <stdint.h>
 
 struct app_info {
-    const char *name;
-    uintptr_t base, end, gp_offset;
+    const char *start, *end;
+    uint32_t gp;
 };
