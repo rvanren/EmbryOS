@@ -1,16 +1,9 @@
 #include "syslib.h"
 #include "screen.h"
+#include "string.h"
 
 void printf(struct screen *screen, const char *s) {
     while (*s != 0) putchar(screen, *s++);
-}
-
-int strcmp(const char *p, const char *q) {
-    while (*p != 0 && *q != 0 && *p == *q) { p++; q++; }
-    if (*p == *q) { return 0; }
-    if (*p == 0) { return -1; }
-    if (*q == 0) { return 1; }
-    return *p - *q;
 }
 
 char *apps[4];
