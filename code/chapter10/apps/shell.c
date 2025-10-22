@@ -117,7 +117,6 @@ void exec(struct screen *screen, char *line) {
         return;
     }
 
-
     if (argc == 1) {
         printf(screen, "Too few arguments\n");
         return;
@@ -154,7 +153,7 @@ void main(void) {
 
     screen_init(&screen);
     screen_sync(&screen);
-    putchar(&screen, '$'); putchar(&screen, ' ');
+    printf(screen, "$ ");
     for (;;) {
         char c = user_get();
         if (c == '\r') {
@@ -162,8 +161,7 @@ void main(void) {
             line[n] = 0;
             exec(&screen, line);
             n = 0;
-            putchar(&screen, '$');
-            putchar(&screen, ' ');
+            printf(screen, "$ ");
         }
         else {
             putchar(&screen, c);
