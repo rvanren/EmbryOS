@@ -12,7 +12,7 @@
 
 #define QUANTUM          50000        // 50 milliseconds
 
-extern void (*applications[])();
+extern int applications[];
 
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
