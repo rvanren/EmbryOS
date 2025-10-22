@@ -119,6 +119,20 @@ int strcmp(char *p, char *q) {
     return *p - *q;
 }
 
+char *apps[] = { "shell", "pretty", "crash", 0 };
+struct rect {
+    char *name;
+    int x, y;   // top-left corner on global screen
+    int w, h;   // width and height
+};
+struct rect rects[] = {
+    { "ul",  0,  0, 40, 12 },
+    { "ur", 40,  0, 40, 12 },
+    { "ll",  0, 12, 40, 12 },
+    { "lr", 40, 12, 40, 12 },
+    { 0,     0,  0,  0,  0 }
+}
+
 void exec(char *line) {
     char *argv[64];
     int argc = 0;
@@ -134,11 +148,37 @@ void exec(char *line) {
     if (argc == 0) return;
 
     if (strcmp(argv[0], "quit") == 0) user_exit();
-    else if (strcmp(argv[0], "exit") == 0) user_exit();
-    else if (strcmp(argv[0], "ur") == 0) user_spawn(1, 40,  0, 40, 12);
-    else if (strcmp(argv[0], "lr") == 0) user_spawn(1, 40, 12, 40, 12);
-    else if (strcmp(argv[0], "crash") == 0) user_spawn(2,  0, 12, 40, 12);
-    else printf("Unknown command: '%s'\n", argv[0]);
+    if (strcmp(argv[0], "exit") == 0) user_exit();
+    if (strcmp(argv[0], "help") {
+        printf("[ul|ur|ll|lr] [shell|pretty|crash]\n");
+        return;
+    }
+
+    int r = 0;
+    while (rects[r].name != 0) {
+        if (strcmp(rects[r].name, argv[0]) == 0) break;
+        r++;
+    }
+    if (rects[r].name == 0) {
+        printf("Unknown command '%s'\n", argv[0]);
+        return;
+    }
+
+    if (argc == 1) {
+        printf("Too few arguments\n");
+        return;
+    }
+
+    int app = 0;
+    while (apps[app] != 0) {
+        if (strcmp(apps[app], argv[1]) == 0) break;
+        app++;
+    }
+    if (apps[app] == 0) {
+        printf("Unknown app '%s'\n", argv[1]);
+        return;
+    }
+    user_spawn(app, rects[r].x,  rects[r].y, rects[r].w, rects[r].h);
 }
 
 void main(void) {
