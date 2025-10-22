@@ -6,7 +6,7 @@
 
 struct cell { char c, fg, bg; };
 struct screen {
-    struct cell screen[NROWS][NCOLS];
+    struct cell cells[NROWS][NCOLS];
     int cur_col, cur_fg, cur_bg;
 };
 
@@ -36,7 +36,7 @@ void screen_sync(struct screen *screen) {
 void screen_scroll(struct screen *screen) {
     for (int row = 0; row < NROWS - 1; row++) {
         for (int col = 0; col < NCOLS; col++) {
-            screen->cells[row][col] = screen[row + 1][col];
+            screen->cells[row][col] = screen->cells[row + 1][col];
         }
     }
     for (int col = 0; col < NCOLS; col++) {
@@ -127,8 +127,8 @@ int strcmp(char *p, char *q) {
 char *apps[] = { "shell", "pretty", "crash", 0 };
 struct rect {
     char *name;
-    int x, y;   // top-left corner on global screen
-    int w, h;   // width and height
+    char x, y;   // top-left corner on global screen
+    char w, h;   // width and height
 };
 struct rect rects[] = {
     { "ul",  0,  0, 40, 12 },
@@ -138,7 +138,7 @@ struct rect rects[] = {
     { 0,     0,  0,  0,  0 }
 };
 
-void exec(char *line) {
+void exec(struct screen *screen, char *line) {
     char *argv[64];
     int argc = 0;
 
@@ -155,7 +155,7 @@ void exec(char *line) {
     if (strcmp(argv[0], "quit") == 0) user_exit();
     if (strcmp(argv[0], "exit") == 0) user_exit();
     if (strcmp(argv[0], "help") == 0) {
-        printf("[ul|ur|ll|lr] [shell|pretty|crash]\n");
+        printf(screen, "[ul|ur|ll|lr] [shell|pretty|crash]\n");
         return;
     }
 
@@ -165,12 +165,12 @@ void exec(char *line) {
         r++;
     }
     if (rects[r].name == 0) {
-        printf("Unknown command '%s'\n", argv[0]);
+        printf(screen, "Unknown command '%s'\n", argv[0]);
         return;
     }
 
     if (argc == 1) {
-        printf("Too few arguments\n");
+        printf(screen, "Too few arguments\n");
         return;
     }
 
@@ -180,7 +180,7 @@ void exec(char *line) {
         app++;
     }
     if (apps[app] == 0) {
-        printf("Unknown app '%s'\n", argv[1]);
+        printf(screen, "Unknown app '%s'\n", argv[1]);
         return;
     }
     user_spawn(app, rects[r].x,  rects[r].y, rects[r].w, rects[r].h);
@@ -199,7 +199,7 @@ void main(void) {
         if (c == '\r') {
             putchar(&screen, '\n');
             line[n] = 0;
-            exec(line);
+            exec(&screen, line);
             n = 0;
             putchar(&screen, '$');
             putchar(&screen, ' ');

@@ -7,7 +7,7 @@ NM        = riscv-none-elf-nm
 
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-CFLAGS = -g -I.. -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
+CFLAGS = -g -I.. -O3 -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
 LDFLAGS = -Wl,--no-relax -T user.lds
 
 APP_ELFS  = $(addsuffix .elf,$(APPS))
