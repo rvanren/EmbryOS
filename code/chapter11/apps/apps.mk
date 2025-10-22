@@ -1,0 +1,1 @@
+APPS = shell pretty crash
