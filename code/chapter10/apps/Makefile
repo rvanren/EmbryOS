@@ -18,8 +18,8 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 all: $(APP_ELFS) $(APP_OBJS)
 
 
-%.elf: %.c crt0.s user.lds screen.c screen.h string.c string.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $< screen.c string.c
+%.elf: %.c crt0.s user.lds screen.c screen.h kb.c kb.h string.c string.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $< screen.c kb.c string.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.bin: %.elf
