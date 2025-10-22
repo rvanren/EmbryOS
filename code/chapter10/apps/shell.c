@@ -167,7 +167,8 @@ void main(void) {
         }
         else {
             putchar(&screen, c);
-            if (n < sizeof(line) - 1) line[n++] = c;
+            if (c == '\b' || c == '\177') { if (n > 0) n--; }
+	        else if (n < sizeof(line) - 1) line[n++] = c;
         }
     }
 }
