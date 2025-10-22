@@ -1,12 +1,13 @@
 #include "syslib.h"
 #include "screen.h"
+#include "kb.h"
 #include "string.h"
 
 #define N_RECTS     4       // number of windows on the screen
 #define N_APPS      3       // number of available applications to run
 
 void printf(struct screen *screen, const char *s) {
-    while (*s != 0) putchar(screen, *s++);
+    while (*s != 0) screen_putchar(screen, *s++);
 }
 
 char *apps[N_APPS];

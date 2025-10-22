@@ -1,3 +1,6 @@
+#include "syslib.h"
+#include "screen.h"
+
 static void screen_put(int row, int col, struct cell cell) {
     user_put(row, col, cell.c, cell.fg, cell.bg);
 }

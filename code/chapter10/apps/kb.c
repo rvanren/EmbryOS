@@ -1,5 +1,6 @@
 #include "syslib.h"
 #include "screen.h"
+#include "kb.h"
 
 void kb_readline(struct screen *screen, char *line, int size) {
     int n = 0;
