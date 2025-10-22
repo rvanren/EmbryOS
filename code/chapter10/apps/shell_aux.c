@@ -1,6 +1,5 @@
 #include "syslib.h"
 #include "screen.h"
-#include "kb.h"
 #include "string.h"
 
 #define N_RECTS 4

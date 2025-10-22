@@ -1,3 +1,5 @@
+#pragma once
+
 #define NROWS 12
 #define NCOLS 40
 

@@ -1,8 +1,5 @@
-#include "syslib.h"
-#include "screen.h"
-#include "kb.h"
-#include "string.h"
 #include "shell_aux.c"      // rest of program
+#include "kb.h"
 
 void main(void) {
     struct screen screen;
