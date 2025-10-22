@@ -14,10 +14,10 @@ void exec_user(void) {
     extern struct flat flat_fs;
     struct pcb *self = run_queue[proc_current]->next;
 
-    uint32_t gp;
-    flat_read(&flat_fs, self->executable, 0, &gp, sizeof(gp));
+    uint32_t gp_offset;
+    flat_read(&flat_fs, self->executable, 0, &gp_offset, sizeof(gp_offset));
 
-    uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp);
+    uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
     if (size > PAGE_SIZE) {
         printf("executable too large<");
         proc_exit();
@@ -30,7 +30,7 @@ void exec_user(void) {
         proc_exit();
     }
 
-    flat_read(&flat_fs, self->executable, sizeof(gp), self->base, size);
+    flat_read(&flat_fs, self->executable, sizeof(gp_offset), self->base, size);
     memset(&self->base[size], 0, PAGE_SIZE - size);
     memset(self->stack, 0, PAGE_SIZE);
 

@@ -6,7 +6,7 @@
 #include "sched.h"
 #include "uart.h"
 
-extern void (*applications[])();
+extern int applications[];
 extern int n_applications;
 
 void syscall_handler(struct trap_frame *tf) {
