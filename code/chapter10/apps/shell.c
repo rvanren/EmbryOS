@@ -1,4 +1,3 @@
-#include <stdarg.h>
 #include "syslib.h"
 
 #define NROWS 12
@@ -67,54 +66,7 @@ void putchar(struct screen *screen, char c) {
     }
 }
 
-static void print_unsigned(struct screen *screen, unsigned int x, unsigned int base) {
-    char buf[16];
-    int i = 0;
-    do {
-        int digit = x % base;
-        buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
-        x /= base;
-    } while (x != 0);
-    while (--i >= 0) putchar(screen, buf[i]);
-}
-
-void printf(struct screen *screen, const char *fmt, ...) {
-    va_list ap;
-    va_start(ap, fmt);
-    for (; *fmt; fmt++) {
-        if (*fmt != '%') { putchar(screen, *fmt); continue; }
-        fmt++;
-        switch (*fmt) {
-        case 'd': { int x = va_arg(ap, int);
-            if (x < 0) { putchar(screen, '-'); x = -x; }
-            print_unsigned(screen, (unsigned int) x, 10);
-            break;
-        }
-        case 'u': { unsigned int x = va_arg(ap, unsigned int);
-            print_unsigned(screen, x, 10);
-            break;
-        }
-        case 'x': { unsigned int x = va_arg(ap, unsigned int);
-            print_unsigned(screen, x, 16);
-            break;
-        }
-        case 's': { char *s = va_arg(ap, char *);
-            while (*s) putchar(screen, *s++);
-            break;
-        }
-        case 'c': { int c = va_arg(ap, int);
-            putchar(screen, c);
-            break;
-        }
-        case '%':
-            putchar(screen, '%');
-            break;
-        default:
-            putchar(screen, '%'); putchar(screen, *fmt);
-        }
-    }
-    va_end(ap);
-}
+void printf(char *s) { while (*s != 0) putchar(*s++); }
 
 int strcmp(char *p, char *q) {
     while (*p != 0 && *q != 0 && *p == *q) { p++; q++; }
@@ -165,7 +117,7 @@ void exec(struct screen *screen, char *line) {
         r++;
     }
     if (rects[r].name == 0) {
-        printf(screen, "Unknown command '%s'\n", argv[0]);
+        printf(screen, "Unknown command\n");
         return;
     }
 
@@ -180,7 +132,7 @@ void exec(struct screen *screen, char *line) {
         app++;
     }
     if (apps[app] == 0) {
-        printf(screen, "Unknown app '%s'\n", argv[1]);
+        printf(screen, "Unknown app\n");
         return;
     }
     user_spawn(app, rects[r].x,  rects[r].y, rects[r].w, rects[r].h);
