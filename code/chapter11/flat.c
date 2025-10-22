@@ -4,8 +4,6 @@
 #include "flat.h"
 #include "string.h"
 
-#define STAT_PER_BLOCK (BLOCK_SIZE / sizeof(struct stat_entry))
-
 static void stat_get(struct flat *fs, int file, struct stat_entry *st) {
     int blk = file / STAT_PER_BLOCK;
     static struct stat_entry buf[STAT_PER_BLOCK];
@@ -88,27 +86,15 @@ void flat_delete(struct flat *fs, int file) {
 void flat_init(struct flat *fs, struct bd *lower, int format) {
     fs->lower = lower;
     if (format) {
-        // Reserve inode #1 for the stat table (first alloc after your format loop)
-        int ino = lower->alloc(lower->state);
-        // Optionally assert if you like:
-        // if (ino != 1) panic("unexpected stat inode");
-
-        fs->stat_inode = ino;
-
-        // Zero all stat blocks
+        fs->stat_inode = lower->alloc(lower->state);
+        // if (fs->stat_inode != 1) panic("unexpected stat inode");
         int nblocks = lower->size(lower->state, fs->stat_inode);
         struct stat_entry zero[STAT_PER_BLOCK] = {0};
         for (int b = 0; b < nblocks; b++)
             lower->write(lower->state, fs->stat_inode, b, zero);
-
-        // File 0 describes the stat table itself
-        struct stat_entry st0 = { .inode = (uint32_t)fs->stat_inode, .size = 0 };
+        struct stat_entry st0 = { .inode = fs->stat_inode, .size = 0 };
         stat_put(fs, 0, &st0);
     }
-    else {
-        // By convention after a fresh format, the stat table lives at inode 1
-        fs->stat_inode = 1;
-        // (If you later want to make this robust, you can store stat_inode in file 0
-        // and read it back; for now the convention keeps it simple.)
-    }
+    // By convention after a fresh format, the stat table lives at inode 1
+    else fs->stat_inode = 1;
 }
