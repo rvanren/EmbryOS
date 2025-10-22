@@ -1,7 +1,6 @@
 #pragma once
 
-#include "frame.h"
-#define BLOCK_SIZE  PAGE_SIZE
+#define BLOCK_SIZE  512
 
 struct block { char bytes[BLOCK_SIZE]; };
 
