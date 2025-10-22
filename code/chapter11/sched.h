@@ -27,8 +27,8 @@ void sched_block(struct pcb *pcb);
 // it is moved to run_queue[1].
 void sched_yield(void);
 
-// Start a new process with the given initial function and screen area.
-void sched_run(void (*fn)(void), struct rect area);
+// Start a new process with the given executable and screen area.
+void sched_run(int executable, struct rect area);
 
 // This function is called when everything's idle.  It waits for the next
 // interrupt.

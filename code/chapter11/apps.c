@@ -11,13 +11,13 @@ __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp);
 
 void exec_user(void) {
-    struct pcb *pcb = run_queue[proc_current]->next;
+    extern struct flat flat_fs;
+    struct pcb *self = run_queue[proc_current]->next;
 
     uint32_t gp;
-    flat_read(&flat_fs, pcb->executable, 0, &gp, sizeof(gp));
+    flat_read(&flat_fs, self->executable, 0, &gp, sizeof(gp));
 
-    extern struct flat flat_fs;
-    uint32_t size = flat_size(&flat_fs, pcb->executable) - sizeof(gp);
+    uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp);
     if (size > PAGE_SIZE) {
         printf("executable too large<");
         proc_exit();
@@ -30,7 +30,7 @@ void exec_user(void) {
         proc_exit();
     }
 
-    flat_read(&flat_fs, pcb->executable, sizeof(gp), self->base, size);
+    flat_read(&flat_fs, self->executable, sizeof(gp), self->base, size);
     memset(&self->base[size], 0, PAGE_SIZE - size);
     memset(self->stack, 0, PAGE_SIZE);
 
