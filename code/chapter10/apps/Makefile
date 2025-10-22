@@ -17,8 +17,11 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 # build both .elf and .o so that top-level can nm the .elf
 all: $(APP_ELFS) $(APP_OBJS)
 
+shell.elf: shell1.c shell2.c screen.c screen.h kb.c kb.h string.c string.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s shell1.c shell2.c screen.c kb.c string.c
+	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-%.elf: %.c crt0.s user.lds screen.c screen.h kb.c kb.h string.c string.h
+%.elf: %.c crt0.s user.lds
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $< screen.c kb.c string.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
