@@ -49,7 +49,7 @@ int main(void) {
     // Layer the simple block device over it
     struct bd simple_iface;
     struct simple_state simple_state;
-    simple_init(&simple_iface, &simple_state, &bd_ramdisk_iface, 0, 1);
+    simple_init(&simple_iface, &simple_state, &ramdisk_iface, 0, 1);
 
     mtime_reset(QUANTUM);
     sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });

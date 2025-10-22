@@ -2,20 +2,20 @@
 #include <string.h>
 #include "bd_simple.h"
 
-int simple_alloc_block(struct inode_layer_state *s) {
+int simple_alloc_block(struct simple_state *s) {
     int b = s->sb.next;
     if (b == 0) return 0;                    // no free blocks
     s->lower->read(s->lower->state, s->inode_below, b, &s->sb);
     return b;
 }
 
-void simple_free_block(struct inode_layer_state *s, int b) {
+void simple_free_block(struct simple_state *s, int b) {
     s->lower->write(s->lower->state, s->inode_below, b, &s->sb);
     s->sb.next = b;
     s->lower->write(s->lower->state, s->inode_below, 0, &s->sb);
 }
 
-void simple_init(struct bd *iface, struct inode_layer_state *s,
+void simple_init(struct bd *iface, struct simple_state *s,
                 struct bd *lower, int inode_below, int format) {
     s->lower = lower; s->inode_below = inode_below;
     int nblocks = lower->size(s->lower->state, inode_below);

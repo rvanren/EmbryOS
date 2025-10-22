@@ -1,5 +1,6 @@
 #include "bd.h"
 #include "string.h"
+#include "bd_ramdisk.h"
 
 static int ramdisk_size(void *st, int inode) {
     struct ramdisk_state *d = st;
