@@ -66,9 +66,11 @@ void putchar(struct screen *screen, char c) {
     }
 }
 
-void printf(char *s) { while (*s != 0) putchar(*s++); }
+void printf(struct screen *screen, const char *s) {
+    while (*s != 0) putchar(screen, *s++);
+}
 
-int strcmp(char *p, char *q) {
+int strcmp(const char *p, const char *q) {
     while (*p != 0 && *q != 0 && *p == *q) { p++; q++; }
     if (*p == *q) { return 0; }
     if (*p == 0) { return -1; }
@@ -76,19 +78,13 @@ int strcmp(char *p, char *q) {
     return *p - *q;
 }
 
-char *apps[] = { "shell", "pretty", "crash", 0 };
+char *apps[4];
 struct rect {
-    char *name;
+    const char *name;
     char x, y;   // top-left corner on global screen
     char w, h;   // width and height
 };
-struct rect rects[] = {
-    { "ul",  0,  0, 40, 12 },
-    { "ur", 40,  0, 40, 12 },
-    { "ll",  0, 12, 40, 12 },
-    { "lr", 40, 12, 40, 12 },
-    { 0,     0,  0,  0,  0 }
-};
+struct rect rects[5];
 
 void exec(struct screen *screen, char *line) {
     char *argv[64];
@@ -121,6 +117,7 @@ void exec(struct screen *screen, char *line) {
         return;
     }
 
+
     if (argc == 1) {
         printf(screen, "Too few arguments\n");
         return;
@@ -141,7 +138,19 @@ void exec(struct screen *screen, char *line) {
 void main(void) {
     struct screen screen;
     char line[128];
-    unsigned int n;
+    unsigned int n = 0;
+
+    // Because of PIC, I can't have pointers-to-objects in global/static data
+    // Hence this awkward initialization
+    rects[0] = (struct rect){ "ul",  0,  0, 40, 12 };
+    rects[1] = (struct rect){ "ur", 40,  0, 40, 12 };
+    rects[2] = (struct rect){ "ll",  0, 12, 40, 12 };
+    rects[3] = (struct rect){ "lr", 40, 12, 40, 12 };
+    rects[4] = (struct rect){ 0,     0,  0,  0,  0 };
+    apps[0] = "shell";
+    apps[1] = "pretty";
+    apps[2] = "crash";
+    apps[3] = 0;
 
     screen_init(&screen);
     screen_sync(&screen);
