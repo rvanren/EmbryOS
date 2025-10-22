@@ -43,7 +43,7 @@ int flat_size(struct flat *fs, int file) {
     return st.size;
 }
 
-int flat_read(struct flat *fs, int file, uint32_t off, void *dst, uint32_t n) {
+int flat_read(struct flat *fs, int file, int off, void *dst, int n) {
     struct stat_entry st; stat_get(fs, file, &st);
     if (off >= st.size) return 0;
     if (off + n > st.size) n = st.size - off;
