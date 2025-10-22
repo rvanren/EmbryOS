@@ -1,6 +1,8 @@
+#include "bd.h"
+
 struct ramdisk_state {
     int nblocks;
-    uint8_t *data;
+    char *data;
 };
 
 static int ramdisk_size(void *st, int inode) {

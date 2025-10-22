@@ -1,5 +1,8 @@
 #pragma once
 
+#include "frame.h"
+#define BLOCK_SIZE  PAGE_SIZE
+
 struct bd {
     void *state;     // depends on implementation of this interface
     int  (*alloc)(void*);                       // allocate an inode
