@@ -10,17 +10,19 @@ void printf(struct screen *screen, const char *s) {
     while (*s != 0) screen_putchar(screen, *s++);
 }
 
-char *apps[N_APPS];
+char *apps[N_APPS];        // list of available applications
 struct rect {
     const char *name;   // name of window
     char x, y, w, h;    // bounding box
 };
-struct rect rects[N_RECTS];
+struct rect rects[N_RECTS]; // list of available windows
 
+// Execute the line that was read from the keyboard
 void exec(struct screen *screen, char *line) {
-    char *argv[64];
-    int argc = 0;
+    char *argv[64];     // list of arguments
+    int argc = 0;       // argument count
 
+    // Split line into argument separated by space
     for (;;) {
         while (*line == ' ' || *line == '\t') line++;
         if (*line == 0) break;
@@ -38,13 +40,15 @@ void exec(struct screen *screen, char *line) {
         return;
     }
 
+    // See what window the application should run in
     int r = 0;
     while (r < N_RECTS) {
         if (strcmp(rects[r].name, argv[0]) == 0) break;
         r++;
     }
-    if (r == N_RECTS) { printf(screen, "Unknown command\n"); return; }
+    if (r == N_RECTS) { printf(screen, "Unknown window\n"); return; }
 
+    // See what application should be run in that window
     if (argc == 1) { printf(screen, "Too few arguments\n"); return; }
     int app = 0;
     while (app < N_APPS) {
@@ -71,6 +75,8 @@ void main(void) {
 
     screen_init(&screen);
     screen_sync(&screen);
+
+    // Main loop
     printf(&screen, "$ ");
     for (;;) {
         kb_readline(&screen, line, sizeof(line));
