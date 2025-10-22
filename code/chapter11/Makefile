@@ -49,26 +49,27 @@ $(APP_OBJS) $(APP_ELFS):
 apps_gen.c: $(APP_ELFS)
 	@echo "// auto-generated" > $@
 	@echo "#include <stdint.h>" >> $@
-	@echo "extern void run_user(const char *start, const char *end, uintptr_t gp_offset);" >> $@
+	@echo "" >> $@
+	@echo "struct app_info {" >> $@
+	@echo "    const char *start;" >> $@
+	@echo "    const char *end;" >> $@
+	@echo "    uint32_t gp;" >> $@
+	@echo "};" >> $@
 	@echo "" >> $@
 	@for f in $^; do \
 	    name=$$(basename $$f .elf); \
-	    func=$$(echo $$name | sed 's/^/task_/'); \
 	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
-	    echo "void $${func}(void) {" >> $@; \
-	    echo "    extern char _binary_$${name}_bin_start[], _binary_$${name}_bin_end[];" >> $@; \
-	    echo "    run_user(_binary_$${name}_bin_start, _binary_$${name}_bin_end, 0x$${off});" >> $@; \
-	    echo "}" >> $@; \
-	    echo "" >> $@; \
+	    echo "extern char _binary_$${name}_bin_start[], _binary_$${name}_bin_end[];" >> $@; \
 	done; \
-	echo "void (*applications[])() = {" >> $@; \
+	echo "" >> $@; \
+	echo "struct app_info app_table[] = {" >> $@; \
 	for f in $^; do \
 	    name=$$(basename $$f .elf); \
-	    func=$$(echo $$name | sed 's/^/task_/'); \
-	    echo "    $${func}," >> $@; \
+	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
+	    echo "    { _binary_$${name}_bin_start, _binary_$${name}_bin_end, 0x$${off} }," >> $@; \
 	done; \
 	echo "};" >> $@; \
-	echo "int n_applications = sizeof(applications)/sizeof(applications[0]);" >> $@; \
+	echo "int n_applications = sizeof(app_table)/sizeof(app_table[0]);" >> $@; \
 	echo "Generated $@"
 
 clean:
