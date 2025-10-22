@@ -1,4 +1,5 @@
 #include "bd.h"
+#include "string.h"
 
 struct ramdisk_state {
     int nblocks;
