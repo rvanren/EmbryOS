@@ -11,11 +11,12 @@ __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp);
 
 void exec_user(void) {
-    struct pcb *current = run_queue[proc_current]->next;
+    struct pcb *pcb = run_queue[proc_current]->next;
 
     uint32_t gp;
     flat_read(&flat_fs, pcb->executable, 0, &gp, sizeof(gp));
 
+    extern struct flat flat_fs;
     uint32_t size = flat_size(&flat_fs, pcb->executable) - sizeof(gp);
     if (size > PAGE_SIZE) {
         printf("executable too large<");

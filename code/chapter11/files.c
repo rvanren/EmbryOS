@@ -9,6 +9,7 @@
 extern struct block ramdisk[], __ramdisk_end[];
 
 int applications[MAX_APPS];
+struct flat flat_fs;
 
 static void write_app(struct flat *ffs, int file_id, uint32_t gp,
                       const char *start, const char *end) {
@@ -22,7 +23,6 @@ void files_init(void) {
     struct ramdisk_state ramdisk_state;
     struct bd simple_iface;
     struct simple_state simple_state;
-    struct flat flat_fs;
 
     ramdisk_init(&ramdisk_iface, &ramdisk_state,
                  ramdisk, __ramdisk_end - ramdisk);
