@@ -8,14 +8,14 @@
 
 static void stat_get(struct flat *fs, int file, struct stat_entry *st) {
     int blk = file / STAT_PER_BLOCK;
-    struct stat_entry buf[STAT_PER_BLOCK];
+    static struct stat_entry buf[STAT_PER_BLOCK];
     fs->lower->read(fs->lower->state, fs->stat_inode, blk, buf);
     *st = buf[file % STAT_PER_BLOCK];
 }
 
 static void stat_put(struct flat *fs, int file, struct stat_entry *st) {
     int blk = file / STAT_PER_BLOCK;
-    struct stat_entry buf[STAT_PER_BLOCK];
+    static struct stat_entry buf[STAT_PER_BLOCK];
     fs->lower->read(fs->lower->state, fs->stat_inode, blk, buf);
     buf[file % STAT_PER_BLOCK] = *st;
     fs->lower->write(fs->lower->state, fs->stat_inode, blk, buf);
@@ -48,7 +48,7 @@ int flat_read(struct flat *fs, int file, int off, void *dst, int n) {
     char *d = dst;
     int blk = off / BLOCK_SIZE, pos = off % BLOCK_SIZE, remaining = n;
     while (remaining > 0) {
-        char buf[BLOCK_SIZE];
+        static char buf[BLOCK_SIZE];
         fs->lower->read(fs->lower->state, st.inode, blk, buf);
         int chunk = BLOCK_SIZE - pos;
         if (chunk > remaining) chunk = remaining;
@@ -63,7 +63,7 @@ int flat_write(struct flat *fs, int file, int off, const void *src, int n) {
     const char *s = src;
     int blk = off / BLOCK_SIZE, pos = off % BLOCK_SIZE, written = 0;
     while (written < n) {
-        char buf[BLOCK_SIZE];
+        static char buf[BLOCK_SIZE];
         fs->lower->read(fs->lower->state, st.inode, blk, buf);
         int chunk = BLOCK_SIZE - pos;
         if (chunk > n - written) chunk = n - written;
