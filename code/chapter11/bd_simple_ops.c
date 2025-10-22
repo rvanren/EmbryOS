@@ -3,7 +3,7 @@
 #include "bd_simple.h"
 
 int simple_alloc(void *st) {
-    struct inode_layer_state *s = st;
+    struct simple_state *s = st;
     int inode = simple_alloc_block(s);
     if (inode == 0) return 0;
     struct inode_block ib = { 0 };
@@ -12,7 +12,7 @@ int simple_alloc(void *st) {
 }
 
 int simple_size(void *st, int inode) {
-    struct inode_layer_state *s = st;
+    struct simple_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, s->inode_below, inode, &ib);
     for (int i = N_POINTERS - 1; i >= 0; i--)
@@ -21,7 +21,7 @@ int simple_size(void *st, int inode) {
 }
 
 void simple_read(void *st, int inode, int blk, void *dst) {
-    struct inode_layer_state *s = st;
+    struct simple_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, s->inode_below, inode, &ib);
     int b = blk < N_POINTERS ? ib.blocks[blk] : 0;
@@ -30,7 +30,7 @@ void simple_read(void *st, int inode, int blk, void *dst) {
 }
 
 void simple_write(void *st, int inode, int blk, const void *src) {
-    struct inode_layer_state *s = st;
+    struct simple_state *s = st;
     if ((unsigned) blk >= N_POINTERS) return;
     struct inode_block ib;
     s->lower->read(s->lower->state, s->inode_below, inode, &ib);
@@ -44,7 +44,7 @@ void simple_write(void *st, int inode, int blk, const void *src) {
 }
 
 void simple_free(void *st, int inode) {
-    struct inode_layer_state *s = st;
+    struct simple_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, s->inode_below, inode, &ib);
     for (int i = 0; i < N_POINTERS; i++)
