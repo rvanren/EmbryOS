@@ -13,7 +13,7 @@ struct inode_layer_state {
 
 static int alloc_block(struct inode_layer_state *s) {
     uint32_t b = * (uint32_t *) &s->sb;
-    if (b == 0) return -1;                    // no free blocks
+    if (b == 0) return 0;                    // no free blocks
     s->lower->read(s->lower->state, 0, b, &s->sb);
     return b;
 }
@@ -24,7 +24,16 @@ static void free_block(struct inode_layer_state *s, uint32_t b) {
     s->lower->write(s->lower->state, 0, 0, &s->sb);
 }
 
-static int simply_size(void *st, int inode) {
+static int simple_alloc(void *st) {
+    struct inode_layer_state *s = st;
+    int inode = alloc_block(s);
+    if (inode == 0) return 0;
+    struct inode_block ib = { 0 };
+    s->lower->write(s->lower->state, 0, inode, &ib);
+    return inode;
+}
+
+static int simple_size(void *st, int inode) {
     struct inode_layer_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, 0, inode, &ib);
@@ -32,30 +41,30 @@ static int simply_size(void *st, int inode) {
     return n;
 }
 
-static void simply_read(void *st, int inode, int blk, void *dst) {
+static void simple_read(void *st, int inode, int blk, void *dst) {
     struct inode_layer_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, 0, inode, &ib);
     uint32_t b = (blk < N_POINTERS) ? ib.blocks[blk] : 0;
-    if (b) s->lower->read(s->lower->state, 0, b, dst);
-    else  memset(dst, 0, BLOCK_SIZE);
+    if (b != 0) s->lower->read(s->lower->state, 0, b, dst);
+    else memset(dst, 0, BLOCK_SIZE);
 }
 
-static void simply_write(void *st, int inode, int blk, const void *src) {
+static void simple_write(void *st, int inode, int blk, const void *src) {
     struct inode_layer_state *s = st;
     if ((unsigned) blk >= N_POINTERS) return;
     struct inode_block ib;
     s->lower->read(s->lower->state, 0, inode, &ib);
     if (!ib.blocks[blk]) {
         int nb = alloc_block(s);
-        if (nb < 0) return; // disk full
+        if (nb == 0) return; // disk full
         ib.blocks[blk] = nb;
         s->lower->write(s->lower->state, 0, inode, &ib);
     }
     s->lower->write(s->lower->state, 0, ib.blocks[blk], src);
 }
 
-static void simply_delete(void *st, int inode) {
+static void simple_free(void *st, int inode) {
     struct inode_layer_state *s = st;
     struct inode_block ib;
     s->lower->read(s->lower->state, 0, inode, &ib);
@@ -71,8 +80,9 @@ void simple_init(struct bd *iface, struct inode_layer_state *st,
     if (format) for (int b = nblocks - 1; b > 0; b--) free_block(b);
     else s->lower->read(s->lower->state, 0, 0, &s->sb);
     iface->state  = st;
-    iface->size   = simply_size;
-    iface->read   = simply_read;
-    iface->write  = simply_write;
-    iface->delete = simply_delete;
+    iface->alloc  = simple_alloc;
+    iface->size   = simple_size;
+    iface->read   = simple_read;
+    iface->write  = simple_write;
+    iface->free   = simple_free;
 }
