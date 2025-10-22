@@ -16,8 +16,9 @@ void simple_free_block(struct inode_layer_state *s, int b) {
 }
 
 void simple_init(struct bd *iface, struct inode_layer_state *s,
-                struct bd *lower, int inode_below, int nblocks, int format) {
+                struct bd *lower, int inode_below, int format) {
     s->lower = lower; s->inode_below = inode_below;
+    int nblocks = lower->size(s->lower->state, inode_below);
     if (format) {
         memset(&s->sb, 0, sizeof s->sb);
         for (int b = nblocks - 1; b > 0; b--) simple_free_block(s, b);

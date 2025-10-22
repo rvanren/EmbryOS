@@ -1,11 +1,6 @@
 #include "bd.h"
 #include "string.h"
 
-struct ramdisk_state {
-    int nblocks;
-    char *data;
-};
-
 static int ramdisk_size(void *st, int inode) {
     struct ramdisk_state *d = st;
     return d->nblocks;

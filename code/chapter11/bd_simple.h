@@ -5,7 +5,7 @@
 #define N_POINTERS (BLOCK_SIZE / 4)
 
 struct inode_block { uint32_t blocks[N_POINTERS]; };
-union free_block   { uint32_t next; uint8_t block[BLOCK_SIZE]; };
+union free_block   { uint32_t next; struct block block; };
 
 struct inode_layer_state {
     struct bd *lower;       // underlying block device
@@ -24,3 +24,6 @@ void simple_free(void *st, int inode);
 
 int simple_alloc_block(struct inode_layer_state *s);
 void simple_free_block(struct inode_layer_state *s, int b);
+
+void simple_init(struct bd *iface, struct inode_layer_state *s,
+                struct bd *lower, int inode_below, int format);
