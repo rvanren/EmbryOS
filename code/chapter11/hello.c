@@ -10,6 +10,7 @@
 #include "plic.h"
 #include "bd_ramdisk.h"
 #include "bd_simple.h"
+#include "flat.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
@@ -50,6 +51,10 @@ int main(void) {
     struct bd simple_iface;
     struct simple_state simple_state;
     simple_init(&simple_iface, &simple_state, &ramdisk_iface, 0, 1);
+
+    // Now layer the flat file system on top of that
+    struct flat flat;
+    flat_init(&flat, &simple_iface, 1);
 
     mtime_reset(QUANTUM);
     sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });
