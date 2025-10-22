@@ -2,10 +2,7 @@
 #include "screen.h"
 #include "kb.h"
 #include "string.h"
-#include "shell.h"
-
-char *apps[N_APPS];
-struct rect rects[N_RECTS];
+#include "shell_aux.c"      // rest of program
 
 void main(void) {
     struct screen screen;

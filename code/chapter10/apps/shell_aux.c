@@ -2,10 +2,14 @@
 #include "screen.h"
 #include "kb.h"
 #include "string.h"
-#include "shell.h"
 
-extern char *apps[N_APPS];
-extern struct rect rects[N_RECTS];
+#define N_RECTS 4
+#define N_APPS  3
+
+struct rect { const char *name; char x, y, w, h; };
+
+char *apps[N_APPS];             // list of applications
+struct rect rects[N_RECTS];     // list of windows
 
 void printf(struct screen *screen, const char *s) {
     while (*s) screen_putchar(screen, *s++);
