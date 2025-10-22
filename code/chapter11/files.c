@@ -4,8 +4,8 @@
 #include "bd_simple.h"
 #include "flat.h"
 
-#define MAX_APPS      64
-#define RAMDISK_SIZE 256
+#define MAX_APPS      32
+#define RAMDISK_SIZE  64
 
 struct block ramdisk_blocks[BLOCK_SIZE];
 
