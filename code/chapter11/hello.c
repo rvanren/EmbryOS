@@ -44,12 +44,12 @@ int main(void) {
     // Instantiate the ramdisk
     struct bd ramdisk_iface;
     struct ramdisk_state ramdisk_state;
-    bd_ramdisk_init(&ramdisk_iface, &ramdisk_state, ramdisk_blocks, RAMDISK_SIZE);
+    ramdisk_init(&ramdisk_iface, &ramdisk_state, ramdisk_blocks, RAMDISK_SIZE);
 
     // Layer the simple block device over it
     struct bd simple_iface;
     struct simple_state simple_state;
-    bd_simple_init(&simple_iface, &simple_state, &bd_ramdisk_iface, 0, 1);
+    simple_init(&simple_iface, &simple_state, &bd_ramdisk_iface, 0, 1);
 
     mtime_reset(QUANTUM);
     sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });
