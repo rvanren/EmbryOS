@@ -4,25 +4,34 @@
 #include "sched.h"
 #include "pmp.h"
 #include "stdio.h"
+#include "string.h"
+#include "flat.h"
 
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp);
 
-void run_user(char start[], char end[], unsigned int gp_offset) {
-    struct pcb *self = run_queue[proc_current]->next;
-    size_t size = end - start;
+void exec_user(void) {
+    struct pcb *current = run_queue[proc_current]->next;
 
+    uint32_t gp;
+    flat_read(&flat_fs, pcb->executable, 0, &gp, sizeof(gp));
+
+    uint32_t size = flat_size(&flat_fs, pcb->executable) - sizeof(gp);
     if (size > PAGE_SIZE) {
-        proc_put(self, 0, 0, '>', 0, 1);
-        printf("run_user: executable too large<");
+        printf("executable too large<");
         proc_exit();
     }
 
     self->base = frame_alloc();
     self->stack = frame_alloc();
-    for (size_t i = 0; i < size; i++) self->base[i] = start[i];
-    for (size_t i = size; i < PAGE_SIZE; i++) self->base[i] = 0;
-    for (size_t i = 0; i < PAGE_SIZE; i++) self->stack[i] = 0;
+    if (self->base == 0 || self->stack == 0) {
+        printf("out of memory<");
+        proc_exit();
+    }
+
+    flat_read(&flat_fs, pcb->executable, sizeof(gp), self->base, size);
+    memset(&self->base[size], 0, PAGE_SIZE - size);
+    memset(self->stack, 0, PAGE_SIZE);
 
     pmp_config(self);
     pmp_load(self);

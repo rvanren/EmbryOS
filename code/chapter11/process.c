@@ -7,15 +7,17 @@ struct pcb *proc_init(struct rect area){
     screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
     struct pcb *pcb = frame_alloc();
     pcb->priority = 0;
+    pcb->executable = -1;
     pcb->area = area;
     pcb->next = 0;
     pcb->base = pcb->stack = 0;
     return pcb;
 }
 
-struct pcb *proc_create(struct rect area) {
+struct pcb *proc_create(int executable, struct rect area) {
     struct pcb *pcb = frame_alloc();
     pcb->priority = 0;
+    pcb->executable = executable;
     pcb->area = area;
     pcb->next = 0;
     pcb->base = pcb->stack = 0;
