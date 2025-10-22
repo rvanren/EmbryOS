@@ -11,11 +11,7 @@
 
 #define QUANTUM          50000        // 50 milliseconds
 
-#define RAMDISK_SIZE      256         // 256 blocks
-
 extern void (*applications[])();
-
-static struct block ramdisk_blocks[RAMDISK_SIZE];
 
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
