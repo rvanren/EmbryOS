@@ -33,13 +33,12 @@ void sched_yield(void) {
     sched_block(current);
 }
 
-void sched_run(int executable, struct rect area) {
-    void exec_user();
+void sched_run(int executable, struct rect area, void (*entry)()) {
     struct pcb *current = run_queue[proc_current]->next;
     struct pcb *pcb = proc_create(executable, area);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE, exec_user);
+    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE, entry);
     proc_reap_zombies();
 }
 

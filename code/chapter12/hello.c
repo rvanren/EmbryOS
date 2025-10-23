@@ -26,6 +26,8 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
+    extern void exec_user();
+
     frame_init(); intr_init(); plic_init(); uart_init(); mtime_init(); files_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
@@ -34,6 +36,6 @@ int main(void) {
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     mtime_reset(QUANTUM);
-    sched_run(2, (struct rect){ 0, 0, 39, 11 });    // run init process
+    sched_run(2, (struct rect){ 0, 0, 39, 11 }, exec_user);  // run init process
     sched_idle();
 }

@@ -10,6 +10,7 @@
 void syscall_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
     extern struct flat flat_fs;
+    extern void exec_user();
 
     switch (tf->a7) {
     case SYS_EXIT:
@@ -18,7 +19,7 @@ void syscall_handler(struct trap_frame *tf) {
         proc_exit();
         break;
     case SYS_SPAWN:
-        sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 });
+        sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, exec_user);
         break;
     case SYS_PUT:
         proc_put(self, tf->a0, tf->a1, tf->a2, tf->a3, tf->a4);
