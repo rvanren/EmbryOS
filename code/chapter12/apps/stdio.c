@@ -9,6 +9,7 @@ void putchar(char c) {
     if (!initialized) {
         screen_init(&screen);
         screen_sync(&screen);
+        initialized = 1;
     }
     screen_putchar(&screen, c);
 }
