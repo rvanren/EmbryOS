@@ -15,6 +15,6 @@ void read(char *file) {
     }
 }
 
-void main(char **argv, int argc) {
+void main(int argc, char **argv) {
     for (int i = 1; i < argc; i++) read(argv[i]);
 }
