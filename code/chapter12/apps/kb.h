@@ -1,1 +1,1 @@
-void kb_readline(struct screen *screen, char *line, int size);
+void kb_readline(char *line, int size);
