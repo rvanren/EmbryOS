@@ -1,7 +1,7 @@
 #include <stdarg.h>
 #include "syslib.h"
-#include "screen.h"
 #include "string.h"
+#include "dir.h"
 
 static void print_unsigned(struct screen *screen, unsigned int x, unsigned int base) {
     char buf[16];
@@ -59,5 +59,16 @@ void main(void) {
     screen_init(&screen);
     screen_sync(&screen);
 
-    printf(&screen, "SIZE %d\n", user_size(1));
+    printf(&screen, "Initializing directory...\n");
+
+    dir_create("init", 2);
+    dir_create("shell", 3);
+    dir_create("pretty", 4);
+    dir_create("crash", 5);
+    dir_create("ls", 6);
+
+    printf(&screen, "System ready.\n");
+
+    user_spawn(dir_lookup("shell"), 0, 0, 40, 12);
+    user_exit();
 }
