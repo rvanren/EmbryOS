@@ -2,12 +2,10 @@
 #include "screen.h"
 
 #define N_RECTS 4
-#define N_APPS  4
 
 struct rect { const char *name; char x, y, w, h; };
 struct app { const char *name; int file; };
 
-struct app apps[N_APPS];        // list of applications
 struct rect rects[N_RECTS];     // list of windows
 
 void printf(struct screen *screen, const char *s) {
@@ -43,17 +41,16 @@ void exec(struct screen *screen, char *line) {
     int r = 0;
     while (r < N_RECTS && strcmp(rects[r].name, argv[0]) != 0) r++;
     if (r == N_RECTS) {
-        printf(screen, "Usage: [ul|ur|ll|lr] [shell|pretty|crash]\n");
+        printf(screen, "Usage: [ul|ur|ll|lr] command\n");
         return;
     }
 
     if (argc == 1) { printf(screen, "Too few arguments\n"); return; }
-    int a = 0;
-    while (a < N_APPS && strcmp(apps[a].name, argv[1]) != 0) a++;
-    if (a == N_APPS) {
+    f = dir_lookup(argv[1]);
+    if (f < 0) {
         printf(screen, "Unknown application\n");
         return;
     }
 
-    user_spawn(apps[a].file, rects[r].x, rects[r].y, rects[r].w, rects[r].h);
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h);
 }
