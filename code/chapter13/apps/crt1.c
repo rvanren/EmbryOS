@@ -1,7 +1,20 @@
 #include "syslib.h"
 
-void _crt_init(char *arg_buf, int size) {
-    extern void main(int argc, char **argv);
-    main(0, 0);
-    user_exit();
+#define MAX_ARGS    16
+
+void _crt_init(const char *argbuf, size_t arglen) {
+    extern int main(int argc, char **argv);
+    int argc = 0;
+    char *argv[MAX_ARGS];
+    const char *p = argbuf;
+    const char *end = argbuf + arglen;
+
+    while (p < end && *p != '\0' && argc < (int)(sizeof(argv)/sizeof(argv[0])) - 1) {
+        argv[argc++] = (char *)p;
+        p += strlen(p) + 1;
+    }
+    argv[argc] = NULL;
+
+    main(argc, argv);
+    sys_exit();
 }
