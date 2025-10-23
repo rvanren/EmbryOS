@@ -8,7 +8,7 @@ void read(char *file) {
         printf("%s: No such file\n", file);
         return;
     }
-    for (int off = 0;; off) {
+    for (int off = 0;; off++) {
         char c;
         while (user_read(f, off, &c, 1) == 1)
             putchar(c);
