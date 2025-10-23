@@ -2,9 +2,16 @@
 #include "screen.h"
 #include "stdio.h"
 
-struct screen screen;
+static struct screen screen;
+static int initialized = 0;
 
-void putchar(char c) { screen_putchar(&screen, c); }
+void putchar(char c) {
+    if (!initialized) {
+        screen_init(&screen);
+        screen_sync(&screen);
+    }
+    screen_putchar(&screen, c);
+}
 
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
@@ -53,9 +60,4 @@ void printf(const char *fmt, ...) {
         }
     }
     va_end(ap);
-}
-
-void stdio_init() {
-    screen_init(&screen);
-    screen_sync(&screen);
 }

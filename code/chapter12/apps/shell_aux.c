@@ -1,5 +1,4 @@
 #include "syslib.h"
-#include "stdio.h"
 #include "string.h"
 #include "dir.h"
 
