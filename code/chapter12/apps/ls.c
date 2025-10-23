@@ -4,6 +4,8 @@
 #include "string.h"
 #include "dir.h"
 
+struct screen screen;
+
 static void print_unsigned(struct screen *screen, unsigned int x, unsigned int base) {
     char buf[16];
     int i = 0;
@@ -58,11 +60,7 @@ void list(const char *name, int file) {
 }
 
 void main(void) {
-    struct screen screen;
-    char line[128];
-
     screen_init(&screen);
     screen_sync(&screen);
-
-    dir_list(void (*fn)(const char *name, int file));
+    dir_list(list);
 }
