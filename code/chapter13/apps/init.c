@@ -13,6 +13,11 @@ void main(void) {
     dir_create("crash", 5);
     dir_create("ls", 6);
 
+    int readme = user_create();
+    char contents[] = "This is EmbryOS\n";
+    user_write(readme, 0, contents, sizeof(contents));
+    dir_create("README", readme);
+
     printf("System ready.\n");
 
     user_spawn(dir_lookup("shell"), 0, 0, 40, 12, 0, 0);
