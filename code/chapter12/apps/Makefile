@@ -17,15 +17,15 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 # build both .elf and .o so that top-level can nm the .elf
 all: $(APP_ELFS) $(APP_OBJS)
 
-init.elf: init.c screen.c screen.h ../shared/string.c ../shared/string.h dir.c dir.h stdio.h ../shared/printf.c putchar.c
+init.elf: init.c screen.c screen.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s init.c screen.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-shell.elf: shell.c shell_aux.c screen.c screen.h ../shared/string.c ../shared/string.h kb.c kb.h dir.c dir.h stdio.h ../shared/printf.c putchar.c
+shell.elf: shell.c shell_aux.c screen.c screen.h ../shared/string.c ../shared/string.h kb.c kb.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s shell.c screen.c ../shared/string.c kb.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-ls.elf: ls.c ../shared/printf.c putchar.c stdio.h ../shared/string.c ../shared/string.h dir.c dir.h screen.h screen.c
+ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h screen.h screen.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s ls.c screen.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
