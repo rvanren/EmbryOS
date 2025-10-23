@@ -7,7 +7,7 @@
 #include "uart.h"
 #include "flat.h"
 
-void check_legal(struct pcb *p, uintptr_t start, size_t size) {
+void check_legal(struct pcb *p, uintptr_t start, int size) {
     uintptr_t end = start + size - 1;
     if (end < start) return 0;
     uintptr_t base_lo  = (uintptr_t) p->base, base_hi  = base_lo + PAGE_SIZE - 1;
