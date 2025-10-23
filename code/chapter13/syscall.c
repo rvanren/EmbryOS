@@ -8,23 +8,6 @@
 #include "flat.h"
 #include "frame.h"
 
-void check_legal(struct pcb *self, uintptr_t start, int size) {
-    if (size == 0) return;
-    uintptr_t end = start + size - 1;
-    if (end < start) {
-        proc_put(self, 0, 0, '>', 0, 1);
-        printf("bad system call size<");
-        proc_exit();
-    }
-    uintptr_t base_lo  = (uintptr_t) self->base,  base_hi  = base_lo  + PAGE_SIZE - 1;
-    uintptr_t stack_lo = (uintptr_t) self->stack, stack_hi = stack_lo + PAGE_SIZE - 1;
-    if (!((start >= base_lo && end <= base_hi) || (start >= stack_lo && end <= stack_hi))) {
-        proc_put(self, 0, 0, '>', 0, 1);
-        printf("bad system call address<");
-        proc_exit();
-    }
-}
-
 void syscall_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
     extern struct flat flat_fs;
@@ -37,7 +20,7 @@ void syscall_handler(struct trap_frame *tf) {
         proc_exit();
         break;
     case SYS_SPAWN:
-        check_legal(self, (uintptr_t) tf->a5, tf->a6);
+        proc_check_legal(self, (uintptr_t) tf->a5, tf->a6);
         sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, (void *) (uintptr_t) tf->a5, tf->a6, exec_user);
         break;
     case SYS_PUT:
@@ -46,16 +29,15 @@ void syscall_handler(struct trap_frame *tf) {
     case SYS_GET:
         tf->a0 = uart_get();
         break;
-
     case SYS_CREATE:
         tf->a0 = flat_create(&flat_fs);
         break;
     case SYS_READ:
-        check_legal(self, (uintptr_t) tf->a2, tf->a3);
+        proc_check_legal(self, (uintptr_t) tf->a2, tf->a3);
         tf->a0 = flat_read(&flat_fs, tf->a0, tf->a1, (void *) (uintptr_t) tf->a2, tf->a3);
         break;
     case SYS_WRITE:
-        check_legal(self, (uintptr_t) tf->a2, tf->a3);
+        proc_check_legal(self, (uintptr_t) tf->a2, tf->a3);
         tf->a0 = flat_write(&flat_fs, tf->a0, tf->a1, (void *) (uintptr_t) tf->a2, tf->a3);
         break;
     case SYS_SIZE:
@@ -64,7 +46,6 @@ void syscall_handler(struct trap_frame *tf) {
     case SYS_DELETE:
         flat_delete(&flat_fs, tf->a0);
         break;
-
     default:
         printf("Unknown syscall %d\n", tf->a7);
     }
