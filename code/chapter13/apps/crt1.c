@@ -17,5 +17,5 @@ void _crt_init(const char *argbuf, size_t arglen) {
     argv[argc] = NULL;
 
     main(argc, argv);
-    sys_exit();
+    user_exit();
 }
