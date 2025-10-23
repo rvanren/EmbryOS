@@ -2,6 +2,7 @@
 #include "syslib.h"
 #include "screen.h"
 #include "string.h"
+#include "dir.h"
 
 static void print_unsigned(struct screen *screen, unsigned int x, unsigned int base) {
     char buf[16];
