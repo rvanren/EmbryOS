@@ -35,7 +35,10 @@ void exec(struct screen *screen, char *line) {
 
     int r = 0;
     while (r < N_RECTS && strcmp(rects[r].name, argv[0]) != 0) r++;
-    if (r == N_RECTS) { printf(screen, "Unknown window\n"); return; }
+    if (r == N_RECTS) {
+        printf(screen, "Usage: [ul|ur|ll|lr] [shell|pretty|crash]\n");
+        return;
+    }
 
     if (argc == 1) { printf(screen, "Too few arguments\n"); return; }
     int a = 0;
