@@ -16,5 +16,5 @@ void read(char *file) {
 }
 
 void main(char **argv, int argc) {
-    read("README");
+    for (int i = 1; i < argc; i++) read(argv[i]);
 }
