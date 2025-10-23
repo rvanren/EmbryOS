@@ -18,23 +18,23 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 all: $(APP_ELFS) $(APP_OBJS)
 
 init.elf: init.c window.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s init.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 shell.elf: shell.c shell_aux.c window.c window.h ../shared/string.c ../shared/string.h kb.c kb.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s shell.c window.c ../shared/string.c kb.c dir.c ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c shell.c window.c ../shared/string.c kb.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s ls.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ls.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s cat.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c cat.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-%.elf: %.c crt0.s user.lds
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $<
+%.elf: %.c crt0.s crt1.c user.lds
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c $<
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.bin: %.elf

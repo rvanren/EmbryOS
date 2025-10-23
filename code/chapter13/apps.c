@@ -8,7 +8,9 @@
 #include "flat.h"
 
 __attribute__((noreturn))
-void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp);
+void enter_user(void *entry, uintptr_t gp_val,
+                uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
+
 
 void exec_user(void) {
     extern struct flat flat_fs;
@@ -46,6 +48,6 @@ void exec_user(void) {
     pmp_config(self);
     pmp_load(self);
 
-    enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp,
+    enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
 }

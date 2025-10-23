@@ -1,23 +1,24 @@
     .section .text
     .globl enter_user
     .type  enter_user,@function
-# void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp)
-# a0=entry, a1=gp_val, a2=user_sp, a3=ksp
+# void enter_user(void *entry, uintptr_t gp_val,
+#                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp)
+# a0=entry, a1=gp_val, a2=user_sp, a3=arg_size, a4=ksp
 enter_user:
     # Save incoming args into temps BEFORE clobbering aX
     mv   t3, a0           # entry
     mv   t4, a1           # gp_val
-    mv   t5, a2           # user_sp
-    mv   t6, a3           # ksp
+    mv   t5, a2           # user_sp (points to args)
+    mv   t7, a3           # arg_size
+    mv   t6, a4           # ksp
 
     # Program per-process kernel stack for future traps
     csrw mscratch, t6
 
-    # (Optional but recommended) briefly disable M-mode interrupts during handoff
-    # so we can't trap in M while gp=USER:
-    csrrc t0, mstatus,  (1 << 3)     # clear MIE
+    # Disable M-mode interrupts during handoff
+    csrrc t0, mstatus, (1 << 3)
 
-    # Zero all integer regs EXCEPT gp/sp and the temps we still need (t3..t6)
+    # Zero all integer regs except gp/sp and temps
     li   t0, 0
     mv   ra, t0
     mv   tp, t0
@@ -43,13 +44,17 @@ enter_user:
     mv   s9, t0
     mv   s10, t0
     mv   s11, t0
-    # DO NOT clobber t3,t4,t5,t6 (they hold entry,gp,sp,ksp)
+    # DO NOT clobber t3..t7 (they hold entry,gp,sp,ksp,arg_size)
 
-    # Load USER gp/sp from saved temps
+    # Load user gp/sp
     mv   gp, t4
     mv   sp, t5
 
-    # Set return target and privilege: MPP=U, mepc=entry
+    # Initialize user arguments
+    mv   a0, t5           # arg_buf pointer
+    mv   a1, t7           # arg_buf size
+
+    # Switch privilege: MPP=U, mepc=entry
     csrr t0, mstatus
     li   t1, 0x1800                 # MSTATUS_MPP_MASK (bits 12..11)
     not  t2, t1
@@ -57,5 +62,5 @@ enter_user:
     csrw mstatus, t0
     csrw mepc, t3
 
-    # mret to user
+    # Jump to user
     mret
