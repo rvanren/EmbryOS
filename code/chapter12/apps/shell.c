@@ -2,7 +2,6 @@
 #include "kb.h"
 
 void main(void) {
-    struct screen screen;
     char line[128];
 
     // Because we are using position-independent code, we can't use pointers
@@ -12,13 +11,9 @@ void main(void) {
     rects[2] = (struct rect){ "ll",  0, 12, 39, 11 };
     rects[3] = (struct rect){ "lr", 40, 12, 39, 11 };
 
-    // initialize windows
-    screen_init(&screen);
-    screen_sync(&screen);
-
     for (;;) {
-        printf(&screen, "$ ");
-        kb_readline(&screen, line, sizeof(line));
-        exec(&screen, line);
+        printf("$ ");
+        kb_readline(line, sizeof(line));
+        exec(line);
     }
 }
