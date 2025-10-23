@@ -16,13 +16,13 @@ enum {
   PMP_L = 1 << 7,
 };
 
-static inline uintptr_t pmp_napot_addr(uintptr_t base, size_t size) {
-  return (base >> 2) | ((size >> 1) - 1);
+static inline uintptr_t pmp_napot_addr(uintptr_t base) {
+  return (base >> 2) | ((PAGE_SIZE >> 1) - 1);
 }
 
 void pmp_config(struct pcb *pcb) {
-    pcb->pmp.addr[0] = pmp_napot_addr((uintptr_t) pcb->base, PAGE_SIZE);
-    pcb->pmp.addr[1] = pmp_napot_addr((uintptr_t) pcb->stack, PAGE_SIZE);
+    pcb->pmp.addr[0] = pmp_napot_addr((uintptr_t) pcb->base);
+    pcb->pmp.addr[1] = pmp_napot_addr((uintptr_t) pcb->stack);
     pcb->pmp.cfg[0]  = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
     pcb->pmp.cfg[1]  = PMP_A_NAPOT | PMP_R | PMP_W;
 }
