@@ -17,6 +17,12 @@ char *strncpy(char *dst, const char *src, size_t n) {
     return dst;
 }
 
+size_t strlen(const char *s) {
+    const char *p = s;
+    while (*p) p++;
+    return (size_t) (p - s);
+}
+
 void *memcpy(void *dst, const void *src, size_t n) {
     unsigned char *d = dst;
     const unsigned char *s = src;
