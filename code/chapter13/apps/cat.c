@@ -9,9 +9,8 @@ void read(char *file) {
         return;
     }
     for (int off = 0;; off++) {
-        char c;
-        while (user_read(f, off, &c, 1) == 1)
-            putchar(c);
+        if (user_read(f, off, &c, 1) != 1) break;
+        putchar(c);
     }
 }
 
