@@ -6,7 +6,6 @@
 #include "files.h"
 #include "mtime.h"
 #include "syscall.h"
-#include "syslib.h"
 #include "uart.h"
 #include "plic.h"
 
