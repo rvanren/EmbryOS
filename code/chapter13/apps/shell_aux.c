@@ -12,16 +12,16 @@ struct rect rects[N_RECTS];     // list of windows
 
 // Execute the given command
 void exec(char *line) {
-    char *argv[64];
+    char *argv[64], *ptr = line;
     int argc = 0;
 
     for (;;) {
-        while (*line == ' ' || *line == '\t') line++;
-        if (*line == 0) break;
-        argv[argc++] = line;
-        while (*line != 0 && *line != ' ' && *line != '\t') line++;
-        if (*line == 0) break;
-        *line++ = 0;
+        while (*ptr == ' ' || *ptr == '\t') ptr++;
+        if (*ptr == 0) break;
+        argv[argc++] = ptr;
+        while (*ptr != 0 && *ptr != ' ' && *ptr != '\t') ptr++;
+        if (*ptr == 0) break;
+        *ptr++ = 0;
     }
     if (argc == 0) return;
 
@@ -42,5 +42,5 @@ void exec(char *line) {
         return;
     }
 
-    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, 0, 0);
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, line, ptr - line);
 }
