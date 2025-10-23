@@ -52,6 +52,10 @@ void printf(struct screen *screen, const char *fmt, ...) {
     va_end(ap);
 }
 
+void list(const char *name, int file) {
+    printf(&screen, "%s %d\n", name, user_size(file));
+}
+
 void main(void) {
     struct screen screen;
     char line[128];
@@ -59,5 +63,5 @@ void main(void) {
     screen_init(&screen);
     screen_sync(&screen);
 
-    printf(&screen, "SIZE %d\n", user_size(1));
+    dir_list(void (*fn)(const char *name, int file));
 }
