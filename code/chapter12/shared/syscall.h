@@ -10,8 +10,3 @@
 #define SYS_WRITE   6     // write a file
 #define SYS_SIZE    7     // get the size of a file
 #define SYS_DELETE  8     // delete a file
-
-#include "interrupt.h"
-
-// This handler is invoked on a system call (ecall).
-void syscall_handler(struct trap_frame *);
