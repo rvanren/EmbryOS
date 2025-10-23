@@ -9,6 +9,7 @@
 #include "frame.h"
 
 void check_legal(struct pcb *self, uintptr_t start, int size) {
+    if (size == 0) return;
     uintptr_t end = start + size - 1;
     if (end < start) {
         proc_put(self, 0, 0, '>', 0, 1);
@@ -17,10 +18,8 @@ void check_legal(struct pcb *self, uintptr_t start, int size) {
     }
     uintptr_t base_lo  = (uintptr_t) self->base,  base_hi  = base_lo  + PAGE_SIZE - 1;
     uintptr_t stack_lo = (uintptr_t) self->stack, stack_hi = stack_lo + PAGE_SIZE - 1;
-        proc_put(self, 0, 0, '>', 0, 1);
-    printf("%x %x %x %x\n", base_lo, start, start + size, base_hi);
-    printf("%x %x %x %x\n", stack_lo, start, start + size, stack_hi);
     if (!((start >= base_lo && end <= base_hi) || (start >= stack_lo && end <= stack_hi))) {
+        proc_put(self, 0, 0, '>', 0, 1);
         printf("bad system call address<");
         proc_exit();
     }
