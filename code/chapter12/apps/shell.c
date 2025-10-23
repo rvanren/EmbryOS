@@ -1,6 +1,5 @@
 #include "shell_aux.c"      // rest of program
 #include "kb.h"
-#include "dir.h"
 
 void main(void) {
     struct screen screen;

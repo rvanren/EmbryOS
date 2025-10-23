@@ -1,5 +1,7 @@
 #include "syslib.h"
 #include "screen.h"
+#include "string.h"
+#include "dir.h"
 
 #define N_RECTS 4
 
@@ -10,14 +12,6 @@ struct rect rects[N_RECTS];     // list of windows
 
 void printf(struct screen *screen, const char *s) {
     while (*s) screen_putchar(screen, *s++);
-}
-
-int strcmp(const char *p, const char *q) {
-    while (*p != 0 && *q != 0 && *p == *q) { p++; q++; }
-    if (*p == *q) { return 0; }
-    if (*p == 0) { return -1; }
-    if (*q == 0) { return 1; }
-    return *p - *q;
 }
 
 // Execute the given command
@@ -46,7 +40,7 @@ void exec(struct screen *screen, char *line) {
     }
 
     if (argc == 1) { printf(screen, "Too few arguments\n"); return; }
-    f = dir_lookup(argv[1]);
+    int f = dir_lookup(argv[1]);
     if (f < 0) {
         printf(screen, "Unknown application\n");
         return;
