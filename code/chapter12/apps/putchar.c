@@ -1,15 +1,15 @@
 #include <stdarg.h>
-#include "screen.h"
+#include "window.h"
 #include "stdio.h"
 
-static struct screen screen;
+static struct window window;
 static int initialized = 0;
 
 void putchar(char c) {
     if (!initialized) {
-        screen_init(&screen);
-        screen_sync(&screen);
+        window_init(&window);
+        window_sync(&window);
         initialized = 1;
     }
-    screen_putchar(&screen, c);
+    window_putchar(&window, c);
 }
