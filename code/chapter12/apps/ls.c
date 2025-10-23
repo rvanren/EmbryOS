@@ -1,3 +1,4 @@
+#include <stdarg.h>
 #include "syslib.h"
 #include "screen.h"
 #include "string.h"
@@ -13,11 +14,11 @@ static void print_unsigned(struct screen *screen, unsigned int x, unsigned int b
     while (--i >= 0) screen_putchar(screen, buf[i]);
 }
 
-void printf(screen, const char *fmt, ...) {
+void printf(struct screen *screen, const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     for (; *fmt; fmt++) {
-        if (*fmt != '%') { screen_putchar(*fmt); continue; }
+        if (*fmt != '%') { screen_putchar(screen, *fmt); continue; }
         fmt++;
         switch (*fmt) {
         case 'd': { int x = va_arg(ap, int);
