@@ -8,7 +8,6 @@
 
 extern struct block ramdisk[], __ramdisk_end[];
 
-int applications[MAX_APPS];
 struct bd ramdisk_iface;
 struct ramdisk_state ramdisk_state;
 struct bd simple_iface;
@@ -31,7 +30,6 @@ void files_init(void) {
 
     for (int i = 0; i < n_applications; i++) {
         int f = flat_create(&flat_fs);
-        applications[i] = f;
         write_app(&flat_fs, f, app_table[i].gp,
                   app_table[i].start, app_table[i].end);
     }

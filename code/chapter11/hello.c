@@ -12,8 +12,6 @@
 
 #define QUANTUM          50000        // 50 milliseconds
 
-extern int applications[];
-
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
     mtime_reset(QUANTUM); // add another quantum
@@ -36,6 +34,6 @@ int main(void) {
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     mtime_reset(QUANTUM);
-    sched_run(applications[0], (struct rect){ 0,   0,  40, 12 });
+    sched_run(1, (struct rect){ 0, 0, 40, 12 });
     sched_idle();
 }
