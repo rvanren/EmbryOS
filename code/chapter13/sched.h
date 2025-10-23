@@ -29,7 +29,7 @@ void sched_yield(void);
 
 // Start a new process with the given executable and screen area using
 // the given entry function.
-void sched_run(int executable, struct rect area, void (*entry)());
+void sched_run(int executable, struct rect area, void *args, int size, void (*entry)());
 
 // This function is called when everything's idle.  It waits for the next
 // interrupt.
