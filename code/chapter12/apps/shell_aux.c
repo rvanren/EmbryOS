@@ -44,7 +44,7 @@ void exec(struct screen *screen, char *line) {
     int a = 0;
     while (a < N_APPS && strcmp(apps[a].name, argv[1]) != 0) a++;
     if (a == N_APPS) {
-        printf(screen, "Usage: [ul|ur|ll|lr] [shell|pretty|crash]\n");
+        printf(screen, "Unknown application\n");
         return;
     }
 
