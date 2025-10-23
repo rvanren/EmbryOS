@@ -31,10 +31,10 @@ void syscall_handler(struct trap_frame *tf) {
         tf->a0 = flat_create(&flat_fs);
         break;
     case SYS_READ:
-        tf->a0 = flat_read(&flat_fs, tf->a0, tf->a1, ft->a2, tf->a3);
+        tf->a0 = flat_read(&flat_fs, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
     case SYS_WRITE:
-        tf->a0 = flat_write(&flat_fs, tf->a0, tf->a1, ft->a2, tf->a3);
+        tf->a0 = flat_write(&flat_fs, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
     case SYS_SIZE:
         tf->a0 = flat_size(&flat_fs, tf->a0);
