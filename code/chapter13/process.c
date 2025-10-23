@@ -9,16 +9,20 @@ struct pcb *proc_init(struct rect area){
     pcb->priority = 0;
     pcb->executable = -1;
     pcb->area = area;
+    pcb->args = 0;
+    pcb->size = 0;
     pcb->next = 0;
     pcb->base = pcb->stack = 0;
     return pcb;
 }
 
-struct pcb *proc_create(int executable, struct rect area) {
+struct pcb *proc_create(int executable, struct rect area, void *args, int size) {
     struct pcb *pcb = frame_alloc();
     pcb->priority = 0;
     pcb->executable = executable;
     pcb->area = area;
+    pcb->args = args;
+    pcb->size = size;
     pcb->next = 0;
     pcb->base = pcb->stack = 0;
     return pcb;

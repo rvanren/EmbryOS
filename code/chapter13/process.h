@@ -19,6 +19,8 @@ struct pcb {
     int priority;       // priority level
     int executable;     // file containing executable
     struct rect area;   // allowed screen region
+    void *args;         // arguments buffer
+    int size;           // size of arguments buffer
     void *sp;           // saved stack pointer
     char *base, *stack; // user space frames
     struct pmp_state pmp;
@@ -28,7 +30,7 @@ struct pcb {
 struct pcb *proc_init(struct rect area);
 
 // Allocate a new PCB
-struct pcb *proc_create(int file, struct rect area);
+struct pcb *proc_create(int file, struct rect area, void *args, int size);
 
 // Allows a process to write to its rectangle
 //  (row, col): position

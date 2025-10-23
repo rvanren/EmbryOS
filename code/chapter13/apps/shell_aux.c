@@ -42,5 +42,5 @@ void exec(char *line) {
         return;
     }
 
-    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h);
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, 0, 0);
 }

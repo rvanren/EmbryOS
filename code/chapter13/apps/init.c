@@ -15,6 +15,6 @@ void main(void) {
 
     printf("System ready.\n");
 
-    user_spawn(dir_lookup("shell"), 0, 0, 40, 12);
+    user_spawn(dir_lookup("shell"), 0, 0, 40, 12, 0, 0);
     user_exit();
 }
