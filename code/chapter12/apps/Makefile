@@ -30,7 +30,7 @@ ls.elf: ls.c stdio.c stdio.h string.c string.h dir.c dir.h screen.h screen.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.elf: %.c crt0.s user.lds
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $< screen.c kb.c string.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $< screen.c string.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.bin: %.elf
