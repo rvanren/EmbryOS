@@ -2,11 +2,13 @@
 #include "string.h"
 #include "dir.h"
 
+#define DIR_FILE 1
+
 int dir_lookup(const char *name) {
     struct dirent e;
-    int n = user_size(dir_file) / sizeof e;
+    int n = user_size(DIR_FILE) / sizeof e;
     for (int i = 0; i < n; i++) {
-        user_read(dir_file, i * sizeof e, &e, sizeof e);
+        user_read(DIR_FILE, i * sizeof e, &e, sizeof e);
         if (strcmp(e.name, name) == 0)
             return e.file;
     }
@@ -19,20 +21,20 @@ int dir_create(const char *name, int file) {
     memset(&e, 0, sizeof e);
     strncpy(e.name, name, NAME_LEN - 1);
     e.file = file;
-    user_write(dir_file, user_size(dir_file), &e, sizeof e);
+    user_write(DIR_FILE, user_size(DIR_FILE), &e, sizeof e);
     return file;
 }
 
 void dir_delete(const char *name) {
     struct dirent e;
-    int n = user_size(dir_file) / sizeof e;
+    int n = user_size(DIR_FILE) / sizeof e;
     for (int i = 0; i < n; i++) {
-        user_read(dir_file, i * sizeof e, &e, sizeof e);
+        user_read(DIR_FILE, i * sizeof e, &e, sizeof e);
         if (strcmp(e.name, name) == 0) {
             user_delete(e.file);
             e.file = -1;
             e.name[0] = 0;
-            user_write(dir_file, i * sizeof e, &e, sizeof e);
+            user_write(DIR_FILE, i * sizeof e, &e, sizeof e);
             return;
         }
     }
@@ -40,9 +42,9 @@ void dir_delete(const char *name) {
 
 void dir_list(void (*fn)(const char *name, int file)) {
     struct dirent e;
-    int n = user_size(dir_file) / sizeof e;
+    int n = user_size(DIR_FILE) / sizeof e;
     for (int i = 0; i < n; i++) {
-        user_read(dir_file, i * sizeof e, &e, sizeof e);
+        user_read(DIR_FILE, i * sizeof e, &e, sizeof e);
         if (e.file > 0 && e.name[0])
             fn(e.name, e.file);
     }

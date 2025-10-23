@@ -12,4 +12,3 @@ void *memset(void *dst, int c, size_t n) {
     while (n--) *d++ = c;
     return dst;
 }
-
