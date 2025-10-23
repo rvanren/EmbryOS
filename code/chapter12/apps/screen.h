@@ -1,7 +1,7 @@
 #pragma once
 
-#define NROWS 12
-#define NCOLS 40
+#define NROWS 11
+#define NCOLS 39
 
 struct cell { char c, fg, bg; };
 struct screen {
