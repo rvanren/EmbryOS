@@ -25,8 +25,8 @@ shell.elf: shell.c shell_aux.c screen.c screen.h string.c string.h kb.c kb.h dir
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s shell.c screen.c string.c kb.c dir.c stdio.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-ls.elf: ls.c screen.c screen.h string.c string.h dir.c dir.h
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s ls.c screen.c string.c dir.c
+ls.elf: ls.c stdio.c stdio.h string.c string.h dir.c dir.h screen.h screen.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s ls.c screen.c string.c dir.c stdio.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.elf: %.c crt0.s user.lds
