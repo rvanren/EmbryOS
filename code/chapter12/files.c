@@ -28,6 +28,7 @@ void files_init(void) {
                 &ramdisk_iface, 0, 1);
     flat_init(&flat_fs, &simple_iface, 1);
 
+    (void) flat_create(&flat_fs);       // empty root directory
     for (int i = 0; i < n_applications; i++) {
         int f = flat_create(&flat_fs);
         write_app(&flat_fs, f, app_table[i].gp,

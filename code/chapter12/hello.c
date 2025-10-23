@@ -34,6 +34,6 @@ int main(void) {
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     mtime_reset(QUANTUM);
-    sched_run(1, (struct rect){ 0, 0, 40, 12 });
+    sched_run(2, (struct rect){ 0, 0, 40, 12 });    // run init process
     sched_idle();
 }
