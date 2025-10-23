@@ -14,6 +14,7 @@ void main(void) {
     apps[0] = (struct app){ .name = "shell",  .file = 1 };
     apps[1] = (struct app){ .name = "pretty", .file = 2 };
     apps[2] = (struct app){ .name = "crash",  .file = 3 };
+    apps[2] = (struct app){ .name = "ls",     .file = 4 };
 
     // initialize windows
     screen_init(&screen);

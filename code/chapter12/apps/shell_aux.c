@@ -3,7 +3,7 @@
 #include "string.h"
 
 #define N_RECTS 4
-#define N_APPS  3
+#define N_APPS  4
 
 struct rect { const char *name; char x, y, w, h; };
 struct app { const char *name; int file; };

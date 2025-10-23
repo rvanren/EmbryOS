@@ -1,1 +1,1 @@
-APPS = shell pretty crash
+APPS = shell pretty crash ls
