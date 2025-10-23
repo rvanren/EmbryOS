@@ -1,6 +1,7 @@
 #include "syslib.h"
 #include "string.h"
 #include "dir.h"
+#include "stdio.h"
 
 #define N_RECTS 4
 
