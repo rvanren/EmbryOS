@@ -19,7 +19,7 @@ void syscall_handler(struct trap_frame *tf) {
         proc_exit();
         break;
     case SYS_SPAWN:
-        sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, tf->a5, tf->a6, exec_user);
+        sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, (void *) (uintptr_t) tf->a5, tf->a6, exec_user);
         break;
     case SYS_PUT:
         proc_put(self, tf->a0, tf->a1, tf->a2, tf->a3, tf->a4);
