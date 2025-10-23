@@ -46,7 +46,7 @@ void printf(struct screen *screen, const char *fmt, ...) {
             screen_putchar(screen, '%');
             break;
         default:
-            screen_putchar(screen, '%'); putchar(*fmt);
+            screen_putchar(screen, '%'); screen_putchar(screen, *fmt);
         }
     }
     va_end(ap);
@@ -59,5 +59,5 @@ void main(void) {
     screen_init(&screen);
     screen_sync(&screen);
 
-    printf("SIZE %d\n", user_size(1));
+    printf(&screen, "SIZE %d\n", user_size(1));
 }
