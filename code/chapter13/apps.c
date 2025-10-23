@@ -32,14 +32,20 @@ void exec_user(void) {
         proc_exit();
     }
 
+    // Initialize code/data page
     flat_read(&flat_fs, self->executable, sizeof(gp_offset), self->base, size);
     memset(&self->base[size], 0, PAGE_SIZE - size);
     memset(self->stack, 0, PAGE_SIZE);
 
+    // Initialized stack page
+    uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
+    sp -= self->size;
+    sp &= ~0xF;   // align down to 16 bytes
+    memcpy((void *) sp, self->args, self->size);
+
     pmp_config(self);
     pmp_load(self);
 
-    enter_user(self->base, (uintptr_t) (self->base + gp_offset),
-                            (uintptr_t) self->stack + PAGE_SIZE,
+    enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp,
                             (uintptr_t) self + PAGE_SIZE);
 }
