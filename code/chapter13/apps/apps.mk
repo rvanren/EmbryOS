@@ -1,1 +1,1 @@
-APPS = init shell pretty crash ls
+APPS = init shell pretty crash ls cat

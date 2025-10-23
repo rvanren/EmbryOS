@@ -29,6 +29,10 @@ ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c .
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s ls.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
+cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s cat.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
+
 %.elf: %.c crt0.s user.lds
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s $<
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
