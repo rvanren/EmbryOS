@@ -4,7 +4,6 @@
 #define SYS_SPAWN   1     // start a new process
 #define SYS_GET     2     // read a character from the keyboard
 #define SYS_PUT     3     // write a character to the screen
-
 #define SYS_CREATE  4     // create a new file
 #define SYS_READ    5     // read a file
 #define SYS_WRITE   6     // write a file

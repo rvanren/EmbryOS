@@ -11,7 +11,7 @@ void _crt_init(const char *argbuf, size_t arglen) {
     const char *p = argbuf;
     const char *end = argbuf + arglen;
 
-    while (p < end && *p != '\0' && argc < (int)(sizeof(argv)/sizeof(argv[0])) - 1) {
+    while (p < end && *p != '\0' && argc < (sizeof(argv)/sizeof(argv[0])) - 1) {
         argv[argc++] = (char *) p;
         p += strlen(p) + 1;
     }
