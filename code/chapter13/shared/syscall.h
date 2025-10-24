@@ -19,14 +19,14 @@ enum ansi_color { ANSI_BLACK, ANSI_RED, ANSI_GREEN, ANSI_YELLOW,
 
 typedef uint32_t cell_t;
 
-#define CELL_FOREGROUND      8  // foreground color
-#define CELL_BACKGROUND     16  // background color
-#define CELL_ATTRIBUTES     24  // not yet supported (blinking, bold, ...)
+#define CELL_FOREGROUND      8  // foreground color shift
+#define CELL_BACKGROUND     11  // background color shift
+#define CELL_ATTRIBUTES     14  // not yet supported (blinking, bold, ...)
 
 #define CELL(ch, fg, bg)     ((uint32_t) (((ch) & 0xFF) | \
-                    (((fg) & 0xFF) << CELL_FOREGROUND) | \
-                    (((bg) & 0xFF) << CELL_BACKGROUND)))
+                    (((fg) & 0x7) << CELL_FOREGROUND) | \
+                    (((bg) & 0x7) << CELL_BACKGROUND)))
 
 #define CELL_CH(c)          (c & 0xFF)
-#define CELL_FG(c)          (((c) >> CELL_FOREGROUND) & 0xFF)
-#define CELL_BG(c)          (((c) >> CELL_BACKGROUND) & 0xFF)
+#define CELL_FG(c)          (((c) >> CELL_FOREGROUND) & 0x7)
+#define CELL_BG(c)          (((c) >> CELL_BACKGROUND) & 0x7)
