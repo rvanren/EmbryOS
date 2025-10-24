@@ -42,7 +42,7 @@ void screen_clear(int x, int y, int w, int h, int color) {
     for (int r = y; r < y + h; r++) {
         screen_move(r, x);
         for (int c = 0; c < w; c++) {
-            screen_put(' ', 7, color);
+            screen_put(CELL(' ', ANSI_WHITE, color));
         }
     }
     screen_move(0, 0);
