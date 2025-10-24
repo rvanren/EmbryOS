@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "syscall.h"
 
 // Each process only gets to write in a particular rectangle of the screen
 struct rect {
@@ -28,10 +29,8 @@ struct pcb *proc_create(int file, struct rect area, void *args, int size);
 
 // Allows a process to write to its rectangle
 //  (row, col): position
-//  ch:         the character to write
-//  fg:         foreground color
-//  bg:         background color
-void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg);
+//  cell:       the character to write (incl. fg/bg color)
+void proc_put(struct pcb *pcb, int row, int col, cell_t cell);
 
 // Put process pcb on the circular queue pointed to by q.  It make pcb the
 // 'current' process on q, moving the current process to the next slot.
