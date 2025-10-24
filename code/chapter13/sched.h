@@ -3,8 +3,8 @@
 #include "process.h"
 
 // There are three priorities (0 being the highest):
-//  0: interactive processes, which are new processes or processes who just woke up
-//     from having been blocked on input
+//  0: interactive processes, which are new processes or processes who just
+//     woke up from having been blocked on input
 //  1: background processes, which are processes that have been pre-empted
 //  2: the "main" process that waits for interrupts in case everything else is idle
 #define N_PRIORITIES 3
