@@ -25,3 +25,6 @@ void window_scroll(struct window *window);
 
 // Put a character at the current position and move it up
 void window_putchar(struct window *window, char c);
+
+// Read a character
+char window_getchar(struct window *window);

@@ -49,3 +49,9 @@ void window_putchar(struct window *window, char c) {
         window->cur_col++;
     }
 }
+
+char window_getchar(struct window *window) {
+    char c = user_get();
+    if (c == '\r') c = '\n';
+    return c;
+}
