@@ -4,6 +4,10 @@
 
 struct block { char bytes[BLOCK_SIZE]; };
 
+// Block device interface.  Each block device has a device-specific
+// state and a set of interface functions.  Abstractly, each block
+// device offers 1 or more 'inodes', each of which is an array of
+// blocks.
 struct bd {
     void *state;     // depends on implementation of this interface
     int  (*alloc)(void*);                       // allocate an inode
