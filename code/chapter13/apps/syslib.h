@@ -19,7 +19,7 @@ static inline void user_spawn(int app, int row, char col, int wd, int ht, const 
     asm volatile("ecall" : : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a4), "r"(a5), "r"(a6), "r"(a7));
 }
 
-static inline void user_put(int row, int col, cell_t ceel) {
+static inline void user_put(int row, int col, cell_t cell) {
     register int a7 asm("a7") = SYS_PUT;
     register int a0 asm("a0") = row;
     register int a1 asm("a1") = col;
