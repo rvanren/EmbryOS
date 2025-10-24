@@ -1,5 +1,7 @@
 #pragma once
 
+#include "syscall.h"
+
 #define NROWS 11
 #define NCOLS 39
 

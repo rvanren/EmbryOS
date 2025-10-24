@@ -42,9 +42,10 @@ void window_putchar(struct window *window, char c) {
         window->cur_col = 0;
     }
     if (c != '\n') {
-        user_put(NROWS - 1, window->cur_col, c, window->cur_fg, window->cur_bg);
+        user_put(NROWS - 1, window->cur_col,
+                    CELL(c, window->cur_fg, window->cur_bg));
         window->cells[NROWS - 1][window->cur_col] =
-                            CELL(c, window->cur_fg, window->cur_bg);
+                    CELL(c, window->cur_fg, window->cur_bg);
         window->cur_col++;
     }
 }
