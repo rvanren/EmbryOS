@@ -7,10 +7,9 @@
 // a particular foreground and background color.  The window has a
 // current column (the current row is always the last one).  The window
 // also supports a current foreground and background color.
-struct cell { char c, fg, bg; };
 struct window {
-    struct cell cells[NROWS][NCOLS];
-    int cur_col, cur_fg, cur_bg;
+    cell_t cells[NROWS][NCOLS];
+    int cur_col /* column */, cur_fg, cur_bg;
 };
 
 // Initialize a window module
