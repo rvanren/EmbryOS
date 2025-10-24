@@ -17,7 +17,7 @@ enum {
 };
 
 static inline uintptr_t pmp_napot_addr(uintptr_t base) {
-  return (base | (PAGE_SIZE >> 1)) >> 2;
+  return (base | (PAGE_SIZE - 1)) >> 2;
 }
 
 // Set PMP registers (before each mret)
