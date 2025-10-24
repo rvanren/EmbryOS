@@ -11,7 +11,6 @@ __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
 
-
 void exec_user(void) {
     extern struct flat flat_fs;
     struct pcb *self = run_queue[proc_current]->next;

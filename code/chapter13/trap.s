@@ -111,13 +111,13 @@ _trap_handler:
     and    t0, t0, t1
     bnez   t0, 3f                   # if MPP != 0 -> kernel return
 
-    # --- returning to user ---
+    # returning to user
     lw     t2, 140(sp)              # tf->usp
     csrw   mscratch, t2
     addi   sp, sp, TRAP_FRAME_SIZE
     csrrw  sp, mscratch, sp         # swap user<->kernel stacks
     mret
 
-    3:  # --- returning to kernel ---
+    3:  # returning to kernel
     addi   sp, sp, TRAP_FRAME_SIZE
     mret
