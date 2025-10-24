@@ -19,7 +19,7 @@ void screen_move(int row, int col) {
 }
 
 void screen_put(cell_t cell) {
-    printf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(bg) % 8);
+    printf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
     putchar(CELL_CH(ch));
