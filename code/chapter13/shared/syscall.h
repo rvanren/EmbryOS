@@ -9,3 +9,19 @@
 #define SYS_WRITE   6     // write a file
 #define SYS_SIZE    7     // get the size of a file
 #define SYS_DELETE  8     // delete a file
+
+// The remaining stuff is for output
+
+typedef uint32_t cell_t;
+
+#define CELL_FOREGROUND      8
+#define CELL_BACKGROUND     16
+#define CELL_ATTRIBUTES     24  // not yet supported (blinking, bold, ...)
+
+#define CELL(ch, fg, bg)     ((uint32_t) (((ch) & 0xFF) | \
+                    (((fg) & 0xFF) << CELL_FOREGROUND) | \
+                    (((bg) & 0xFF) << CELL_BACKGROUND)))
+
+#define CELL_CH(c)          (c & 0xFF)
+#define CELL_FG(c)          (((c) >> CELL_FOREGROUND) & 0xFF)
+#define CELL_BG(c)          (((c) >> CELL_BACKGROUND) & 0xFF)
