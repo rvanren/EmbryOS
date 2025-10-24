@@ -53,5 +53,6 @@ void window_putchar(struct window *window, char c) {
 char window_getchar(struct window *window) {
     char c = user_get();
     if (c == '\r') c = '\n';
+    putchar(c);
     return c;
 }

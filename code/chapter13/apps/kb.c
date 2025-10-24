@@ -6,7 +6,6 @@ void kb_readline(char *line, int size) {
     int n = 0;
     for (;;) {
         char c = getchar();
-        putchar(c);
         if (c == '\n') {
             line[n] = 0;
             return;
