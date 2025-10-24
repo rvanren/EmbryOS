@@ -12,10 +12,13 @@
 
 // The remaining stuff is for output
 
+enum ansi_color { ANSI_BLACK, ANSI_RED, ANSI_GREEN, ANSI_YELLOW,
+                     ANSI_BLUE,ANSI_MAGENTA, ANSI_CYAN, ANSI_WHITE };
+
 typedef uint32_t cell_t;
 
-#define CELL_FOREGROUND      8
-#define CELL_BACKGROUND     16
+#define CELL_FOREGROUND      8  // foreground color
+#define CELL_BACKGROUND     16  // background color
 #define CELL_ATTRIBUTES     24  // not yet supported (blinking, bold, ...)
 
 #define CELL(ch, fg, bg)     ((uint32_t) (((ch) & 0xFF) | \

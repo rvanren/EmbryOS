@@ -5,6 +5,7 @@
 // in a certain foreground and background color.  There is a current position (aka cursor).
 
 #include "stdio.h"
+#include "syscall.h"
 
 #define SCREEN_ROWS 24
 #define SCREEN_COLS 80
@@ -13,7 +14,7 @@
 void screen_move(int row, int col);
 
 // Put a character at the current position and move up the position
-void screen_put(char ch, int fg, int bg);
+void screen_put(cell_t cell);
 
 // Clear the given rectangle with the given color.
 void screen_clear(int x, int y, int w, int h, int color);

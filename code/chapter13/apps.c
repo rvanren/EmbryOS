@@ -20,7 +20,7 @@ void exec_user(void) {
 
     uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
     if (size > PAGE_SIZE) {
-        proc_put(self, 0, 0, '>', 0, 1);
+        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
         printf("executable too large<");
         proc_exit();
     }
@@ -28,7 +28,7 @@ void exec_user(void) {
     self->base = frame_alloc();
     self->stack = frame_alloc();
     if (self->base == 0 || self->stack == 0) {
-        proc_put(self, 0, 0, '>', 0, 1);
+        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
         printf("out of memory<");
         proc_exit();
     }

@@ -28,11 +28,11 @@ struct pcb *proc_create(int executable, struct rect area, void *args, int size) 
     return pcb;
 }
 
-void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg) {
+void proc_put(struct pcb *pcb, int row, int col, cell_t cell) {
     if (row < 0 || row >= pcb->area.h) return;
     if (col < 0 || col >= pcb->area.w) return;
     screen_move(pcb->area.y + row, pcb->area.x + col);
-    screen_put(ch, fg, bg);
+    screen_put(cell);
 }
 
 void proc_enqueue(struct pcb **q, struct pcb *pcb) {

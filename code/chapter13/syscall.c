@@ -15,7 +15,7 @@ void syscall_handler(struct trap_frame *tf) {
 
     switch (tf->a7) {
     case SYS_EXIT:
-        proc_put(self, 0, 0, '>', 0, 1);
+        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
         printf("process ended<");
         proc_exit();
         break;
@@ -24,7 +24,7 @@ void syscall_handler(struct trap_frame *tf) {
         sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, (void *) (uintptr_t) tf->a5, tf->a6, exec_user);
         break;
     case SYS_PUT:
-        proc_put(self, tf->a0, tf->a1, tf->a2, tf->a3, tf->a4);
+        proc_put(self, tf->a0, tf->a1, tf->a2);
         break;
     case SYS_GET:
         tf->a0 = uart_get();
