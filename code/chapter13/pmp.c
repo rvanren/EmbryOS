@@ -20,17 +20,10 @@ static inline uintptr_t pmp_napot_addr(uintptr_t base) {
   return (base >> 2) | ((PAGE_SIZE >> 1) - 1);
 }
 
-void pmp_config(struct pcb *pcb) {
-    pcb->pmp.addr[0] = pmp_napot_addr((uintptr_t) pcb->base);
-    pcb->pmp.addr[1] = pmp_napot_addr((uintptr_t) pcb->stack);
-    pcb->pmp.cfg[0]  = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
-    pcb->pmp.cfg[1]  = PMP_A_NAPOT | PMP_R | PMP_W;
-}
-
 // Set PMP registers (before each mret)
 void pmp_load(struct pcb *pcb) {
-    write_csr(pmpaddr0, pcb->pmp.addr[0]);
-    write_csr(pmpaddr1, pcb->pmp.addr[1]);
-    write_csr(pmpcfg0, ((uintptr_t) pcb->pmp.cfg[0]) |
-                        ((uintptr_t) pcb->pmp.cfg[1] << 8));
+    write_csr(pmpaddr0, pmp_napot_addr((uintptr_t) pcb->base)); 
+    write_csr(pmpaddr1, pmp_napot_addr((uintptr_t) pcb->stack)); 
+    write_csr(pmpcfg0, ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)) |
+                        ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W) << 8));
 }

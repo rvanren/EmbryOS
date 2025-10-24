@@ -44,7 +44,7 @@ void exec_user(void) {
     sp &= ~0xF;   // align down to 16 bytes
     memcpy((void *) sp, self->args, self->size);
 
-    pmp_config(self);
+    // Load PMP registers
     pmp_load(self);
 
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,

@@ -8,11 +8,6 @@ struct rect {
     int w, h;   // width and height
 };
 
-struct pmp_state {
-    uintptr_t addr[2];   // pmpaddr0, pmpaddr1
-    uint8_t   cfg[2];    // cfg bytes for each
-};
-
 // Process Control Block: contains information for a particular process
 struct pcb {
     struct pcb *next;   // queue management
@@ -23,7 +18,6 @@ struct pcb {
     int size;           // size of arguments buffer
     void *sp;           // saved stack pointer
     char *base, *stack; // user space frames
-    struct pmp_state pmp;
 };
 
 // Initialize the process module.  Returns a PCB for the initial process.
