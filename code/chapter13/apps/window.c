@@ -5,7 +5,7 @@ void window_init(struct window *window) {
     window->cur_col = 0; window->cur_fg = 0; window->cur_bg = 7;
     for (int row = 0; row < NROWS; row++)
         for (int col = 0; col < NCOLS; col++)
-            window->cells[row][col] = CELL(' ', ANSI_BLACK, ANSI_WHITE) };
+            window->cells[row][col] = CELL(' ', ANSI_BLACK, ANSI_WHITE);
 }
 
 void window_sync(struct window *window) {
