@@ -22,11 +22,7 @@ void screen_put(cell_t cell) {
     printf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
-    putchar(CELL_CH(ch));
-
-    term_move(SCREEN_ROWS - 1, SCREEN_COLS - 1);
-    printf("\033[3%dm\033[4%dm", ANSI_WHITE, ANSI_BLACK);
-    putchar(' ');
+    printf("%c\033[D", CELL_CH(ch));
 
     cur_col++;
     if (cur_col >= SCREEN_COLS) {
