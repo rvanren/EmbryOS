@@ -42,7 +42,7 @@ void uart_isr(void) {
 }
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
-    screen_move(int row, int col);
+    screen_move(row, col);
     screen_put(cf);
     while (head == tail) {
         struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
