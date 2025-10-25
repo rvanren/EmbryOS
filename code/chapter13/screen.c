@@ -23,6 +23,11 @@ void screen_put(cell_t cell) {
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
     putchar(CELL_CH(ch));
+
+    term_move(SCREEN_ROWS - 1, SCREEN_COLS - 1);
+    printf("\033[3%dm\033[4%dm", ANSI_WHITE, ANSI_BLACK);
+    putchar(' ');
+
     cur_col++;
     if (cur_col >= SCREEN_COLS) {
         cur_col = 0;
