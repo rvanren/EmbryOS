@@ -40,7 +40,7 @@ void uart_isr(void) {
     }
 }
 
-int uart_get(struct process *c, int row, int col, cell_t cf, cell_t cu) {
+int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (head == tail) {
         struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
         pcb->next = uart_wait;
