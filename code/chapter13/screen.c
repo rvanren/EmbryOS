@@ -33,7 +33,7 @@ void screen_put(cell_t cell) {
 }
 
 void screen_clear(int x, int y, int w, int h, int color) {
-    printf("\033[?25l");
+    printf("\033[?25l");    // hide cursor (we simulate our own)
 
     if (x < 0) { w += x; x = 0; }
     if (y < 0) { h += y; y = 0; }
