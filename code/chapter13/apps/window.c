@@ -51,7 +51,9 @@ void window_putchar(struct window *window, char c) {
 }
 
 char window_getchar(struct window *window) {
-    char c = user_get();
+    char c = user_get(NROWS - 1, window->cur_col,
+                    CELL(' ',  FG_WHITE,  BG_CYAN),
+                    CELL('.',  FG_BLACK,  BG_DARKGRAY));
     if (c == '\r') c = '\n';
     window_putchar(window, c);
     return c;

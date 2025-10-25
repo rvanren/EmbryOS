@@ -27,10 +27,14 @@ static inline void user_put(int row, int col, cell_t cell) {
     asm volatile("ecall" : : "r"(a0), "r"(a1), "r"(a2), "r"(a7));
 }
 
-static inline int user_get(void) {
+static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
     register int a7 asm("a7") = SYS_GET;
     register int a0 asm("a0");
     asm volatile("ecall" : "=r"(a0) : "r"(a7));
+    register int a0 asm("a0") = row;
+    register int a1 asm("a1") = col;
+    register int a2 asm("a2") = cursor_f;
+    register int a3 asm("a3") = cursor_u;
     return a0;
 }
 
