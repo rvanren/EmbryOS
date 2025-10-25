@@ -2,8 +2,6 @@
 #include "uart.h"
 #include "sched.h"
 #include "platform.h"
-#include "process.h"
-#include "syscall.h"
 
 #define KBD_BUF_SIZE 64
 
