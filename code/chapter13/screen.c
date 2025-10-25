@@ -22,7 +22,7 @@ void screen_put(cell_t cell) {
     printf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
-    printf("%c\033[D", CELL_CH(ch));
+    putchar(CELL_CH(ch));
 
     cur_col++;
     if (cur_col >= SCREEN_COLS) {
@@ -33,6 +33,8 @@ void screen_put(cell_t cell) {
 }
 
 void screen_clear(int x, int y, int w, int h, int color) {
+    printf("\033[?25l");
+
     if (x < 0) { w += x; x = 0; }
     if (y < 0) { h += y; y = 0; }
     if (x + w > SCREEN_COLS) w = SCREEN_COLS - x;
