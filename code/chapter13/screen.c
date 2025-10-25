@@ -15,10 +15,10 @@ void screen_move(int row, int col) {
     if (col >= SCREEN_COLS) col = SCREEN_COLS - 1;
     cur_row = row;
     cur_col = col;
-    term_move(cur_row, cur_col);
 }
 
 void screen_put(cell_t cell) {
+    term_move(cur_row, cur_col);
     printf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
@@ -28,7 +28,6 @@ void screen_put(cell_t cell) {
         cur_col = 0;
         cur_row++;
         if (cur_row >= SCREEN_ROWS) cur_row = 0;
-        term_move(cur_row, cur_col);
     }
 }
 
