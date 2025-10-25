@@ -2,15 +2,17 @@
 
 #include <stdint.h>
 
-#define SYS_EXIT    0     // exit process
-#define SYS_SPAWN   1     // start a new process
-#define SYS_GET     2     // read a character from the keyboard
-#define SYS_PUT     3     // write a character to the screen
-#define SYS_CREATE  4     // create a new file
-#define SYS_READ    5     // read a file
-#define SYS_WRITE   6     // write a file
-#define SYS_SIZE    7     // get the size of a file
-#define SYS_DELETE  8     // delete a file
+enum syscall {
+    SYS_EXIT,       // exit process
+    SYS_SPAWN,      // start a new process
+    SYS_GET,        // read a character from the keyboard
+    SYS_PUT,        // write a character to the screen
+    SYS_CREATE,     // create a new file
+    SYS_READ,       // read a file
+    SYS_WRITE,      // write a file
+    SYS_SIZE,       // get the size of a file
+    SYS_DELETE      // delete a file
+};
 
 // The remaining stuff is for output
 
