@@ -27,7 +27,7 @@ void syscall_handler(struct trap_frame *tf) {
         proc_put(self, tf->a0, tf->a1, tf->a2);
         break;
     case SYS_GET:
-        tf->a0 = uart_get();
+        tf->a0 = uart_get(self, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
     case SYS_CREATE:
         tf->a0 = flat_create(&flat_fs);
