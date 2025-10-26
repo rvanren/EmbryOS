@@ -23,7 +23,7 @@ char ls_help[] = "List the file names and sizes";
 
 char snake_help[] =
     "Snake Game: use arrows to move snake around.\n"
-    "Type q to quit"
+    "Type q to quit";
 
 void main(int argc, char **argv) {
     if (argc == 1) printf("%s", help);
