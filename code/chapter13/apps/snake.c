@@ -18,11 +18,11 @@ static int moves = 0;
 // ----------------------------------------------------------------------
 
 static void draw_cell(int r, int c, char ch) {
-    user_put(r, c, CELL(ch, ANSI_GREEN, ANSI_YELLOW));
+    user_put(r, c, CELL(ch, ANSI_BLACK, ANSI_YELLOW)); // body
 }
 
 static void clear_cell(int r, int c) {
-    user_put(r, c, CELL(' ', ANSI_YELLOW, ANSI_YELLOW));
+    user_put(r, c, CELL(' ', ANSI_YELLOW, ANSI_YELLOW)); // background
 }
 
 static void clear_screen(void) {
@@ -57,7 +57,7 @@ static void init_snake(void) {
 }
 
 // ----------------------------------------------------------------------
-// Collision
+// Collision & movement
 // ----------------------------------------------------------------------
 
 static int hits_body(int r, int c, int grow) {
@@ -80,16 +80,11 @@ static int would_be_blocked(int dr, int dc, int grow) {
     return 0;
 }
 
-// ----------------------------------------------------------------------
-// Movement
-// ----------------------------------------------------------------------
-
 static void move_snake(int grow) {
     point_t old_head = get_at(len - 1);
     int new_r = old_head.r + dir_r;
     int new_c = old_head.c + dir_c;
 
-    // normal move
     if (!grow) {
         point_t old_tail = pos[tail];
         clear_cell(old_tail.r, old_tail.c);
@@ -101,7 +96,6 @@ static void move_snake(int grow) {
     int new_head_idx = (tail + len - 1) % MAXLEN;
     pos[new_head_idx] = (point_t){new_r, new_c};
 
-    // redraw old head as body
     draw_cell(old_head.r, old_head.c, 'o');
 }
 
@@ -118,17 +112,16 @@ int main(void) {
         point_t head = pos[idx_head()];
         int key = user_get(
             head.r, head.c,
-            CELL('@', ANSI_BLACK, ANSI_YELLOW), // focused
+            CELL('@', ANSI_WHITE, ANSI_YELLOW), // focused
             CELL('@', ANSI_BLUE,  ANSI_YELLOW)  // unfocused
         );
 
-        // Proposed direction
         int new_dr = dir_r, new_dc = dir_c;
         switch (key) {
-            case 'k': new_dr = -1; new_dc =  0; break; // up
-            case 'j': new_dr =  1; new_dc =  0; break; // down
-            case 'l': new_dr =  0; new_dc =  1; break; // right
-            case 'h': new_dr =  0; new_dc = -1; break; // left
+            case 'k': new_dr = -1; new_dc =  0; break;
+            case 'j': new_dr =  1; new_dc =  0; break;
+            case 'l': new_dr =  0; new_dc =  1; break;
+            case 'h': new_dr =  0; new_dc = -1; break;
             case 'q':
             case 'Q':
                 user_exit();
@@ -137,26 +130,23 @@ int main(void) {
                 break;
         }
 
-        // 1. Prevent reversal
+        // prevent reversing direction
         if (len > 1) {
             point_t neck = get_at(len - 2);
             int cur_dr = head.r - neck.r;
             int cur_dc = head.c - neck.c;
             if (new_dr == -cur_dr && new_dc == -cur_dc) {
-                // Invalid reverse — ignore, don’t move
                 moves++;
                 continue;
             }
         }
 
-        // 2. Prevent moving into wall or body
+        // prevent moving into wall or body
         if (would_be_blocked(new_dr, new_dc, grow)) {
-            // Invalid move — ignore, don’t move
             moves++;
             continue;
         }
 
-        // Commit new direction and move
         dir_r = new_dr;
         dir_c = new_dc;
         move_snake(grow);
