@@ -8,7 +8,7 @@ struct pcb *proc_init(struct rect area){
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
     struct pcb *pcb = frame_alloc();
-    memset(pcb, 0, sizeof(*pcb);
+    memset(pcb, 0, sizeof(*pcb));
     pcb->executable = -1;
     pcb->area = area;
     return pcb;
@@ -16,7 +16,7 @@ struct pcb *proc_init(struct rect area){
 
 struct pcb *proc_create(int executable, struct rect area, void *args, int size) {
     struct pcb *pcb = frame_alloc();
-    memset(pcb, 0, sizeof(*pcb);
+    memset(pcb, 0, sizeof(*pcb));
     pcb->executable = executable;
     pcb->area = area;
     pcb->args = args;
