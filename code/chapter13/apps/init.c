@@ -12,11 +12,7 @@ void main(void) {
 
     printf("Initializing directory...\n");
 
-
-# The list of applications to be compiled into the kernel image is here
-# Note that the kernel must know the order of these applications.
-APPS = init splash cat crash help life ls shell snake
-
+    // This should correspond to the order in apps.mk
     dir_create("init",   2);    // init must be 2
     dir_create("splash", 3);
     dir_create("cat",    4);
