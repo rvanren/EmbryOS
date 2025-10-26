@@ -20,6 +20,8 @@ void window_readline(struct window *window, char *line, int size) {
                 user_put(NROWS - 1, window->cur_col,    // erase cursor
                         CELL(' ', window->cur_fg, window->cur_bg));
                 window->cur_col--;
+                window->cells[NROWS - 1][window->cur_col] =
+                        CELL(' ', window->cur_fg, window->cur_bg));
                 user_put(NROWS - 1, window->cur_col,    // erase last char
                         CELL(' ', window->cur_fg, window->cur_bg));
                 n--;
