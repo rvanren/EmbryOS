@@ -5,6 +5,7 @@
 #include "sched.h"
 #include "ctx.h"
 #include "interrupt.h"
+#include "uart.h"
 
 static struct pcb *zombies = 0;   // list of PCBs pending free
 
