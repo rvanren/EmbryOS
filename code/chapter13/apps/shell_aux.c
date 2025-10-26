@@ -29,16 +29,17 @@ void exec(char *line) {
     if (strcmp(argv[0], "exit") == 0) user_exit();
     if (strcmp(argv[0], "quit") == 0) user_exit();
 
-    int r = 0;
+    int r = 0, i = 0;
     while (r < N_RECTS && strcmp(rects[r].name, argv[0]) != 0) r++;
-    if (r == N_RECTS) { r = default_rec; argv++; argc--; }
+    if (r == N_RECTS) { r = default_rec; i++; argc--; }
     else if (argc == 1) { default_rec = r; return; }
 
-    int f = dir_lookup(argv[0]);
+    int f = dir_lookup(argv[i]);
     if (f < 0) {
         printf("Unknown application\n");
         return;
     }
 
-    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, argv[0], ptr - argv[0]);
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h,
+                            argv[i], ptr - argv[i]);
 }
