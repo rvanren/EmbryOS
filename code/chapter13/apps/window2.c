@@ -28,7 +28,7 @@ void window_readline(struct window *window, char *line, int size) {
             }
         }
         else {
-            window_putchar(window, (32 <= c && c < 127) ? c : ' ');
+            window_putchar(window, (32 <= c && c < 127) ? c : '?');
             if (n < size - 1) line[n] = c;
             n++;
         }
