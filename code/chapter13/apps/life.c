@@ -3,7 +3,7 @@
 #define WIDTH   39
 #define HEIGHT  11
 #define ITERATION  200
-#define DELAY   30000   // adjust for animation speed
+#define DELAY   10000000   // adjust for animation speed
 
 int grid[HEIGHT][WIDTH];
 
@@ -70,7 +70,7 @@ int main(void) {
     for (int t = 0; t < ITERATION; t++) {
         drawGrid();
         updateGrid();
-        for (volatile int i = 0; i < DELAY * 100; i++) ;
+        for (volatile int i = 0; i < DELAY; i++) ;
     }
     return 0;
 }
