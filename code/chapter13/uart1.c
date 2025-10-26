@@ -23,7 +23,7 @@ void uart_tab(void) {
     }
 }
 
-static void uart_char(char c) {
+void uart_char(char c) {
     struct pcb *pcb = uart_focus;
     if (pcb->kbd_size >= KBD_BUF_SIZE) return;
     if (pcb->kbd_waiting) {
