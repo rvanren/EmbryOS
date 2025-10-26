@@ -19,13 +19,13 @@ enum syscall {
 enum ansi_color { ANSI_BLACK, ANSI_RED, ANSI_GREEN, ANSI_YELLOW,
                      ANSI_BLUE,ANSI_MAGENTA, ANSI_CYAN, ANSI_WHITE };
 
-typedef uint32_t cell_t;
+typedef uint16_t cell_t;
 
 #define CELL_FOREGROUND      8  // foreground color shift
 #define CELL_BACKGROUND     11  // background color shift
-#define CELL_ATTRIBUTES     14  // not yet supported (blinking, bold, ...)
+#define CELL_ATTRIBUTES     14  // 2 bits for attrs (blinking, bold?)
 
-#define CELL(ch, fg, bg)     ((uint32_t) (((ch) & 0xFF) | \
+#define CELL(ch, fg, bg)     ((cell_t) (((ch) & 0xFF) | \
                     (((fg) & 0x7) << CELL_FOREGROUND) | \
                     (((bg) & 0x7) << CELL_BACKGROUND)))
 
