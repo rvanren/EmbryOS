@@ -56,7 +56,7 @@ static void uart_char(char c) {
             }
             proc_enqueue(&run_queue[0], pcb);
         }
-        pcb->buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
+        pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
         pcb->kbd_size++;
     }
 }
@@ -71,7 +71,7 @@ void uart_isr(void) {
 }
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
-    while (pcb->kbd_size == 0) {
+    while (self->kbd_size == 0) {
         screen_move(row, col);
         screen_put(self == uart_focus ? cf : cu);
         self->cf = cf; self->cu = cu;
