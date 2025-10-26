@@ -13,7 +13,7 @@ void main(void) {
 
     for (;;) {
         printf("$ ");
-        kb_readline(line, sizeof(line));
+        readline(line, sizeof(line));
         exec(line);
     }
 }

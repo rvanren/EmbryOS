@@ -18,7 +18,7 @@ void putchar(char c) {
     window_putchar(&window, c);
 }
 
-char getchar(void) {
+void readline(char *line, int size) {
     init();
-    return window_getchar(&window);
+    window_readline(&window, line, size);
 }

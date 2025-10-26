@@ -1,3 +1,3 @@
 void putchar(char c);
-char getchar();
 void printf(const char *fmt, ...);
+void readline(char *line, int size);

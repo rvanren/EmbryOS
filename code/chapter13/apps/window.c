@@ -24,7 +24,7 @@ void window_scroll(struct window *window) {
 }
 
 void window_putchar(struct window *window, char c) {
-    if (c == '\b' || c == '\177') {
+    if (c == '\b') {
         if (window->cur_col > 0) {
             window->cur_col--;
             user_put(NROWS - 1, window->cur_col,
@@ -50,11 +50,29 @@ void window_putchar(struct window *window, char c) {
     }
 }
 
-char window_getchar(struct window *window) {
-    char c = user_get(NROWS - 1, window->cur_col,
+void window_readline(struct window *window, char *line, int size) {
+    int start_col = window->col;
+
+    int n = 0;
+    for (;;) {
+        char c = user_get(NROWS - 1, window->cur_col,
                     CELL(' ',  ANSI_WHITE,  ANSI_CYAN),
                     CELL('.',  ANSI_BLACK,  ANSI_MAGENTA));
-    if (c == '\r') c = '\n';
-    window_putchar(window, c);
-    return c;
+        if (c == '\r') c = '\n';
+        if (c == '\n') {
+            line[(n < size - 1) ? n : (size - 1)] = 0;
+            return;
+        }
+        window_putchar(window, (32 <= c && c < 127) ? c : ' ');
+        if (c == '\b' || c == '\177') {
+            if (n > 0) {
+                window->col--;
+                n--;
+            }
+        }
+        else {
+            if (n < size - 1) line[n] = c;
+            n++;
+        }
+    }
 }
