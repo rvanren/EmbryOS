@@ -3,9 +3,15 @@
 #include "dir.h"
 
 char README[] =
+//   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     "This is EmbryOS\n"
-    "Switch focus on windows using TAB\n"
-    "Type help in the shell for help";
+    "Type help in the shell for help\n"
+    "These are the current apps:\n"
+    "* cat [files] - output files\n"
+    "* life        - Game of Life\n"
+    "* ls          - directory listing\n"
+    "* shell       - command shell\n"
+    "* snake       - snake game\n";
 
 void main(void) {
     char line[128];
