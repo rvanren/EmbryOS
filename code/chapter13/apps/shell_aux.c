@@ -36,7 +36,7 @@ void exec(char *line) {
 
     int f = dir_lookup(argv[i]);
     if (f < 0) {
-        printf("Unknown application %d '%s'\n", i, argv[i]);
+        printf("Unknown application '%s'\n", argv[i]);
         return;
     }
 
