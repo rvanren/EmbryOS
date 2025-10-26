@@ -2,7 +2,6 @@
 #include "uart.h"
 #include "sched.h"
 #include "platform.h"
-#include "screen.h"
 
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 #define UART ((volatile struct uart *) UART_BASE)
@@ -25,16 +24,13 @@ void uart_tab(void) {
     if (uart_wait == 0) return;
     if (uart_focus == 0) {
         uart_focus = uart_wait;
-        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
-        screen_put(uart_focus->cf);
+        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cf);
     }
     else {
-        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
-        screen_put(uart_focus->cu);
+        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cu);
         if (uart_focus == uart_wait) uart_wait = uart_wait->next;
         uart_focus = uart_wait;
-        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
-        screen_put(uart_focus->cf);
+        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cf);
     }
 }
 
@@ -75,8 +71,7 @@ void uart_isr(void) {
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {
         if (uart_focus == 0) uart_focus = self;
-        screen_move(row, col);
-        screen_put(self == uart_focus ? cf : cu);
+        proc_put(self, row, col, self == uart_focus ? cf : cu);
         self->cf = cf; self->cu = cu;
         self->kbd_waiting = 1;
         self->kbd_row = row; self->kbd_col = col;
