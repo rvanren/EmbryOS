@@ -23,7 +23,6 @@ void uart_init(void) {
 
 void uart_tab(void) {
     if (uart_wait == 0) return;
-    uart_wait = uart_wait->next;
     if (uart_focus == 0) {
         uart_focus = uart_wait;
         screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
@@ -32,6 +31,7 @@ void uart_tab(void) {
     else {
         screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
         screen_put(uart_focus->cu);
+        if (uart_focus == uart_wait) uart_wait = uart_wait->next;
         uart_focus = uart_wait;
         screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
         screen_put(uart_focus->cf);
