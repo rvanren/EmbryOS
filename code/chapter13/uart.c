@@ -56,7 +56,7 @@ static void uart_char(char c) {
             }
             proc_enqueue(&run_queue[0], pcb);
         }
-        pcb->buf[(pcb->tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
+        pcb->buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
         pcb->kbd_size++;
     }
 }
@@ -84,9 +84,9 @@ int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
         sched_block(self);
     }
     // assert !self->kbd_waiting
-    char c = self->buf[self->tail];
-    self->tail = (self->tail + 1) % KBD_BUF_SIZE;
-    self->size--;
+    char c = self->kbd_buf[self->kbd_tail];
+    self->kbd_tail = (self->kbd_tail + 1) % KBD_BUF_SIZE;
+    self->kbd_size--;
     return c;
 }
 
