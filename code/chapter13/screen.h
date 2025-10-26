@@ -10,11 +10,8 @@
 #define SCREEN_ROWS 24
 #define SCREEN_COLS 80
 
-// Go to the given position.  (0, 0) is top left.
-void screen_move(int row, int col);
-
-// Put a character at the current position and move up the position
-void screen_put(cell_t cell);
+// Put a character at the given position
+void screen_put(int row, int col, cell_t cell);
 
 // Clear the given rectangle with the given cell.
 void screen_fill(int x, int y, int w, int h, cell_t cell);
