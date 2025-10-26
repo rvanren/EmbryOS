@@ -1,5 +1,4 @@
 #include "shell_aux.c"      // rest of program
-#include "kb.h"
 
 void main(void) {
     char line[128];
