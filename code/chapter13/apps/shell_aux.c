@@ -9,6 +9,7 @@ struct rect { const char *name; char x, y, w, h; };
 struct app { const char *name; int file; };
 
 struct rect rects[N_RECTS];     // list of windows
+int default_rec = 1;            // upper right
 
 // Execute the given command
 void exec(char *line) {
@@ -30,17 +31,14 @@ void exec(char *line) {
 
     int r = 0;
     while (r < N_RECTS && strcmp(rects[r].name, argv[0]) != 0) r++;
-    if (r == N_RECTS) {
-        printf("Usage: [ul|ur|ll|lr] command\n");
-        return;
-    }
+    if (r == N_RECTS) { r = default_rec; argv++; argc--; }
+    else if (argc == 1) { default_rec = r; return; }
 
-    if (argc == 1) { printf("Too few arguments\n"); return; }
-    int f = dir_lookup(argv[1]);
+    int f = dir_lookup(argv[0]);
     if (f < 0) {
         printf("Unknown application\n");
         return;
     }
 
-    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, argv[1], ptr - argv[1]);
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, argv[0], ptr - argv[0]);
 }

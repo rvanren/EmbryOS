@@ -4,7 +4,7 @@
 
 char README[] =
     "This is EmbryOS\n"
-    "You can switch focus between windows using TAB\n"
+    "Switch focus on windows using TAB\n"
     "Type help in the shell for help";
 
 void main(void) {
