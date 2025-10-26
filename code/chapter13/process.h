@@ -3,6 +3,8 @@
 #include <stdint.h>
 #include "syscall.h"
 
+#define KBD_BUF_SIZE 64
+
 // Each process only gets to write in a particular rectangle of the screen
 struct rect {
     int x, y;   // top-left corner on global screen
@@ -15,6 +17,10 @@ struct pcb {
     int priority;       // priority level
     int executable;     // file containing executable
     struct rect area;   // allowed screen region
+    cell_t cf, cu;      // focused cursor, unfocused cursor
+    char kbf_buf[KBD_BUF_SIZE];     // circular keyboard buffer
+    int kbd_tail, kbd_size;         // meta data for kbd buffer
+    int kbd_waiting;    // waiting for input
     void *args;         // arguments buffer
     int size;           // size of arguments buffer
     void *sp;           // saved stack pointer

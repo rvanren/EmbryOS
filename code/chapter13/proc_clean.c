@@ -20,6 +20,7 @@ void proc_reap_zombies(void) {
 
 void proc_exit(void) {
     struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
+    if (pcb->kbd_waiting) uart_exit(pcb);
     pcb->next = zombies;
     zombies = pcb;
     sched_block(pcb);

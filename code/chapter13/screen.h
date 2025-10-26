@@ -16,5 +16,5 @@ void screen_move(int row, int col);
 // Put a character at the current position and move up the position
 void screen_put(cell_t cell);
 
-// Clear the given rectangle with the given color.
-void screen_clear(int x, int y, int w, int h, int color);
+// Clear the given rectangle with the given cell.
+void screen_fill(int x, int y, int w, int h, cell_t cell);

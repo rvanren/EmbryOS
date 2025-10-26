@@ -32,7 +32,7 @@ void screen_put(cell_t cell) {
     }
 }
 
-void screen_clear(int x, int y, int w, int h, int color) {
+void screen_fill(int x, int y, int w, int h, cell_t cell) {
     printf("\033[?25l");    // hide cursor (we simulate our own)
 
     if (x < 0) { w += x; x = 0; }
@@ -44,7 +44,7 @@ void screen_clear(int x, int y, int w, int h, int color) {
     for (int r = y; r < y + h; r++) {
         screen_move(r, x);
         for (int c = 0; c < w; c++) {
-            screen_put(CELL(' ', ANSI_WHITE, color));
+            screen_put(cell);
         }
     }
     screen_move(0, 0);
