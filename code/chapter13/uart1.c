@@ -11,11 +11,12 @@ static void uart_put(struct pcb *pcb, cell_t c) {
 }
 
 void uart_tab(void) {
-    if (uart_wait == 0) return;
-    if (uart_focus == 0) {
+    if (uart_wait == 0) { if (uart_focus == 0) putchar(7); }
+    else if (uart_focus == 0) {
         uart_focus = uart_wait;
         uart_put(uart_focus, uart_focus->cf);
-    } else {
+    }
+    else {
         uart_put(uart_focus, uart_focus->cu);
         if (uart_focus == uart_wait) uart_wait = uart_wait->next;
         uart_focus = uart_wait;
