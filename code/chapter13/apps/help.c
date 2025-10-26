@@ -1,5 +1,6 @@
 #include "syslib.h"
 #include "stdio.h"
+#include "string.h"
 
 char help[] =
 //   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
