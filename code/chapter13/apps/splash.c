@@ -1,10 +1,10 @@
 #include "syslib.h"
 
-#define WIDTH  39
-#define HEIGHT 11
+#define WIDTH   39
+#define HEIGHT  11
 
 static void delay(void) {
-    for (volatile int i = 0; i < 200000; i++);
+    for (volatile int i = 0; i < 100000; i++); // tune as needed
 }
 
 static void clear(void) {
@@ -13,46 +13,48 @@ static void clear(void) {
             user_put(r, c, CELL(' ', ANSI_WHITE, ANSI_BLACK));
 }
 
-static void draw_centered(const char *s, int row) {
-    int len = 0;
-    while (s[len]) len++;
+static void put_centered(const char *s, int row) {
+    int len = 0; while (s[len]) len++;
+    if (row < 0 || row >= HEIGHT) return;
     int start = (WIDTH - len) / 2;
-    for (int i = 0; i < len; i++)
+    if (start < 0) start = 0;
+    for (int i = 0; i < len && start + i < WIDTH; i++)
         user_put(row, start + i, CELL(s[i], ANSI_WHITE, ANSI_BLACK));
 }
 
-void main(void) {
-    const char *title = "EmbryOS";
-    const char *wave[4] = {
-        ".........................",
-        "..........ooo............",
-        ".......OOO***OOO.........",
-        "..........ooo............"
-    };
-
+int main(void) {
     clear();
 
-    // Animate wave background
-    for (int phase = 0; phase < 8; phase++) {
-        for (int r = 0; r < HEIGHT; r++) {
-            const char *pattern = wave[(r + phase) % 4];
-            int len = 0; while (pattern[len]) len++;
-            int start = (WIDTH - len) / 2;
-            for (int i = 0; i < len; i++)
-                user_put(r, start + i, CELL(pattern[i], ANSI_WHITE, ANSI_BLACK));
-        }
+    const char *title = "EmbryOS";
+    int cx = WIDTH / 2;
+    int cy = HEIGHT / 2;
 
-        // Grow the title one letter at a time
-        for (int i = 0; i < 7; i++) {
-            draw_centered(title, HEIGHT / 2);
-            delay();
-        }
-
-        delay();
+    // expanding / contracting rings
+    for (int phase = 0; phase < 12; phase++) {
         clear();
+
+        int radius = (phase <= 6) ? phase : 12 - phase;
+
+        for (int r = 0; r < HEIGHT; r++) {
+            for (int c = 0; c < WIDTH; c++) {
+                int dr = r - cy;
+                int dc = c - cx;
+                int dist = dr*dr + dc*dc;
+                // crude ring: show '.' near the chosen radius^2
+                if (dist >= (radius*radius - 2) && dist <= (radius*radius + 2))
+                    user_put(r, c, CELL('.', ANSI_WHITE, ANSI_BLACK));
+            }
+        }
+
+        // draw the logo in the middle
+        put_centered(title, cy);
+        delay();
     }
 
-    // Final static logo
-    draw_centered("EmbryOS", HEIGHT / 2);
-    draw_centered("ready.", HEIGHT / 2 + 2);
+    // final stable screen
+    clear();
+    put_centered("EmbryOS", HEIGHT / 2);
+    put_centered("ready.", HEIGHT / 2 + 2);
+
+    for (;;); // keep displayed
 }
