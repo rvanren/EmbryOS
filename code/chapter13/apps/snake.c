@@ -112,8 +112,8 @@ int main(void) {
         point_t head = pos[idx_head()];
         int key = user_get(
             head.r, head.c,
-            CELL('@', ANSI_WHITE, ANSI_YELLOW), // focused
-            CELL('@', ANSI_BLUE,  ANSI_YELLOW)  // unfocused
+            CELL('@', ANSI_BLUE,  ANSI_YELLOW), // focused
+            CELL('X', ANSI_BLACK, ANSI_YELLOW)  // unfocused
         );
 
         int new_dr = dir_r, new_dc = dir_c;
