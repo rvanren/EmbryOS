@@ -17,20 +17,20 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 # build both .elf and .o so that top-level can nm the .elf
 all: $(APP_ELFS) $(APP_OBJS)
 
-init.elf: init.c window.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+init.elf: init.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-shell.elf: shell.c shell_aux.c window.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c shell.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+shell.elf: shell.c shell_aux.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c shell.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ls.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window1.c window2.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ls.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c cat.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window1.c window2.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c cat.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.elf: %.c crt0.s crt1.c user.lds ../shared/string.h ../shared/string.c
