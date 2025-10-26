@@ -18,11 +18,11 @@ static int moves = 0;
 // ----------------------------------------------------------------------
 
 static void draw_cell(int r, int c, char ch) {
-    user_put(r, c, CELL(ch, ANSI_BLACK, ANSI_YELLOW)); // body
+    user_put(r, c, CELL(ch, ANSI_BLACK, ANSI_YELLOW));
 }
 
 static void clear_cell(int r, int c) {
-    user_put(r, c, CELL(' ', ANSI_YELLOW, ANSI_YELLOW)); // background
+    user_put(r, c, CELL(' ', ANSI_YELLOW, ANSI_YELLOW));
 }
 
 static void clear_screen(void) {
@@ -57,7 +57,7 @@ static void init_snake(void) {
 }
 
 // ----------------------------------------------------------------------
-// Collision & movement
+// Collision / movement checks
 // ----------------------------------------------------------------------
 
 static int hits_body(int r, int c, int grow) {
@@ -106,6 +106,8 @@ static void move_snake(int grow) {
 int main(void) {
     init_snake();
 
+    int esc_state = 0;  // track arrow key sequences
+
     while (1) {
         int grow = ((moves + 1) % GROW_INTERVAL == 0);
 
@@ -117,6 +119,34 @@ int main(void) {
         );
 
         int new_dr = dir_r, new_dc = dir_c;
+
+        // ------------------------------------------------------------
+        // Arrow key state machine
+        // ------------------------------------------------------------
+        if (esc_state == 1) {
+            if (key == '[') {
+                esc_state = 2;  // expect A/B/C/D next
+                moves++; 
+                continue;
+            }
+            esc_state = 0;
+        } else if (esc_state == 2) {
+            switch (key) {
+                case 'A': new_dr = -1; new_dc =  0; break; // up
+                case 'B': new_dr =  1; new_dc =  0; break; // down
+                case 'C': new_dr =  0; new_dc =  1; break; // right
+                case 'D': new_dr =  0; new_dc = -1; break; // left
+                default:  break;
+            }
+            esc_state = 0;
+        } else if (key == 27) {  // ESC starts arrow sequence
+            esc_state = 1;
+            moves++;
+            continue;
+        }
+        // ------------------------------------------------------------
+        // vi-style keys
+        // ------------------------------------------------------------
         switch (key) {
             case 'k': new_dr = -1; new_dc =  0; break;
             case 'j': new_dr =  1; new_dc =  0; break;
@@ -137,14 +167,14 @@ int main(void) {
             int cur_dc = head.c - neck.c;
             if (new_dr == -cur_dr && new_dc == -cur_dc) {
                 moves++;
-                continue;
+                continue; // ignore reverse
             }
         }
 
-        // prevent moving into wall or body
+        // prevent illegal moves (into wall/body)
         if (would_be_blocked(new_dr, new_dc, grow)) {
             moves++;
-            continue;
+            continue; // ignore blocked move
         }
 
         dir_r = new_dr;
