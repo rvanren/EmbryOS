@@ -53,6 +53,7 @@ int main(void) {
 
     // final stable screen
     clear();
-    put_centered("EmbryOS", HEIGHT / 2);
-    put_centered("Life Has Begun", HEIGHT / 2 + 2);
+    put_centered("EmbryOS", HEIGHT / 2 - 1);
+    put_centered("Life Has Begun", HEIGHT / 2 + 1);
+    put_centered("type 'help' for help", HEIGHT / 2 + 2);
 }
