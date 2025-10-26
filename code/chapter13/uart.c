@@ -24,13 +24,13 @@ void uart_tab(void) {
     if (uart_wait == 0) return;
     if (uart_focus == 0) {
         uart_focus = uart_wait;
-        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cf);
+        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cf);
     }
     else {
-        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cu);
+        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cu);
         if (uart_focus == uart_wait) uart_wait = uart_wait->next;
         uart_focus = uart_wait;
-        proc_put(self, self->kbd_row, self->kbd_col, uart_focus->cf);
+        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cf);
     }
 }
 
