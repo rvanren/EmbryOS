@@ -15,7 +15,6 @@ static int moves = 0;
 static void draw_cell(int r, int c, char ch) {
     user_put(r, c, CELL(ch, ANSI_GREEN, ANSI_BLACK));
 }
-
 static void clear_cell(int r, int c) {
     user_put(r, c, CELL(' ', ANSI_BLACK, ANSI_BLACK));
 }
@@ -36,7 +35,7 @@ static int hits_body(int r, int c) {
     return 0;
 }
 
-static void move_snake(void) {
+static void move_snake(int grow) {
     point_t old_head = snake[length - 1];
     int new_r = old_head.r + dir_r;
     int new_c = old_head.c + dir_c;
@@ -46,31 +45,30 @@ static void move_snake(void) {
     if (hits_body(new_r, new_c))
         return;
 
-    int grow = (moves % GROW_INTERVAL == GROW_INTERVAL - 1 && length < MAXLEN);
-
-    if (grow) {
-        // shift right, duplicate tail
+    if (grow && length < MAXLEN) {
+        // shift right to make room for new head
         for (int i = length; i > 0; i--)
             snake[i] = snake[i - 1];
         length++;
     } else {
-        // remember tail before shifting
+        // normal move: remember tail, shift left, then erase it
         point_t old_tail = snake[0];
         for (int i = 0; i < length - 1; i++)
             snake[i] = snake[i + 1];
-        clear_cell(old_tail.r, old_tail.c);   // erase the old tail *after* shifting
+        clear_cell(old_tail.r, old_tail.c);
     }
 
     snake[length - 1] = (point_t){new_r, new_c};
-
-    // redraw old head as body
-    draw_cell(old_head.r, old_head.c, 'o');
+    draw_cell(old_head.r, old_head.c, 'o'); // old head becomes body
 }
 
 int main(void) {
     init_snake();
 
     while (1) {
+        // decide if this move should cause growth *before* moving*
+        int grow = ((moves + 1) % GROW_INTERVAL == 0);
+
         int key = user_get(
             snake[length - 1].r,
             snake[length - 1].c,
@@ -88,11 +86,8 @@ int main(void) {
             case 'Q':
                 user_exit();
                 return 0;
-            default:
-                break;
         }
 
-        // prevent 180-degree turns
         if (length > 1) {
             point_t head = snake[length - 1];
             point_t neck = snake[length - 2];
@@ -107,7 +102,7 @@ int main(void) {
         dir_r = new_dr;
         dir_c = new_dc;
 
-        move_snake();
+        move_snake(grow);
         moves++;
     }
 }
