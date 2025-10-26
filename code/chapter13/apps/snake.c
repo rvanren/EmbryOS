@@ -7,9 +7,10 @@
 
 typedef struct { int r, c; } point_t;
 
-static point_t snake[MAXLEN];
-static int length = 3;
-static int dir_r = 0, dir_c = 1;
+static point_t pos[MAXLEN];  // ring buffer of segments (tail..head)
+static int tail = 0;         // index of current tail in pos[]
+static int len  = 3;         // number of segments
+static int dir_r = 0, dir_c = 1; // moving right
 static int moves = 0;
 
 static void draw_cell(int r, int c, char ch) {
@@ -19,78 +20,97 @@ static void clear_cell(int r, int c) {
     user_put(r, c, CELL(' ', ANSI_BLACK, ANSI_BLACK));
 }
 
-static void init_snake(void) {
-    int mid = HEIGHT / 2;
-    snake[0] = (point_t){mid, 0};
-    snake[1] = (point_t){mid, 1};
-    snake[2] = (point_t){mid, 2};
-    for (int i = 0; i < length - 1; i++)
-        draw_cell(snake[i].r, snake[i].c, 'o');
+static int idx_head(void) {
+    return (tail + len - 1) % MAXLEN;
+}
+static point_t get_at(int i) {
+    return pos[(tail + i) % MAXLEN];
 }
 
-static int hits_body(int r, int c) {
-    for (int i = 0; i < length; i++)
-        if (snake[i].r == r && snake[i].c == c)
-            return 1;
+static void init_snake(void) {
+    int mid = HEIGHT / 2;
+    pos[0] = (point_t){mid, 0};
+    pos[1] = (point_t){mid, 1};
+    pos[2] = (point_t){mid, 2};
+    tail = 0; len = 3;
+    // draw initial body (head is drawn by user_get)
+    draw_cell(pos[0].r, pos[0].c, 'o');
+    draw_cell(pos[1].r, pos[1].c, 'o');
+}
+
+// Return 1 if (r,c) collides with body.
+// If !grow, stepping onto the current tail is allowed (it will move away).
+static int hits_body(int r, int c, int grow) {
+    for (int i = 0; i < len; i++) {
+        if (!grow && i == 0) continue; // allow stepping into tail if not growing
+        point_t p = get_at(i);
+        if (p.r == r && p.c == c) return 1;
+    }
     return 0;
 }
 
 static void move_snake(int grow) {
-    point_t old_head = snake[length - 1];
+    int h = idx_head();
+    point_t old_head = pos[h];
     int new_r = old_head.r + dir_r;
     int new_c = old_head.c + dir_c;
 
+    // bounds
     if (new_r < 0 || new_r >= HEIGHT || new_c < 0 || new_c >= WIDTH)
         return;
-    if (hits_body(new_r, new_c))
+
+    // collision (with tail exception on non-grow)
+    if (hits_body(new_r, new_c, grow))
         return;
 
-    if (grow && length < MAXLEN) {
-        // shift right to make room for new head
-        for (int i = length; i > 0; i--)
-            snake[i] = snake[i - 1];
-        length++;
-    } else {
-        // normal move: remember tail, shift left, then erase it
-        point_t old_tail = snake[0];
-        for (int i = 0; i < length - 1; i++)
-            snake[i] = snake[i + 1];
+    // normal move: pop/clear tail
+    if (!grow) {
+        point_t old_tail = pos[tail];
         clear_cell(old_tail.r, old_tail.c);
+        tail = (tail + 1) % MAXLEN;
+    } else if (len < MAXLEN) {
+        len++; // extend snake: we do not remove the tail this step
     }
 
-    snake[length - 1] = (point_t){new_r, new_c};
-    draw_cell(old_head.r, old_head.c, 'o'); // old head becomes body
+    // write new head
+    int new_head_idx = (tail + len - 1) % MAXLEN;
+    pos[new_head_idx] = (point_t){new_r, new_c};
+
+    // redraw previous head as body segment
+    draw_cell(old_head.r, old_head.c, 'o');
 }
 
 int main(void) {
     init_snake();
 
     while (1) {
-        // decide if this move should cause growth *before* moving*
+        // decide growth BEFORE moving: every third move
         int grow = ((moves + 1) % GROW_INTERVAL == 0);
 
+        // draw focus-aware head and block for input
+        point_t head = pos[idx_head()];
         int key = user_get(
-            snake[length - 1].r,
-            snake[length - 1].c,
-            CELL('@', ANSI_YELLOW, ANSI_BLACK),
-            CELL('@', ANSI_BLUE,   ANSI_BLACK)
+            head.r, head.c,
+            CELL('@', ANSI_YELLOW, ANSI_BLACK), // focused
+            CELL('@', ANSI_BLUE,   ANSI_BLACK)  // unfocused
         );
 
         int new_dr = dir_r, new_dc = dir_c;
         switch (key) {
-            case 'k': new_dr = -1; new_dc =  0; break;
-            case 'j': new_dr =  1; new_dc =  0; break;
-            case 'l': new_dr =  0; new_dc =  1; break;
-            case 'h': new_dr =  0; new_dc = -1; break;
+            case 'k': new_dr = -1; new_dc =  0; break; // up
+            case 'j': new_dr =  1; new_dc =  0; break; // down
+            case 'l': new_dr =  0; new_dc =  1; break; // right
+            case 'h': new_dr =  0; new_dc = -1; break; // left
             case 'q':
             case 'Q':
                 user_exit();
                 return 0;
+            default: break;
         }
 
-        if (length > 1) {
-            point_t head = snake[length - 1];
-            point_t neck = snake[length - 2];
+        // prevent direct reversal (compare to neck vector)
+        if (len > 1) {
+            point_t neck = get_at(len - 2);
             int cur_dr = head.r - neck.r;
             int cur_dc = head.c - neck.c;
             if (new_dr == -cur_dr && new_dc == -cur_dc) {
