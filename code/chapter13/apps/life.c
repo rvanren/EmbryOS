@@ -5,7 +5,7 @@
 #define ITERATION  200
 #define DELAY   30000   // adjust for animation speed
 
-#define DEAD_COLOR   ANSI_BLACK
+#define DEAD_COLOR   ANSI_GREEN
 #define ALIVE_COLOR  ANSI_YELLOW
 
 int grid[HEIGHT][WIDTH];
@@ -56,7 +56,7 @@ static void drawGrid(void) {
     for (int r = 0; r < HEIGHT; r++) {
         for (int c = 0; c < WIDTH; c++) {
             if (grid[r][c])
-                user_put(r, c, CELL('#', ALIVE_COLOR, ANSI_BLACK));
+                user_put(r, c, CELL(' ', ALIVE_COLOR, ANSI_BLACK));
             else
                 user_put(r, c, CELL(' ', DEAD_COLOR, ANSI_BLACK));
         }
