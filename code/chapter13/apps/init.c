@@ -9,7 +9,7 @@ void main(void) {
 
     dir_create("init", 2);
     dir_create("shell", 3);
-    dir_create("pretty", 4);
+    dir_create("life", 4);
     dir_create("crash", 5);
     dir_create("ls", 6);
     dir_create("cat", 7);
