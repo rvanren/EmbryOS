@@ -26,6 +26,7 @@ void uart_isr(void) {
         if (val & FULL) break;
         if ((val & 0xFF) == '\t') uart_tab();
         else if (uart_focus != 0) uart_char(val & 0xFF);
+        else putchar(7);    // beep
     }
 }
 

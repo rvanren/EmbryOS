@@ -25,7 +25,7 @@ void uart_tab(void) {
 
 void uart_char(char c) {
     struct pcb *pcb = uart_focus;
-    if (pcb->kbd_size >= KBD_BUF_SIZE) return;
+    if (pcb->kbd_size >= KBD_BUF_SIZE) { putchar(7 /* beep */); return; }
     if (pcb->kbd_waiting) {
         pcb->kbd_waiting = 0;
         if (pcb == pcb->next) uart_wait = 0;
