@@ -51,7 +51,7 @@ void window_putchar(struct window *window, char c) {
 }
 
 void window_readline(struct window *window, char *line, int size) {
-    int start_col = window->col;
+    int start_col = window->cur_col;
 
     int n = 0;
     for (;;) {
@@ -66,7 +66,7 @@ void window_readline(struct window *window, char *line, int size) {
         window_putchar(window, (32 <= c && c < 127) ? c : ' ');
         if (c == '\b' || c == '\177') {
             if (n > 0) {
-                window->col--;
+                window->cur_col--;
                 n--;
             }
         }
