@@ -18,18 +18,20 @@ char cat_help[] =
     "Usage: cat file1 file2 ...\n"
     "Outputs the contents in the files.";
 
+char help_help[] = "Usage: help [cmd]\n";
+
 char life_help[] = "Game of Life demo";
 
 char ls_help[] = "List file names and sizes";
 
 char snake_help[] =
     "Snake Game: use arrows to move snake.\n"
-    "Type q to quit";
+    "Type q to quit.";
 
 void main(int argc, char **argv) {
     if (argc == 1) printf("%s", help);
     else if (strcmp(argv[1], "cat") == 0) printf("%s", cat_help);
-    else if (strcmp(argv[1], "help") == 0) printf("%s", help);
+    else if (strcmp(argv[1], "help") == 0) printf("%s", help_help);
     else if (strcmp(argv[1], "life") == 0) printf("%s", life_help);
     else if (strcmp(argv[1], "ls") == 0) printf("%s", ls_help);
     else if (strcmp(argv[1], "shell") == 0) printf("%s", help);
