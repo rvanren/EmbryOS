@@ -13,19 +13,20 @@ struct rect {
 
 // Process Control Block: contains information for a particular process
 struct pcb {
-    struct pcb *next;   // queue management
-    int priority;       // priority level
-    int executable;     // file containing executable
-    struct rect area;   // allowed screen region
-    cell_t cf, cu;      // focused cursor, unfocused cursor
+    struct pcb *next;    // queue management
+    int priority;        // priority level
+    int executable;      // file containing executable
+    struct rect area;    // allowed screen region
+    cell_t cf, cu;       // focused cursor, unfocused cursor
     char kbd_buf[KBD_BUF_SIZE];     // circular keyboard buffer
     int kbd_tail, kbd_size;         // meta data for kbd buffer
     int kbd_row, kbd_col;           // cursor position
-    int kbd_waiting;    // waiting for input
-    void *args;         // arguments buffer
-    int size;           // size of arguments buffer
-    void *sp;           // saved stack pointer
-    char *base, *stack; // user space frames
+    int kbd_waiting : 1; // waiting for input
+    int kbd_warm : 1:    // first get() gets focus
+    void *args;          // arguments buffer
+    int size;            // size of arguments buffer
+    void *sp;            // saved stack pointer
+    char *base, *stack;  // user space frames
 };
 
 // Initialize the process module.  Returns a PCB for the initial process.
