@@ -21,7 +21,7 @@ init.elf: init.c window.c window.h ../shared/string.c ../shared/string.h dir.c d
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
-shell.elf: shell.c shell_aux.c window.c window.h ../shared/string.c ../shared/string.h kb.c kb.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
+shell.elf: shell.c shell_aux.c window.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c shell.c window.c ../shared/string.c kb.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 

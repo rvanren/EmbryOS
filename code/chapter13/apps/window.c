@@ -61,6 +61,7 @@ void window_readline(struct window *window, char *line, int size) {
         if (c == '\r') c = '\n';
         if (c == '\n') {
             line[(n < size - 1) ? n : (size - 1)] = 0;
+            window_putchar(window, '\n');
             return;
         }
         window_putchar(window, (32 <= c && c < 127) ? c : ' ');
