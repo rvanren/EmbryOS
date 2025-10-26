@@ -39,6 +39,7 @@ void uart_tab(void) {
 }
 
 static void uart_char(char c) {
+    // assert uart_focus != 0
     struct pcb *pcb = uart_focus;
 
     if (pcb->kbd_size < KBD_BUF_SIZE) {
@@ -53,6 +54,7 @@ static void uart_char(char c) {
                 struct pcb *prev = uart_wait;
                 while (prev->next != pcb) prev = prev->next;
                 prev->next = pcb->next;
+                if (uart_wait == pcb) uart_wait = prev;
             }
             proc_enqueue(&run_queue[0], pcb);
         }
