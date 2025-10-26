@@ -20,7 +20,7 @@ void uart_init(void) {
     UART->ie = (1 << 1);  // enable RX interrupt (bit 1)
 }
 
-static void uart_put(struct process *pcb, cell_t c) {
+static void uart_put(struct pcb *pcb, cell_t c) {
     proc_put(pcb, pcb->kbd_row, pcb->kbd_col, c);
 }
 
