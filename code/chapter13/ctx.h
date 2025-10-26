@@ -5,5 +5,5 @@
 extern void ctx_switch(void **old_sp, void *new_sp);
 
 // Like ctx_switch, but the new stack does not contain any saved
-// registers.  Instead, it calls the function entry().
-extern void ctx_start(void **save_sp, void *new_sp, void (*entry)(void));
+// registers.  Instead, it calls the function exec_user().
+extern void ctx_start(void **save_sp, void *new_sp);

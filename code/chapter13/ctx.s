@@ -21,8 +21,8 @@ ctx_switch:
     sw s10,44(sp)
     sw s11,48(sp)
     sw ra, 52(sp)
-    sw sp, 0(a0)
-    mv sp, a1
+    sw sp, 0(a0)          # *save_sp = current sp
+    mv sp, a1             # switch to new stack
     lw s0, 4(sp)
     lw s1, 8(sp)
     lw s2, 12(sp)
@@ -39,11 +39,11 @@ ctx_switch:
     addi sp, sp, 64
     ret
 
-# void ctx_start(void **save_sp, void *new_sp, void (*entry)(void))
+# void ctx_start(void **save_sp, void *new_sp)
 # ------------------------------------------------------------
 # Saves current stack pointer, switches to new stack, and calls
-# the entry function.
-# old_sp = a0; new_sp = a1; entry = a2
+# exec_user()
+# old_sp = a0; new_sp = a1
 ctx_start:
     addi sp, sp, -64
     sw s0, 4(sp)
@@ -59,6 +59,8 @@ ctx_start:
     sw s10, 44(sp)
     sw s11, 48(sp)
     sw ra, 52(sp)
-    sw sp, 0(a0)
-    mv sp, a1
-    jalr a2
+    sw sp, 0(a0)          # *save_sp = current sp
+    mv sp, a1             # switch to new stack
+    la a0, exec_user      # load address of exec_user into a0
+    jalr a0               # call exec_user()
+

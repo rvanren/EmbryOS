@@ -7,3 +7,5 @@
 
 #define PLIC_BASE       0x0C000000UL
 #define CLINT_BASE      0x02000000UL
+
+// #define NO_PMP       // define if no PMP
