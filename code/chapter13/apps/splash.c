@@ -4,7 +4,7 @@
 #define HEIGHT  11
 
 static void delay(void) {
-    for (volatile int i = 0; i < 100000; i++); // tune as needed
+    for (volatile int i = 0; i < 100000000; i++); // tune as needed
 }
 
 static void clear(void) {

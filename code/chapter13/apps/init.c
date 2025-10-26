@@ -20,6 +20,6 @@ void main(void) {
     char contents[] = "This is EmbryOS\n";
     user_write(readme, 0, contents, sizeof(contents) - 1);
     dir_create("README", readme);
-    user_spawn(dir_lookup("shell"),  0,  0, 40, 12, 0, 0);
-    user_spawn(dir_lookup("splash"), 0, 40, 40, 12, 0, 0);
+    user_spawn(dir_lookup("shell"),   0, 0, 40, 12, 0, 0);
+    user_spawn(dir_lookup("splash"), 40, 0, 40, 12, 0, 0);
 }
