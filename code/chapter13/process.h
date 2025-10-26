@@ -22,7 +22,7 @@ struct pcb {
     int kbd_tail, kbd_size;         // meta data for kbd buffer
     int kbd_row, kbd_col;           // cursor position
     int kbd_waiting : 1; // waiting for input
-    int kbd_warm : 1:    // first get() gets focus
+    int kbd_warm : 1;    // first get() gets focus
     void *args;          // arguments buffer
     int size;            // size of arguments buffer
     void *sp;            // saved stack pointer
