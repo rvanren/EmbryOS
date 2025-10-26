@@ -20,17 +20,21 @@ void uart_init(void) {
     UART->ie = (1 << 1);  // enable RX interrupt (bit 1)
 }
 
+static void uart_put(struct process *pcb, cell_t c) {
+    proc_put(pcb, pcb->kbd_row, pcb->kbd_col, c);
+}
+
 void uart_tab(void) {
     if (uart_wait == 0) return;
     if (uart_focus == 0) {
         uart_focus = uart_wait;
-        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cf);
+        uart_put(uart_focus, uart_focus->cf);
     }
     else {
-        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cu);
+        uart_put(uart_focus, uart_focus->cu);
         if (uart_focus == uart_wait) uart_wait = uart_wait->next;
         uart_focus = uart_wait;
-        proc_put(uart_focus, uart_focus->kbd_row, uart_focus->kbd_col, uart_focus->cf);
+        uart_put(uart_focus, uart_focus->cf);
     }
 }
 
