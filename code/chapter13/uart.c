@@ -23,8 +23,19 @@ void uart_init(void) {
 
 void uart_tab(void) {
     if (uart_wait == 0) return;
-    if (uart_focus == 0) uart_focus = uart_wait;
-    else uart_focus = uart_focus->next;
+    uart_wait = uart_wait->next;
+    if (uart_focus == 0) {
+        uart_focus = uart_wait;
+        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
+        screen_put(uart_focus->cf);
+    }
+    else {
+        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
+        screen_put(uart_focus->cu);
+        uart_focus = uart_wait;
+        screen_move(uart_focus->kbd_row, uart_focus->kbd_col);
+        screen_put(uart_focus->cf);
+    }
 }
 
 static void uart_char(char c) {
@@ -60,11 +71,12 @@ void uart_isr(void) {
 }
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
-    screen_move(row, col);
-    screen_put(self == focus ? cf : cu);
-    self->cf = cf; self->cu = cu;
     while (pcb->kbd_size == 0) {
+        screen_move(row, col);
+        screen_put(self == uart_focus ? cf : cu);
+        self->cf = cf; self->cu = cu;
         self->kbd_waiting = 1;
+        self->kbd_row = row; self->kbd_col = col;
         proc_dequeue(&run_queue[proc_current]);
         // assert return value == self
         if (uart_wait == 0) uart_wait = self->next = self;

@@ -20,6 +20,7 @@ struct pcb {
     cell_t cf, cu;      // focused cursor, unfocused cursor
     char kbf_buf[KBD_BUF_SIZE];     // circular keyboard buffer
     int kbd_tail, kbd_size;         // meta data for kbd buffer
+    int kbd_row, kbd_col;           // cursor position
     int kbd_waiting;    // waiting for input
     void *args;         // arguments buffer
     int size;           // size of arguments buffer
