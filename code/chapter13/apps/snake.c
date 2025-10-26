@@ -57,7 +57,7 @@ static void init_snake(void) {
 }
 
 // ----------------------------------------------------------------------
-// Collision & movement
+// Movement — ignore blocked directions
 // ----------------------------------------------------------------------
 
 static int hits_body(int r, int c, int grow) {
@@ -69,21 +69,20 @@ static int hits_body(int r, int c, int grow) {
     return 0;
 }
 
-static void move_snake(int grow) {
+static void try_move_snake(int grow) {
     int h = idx_head();
     point_t old_head = pos[h];
     int new_r = old_head.r + dir_r;
     int new_c = old_head.c + dir_c;
 
-    // bounds or collision → game over
-    if (new_r < 0 || new_r >= HEIGHT || new_c < 0 || new_c >= WIDTH ||
-        hits_body(new_r, new_c, grow)) {
-        user_put(old_head.r, old_head.c, CELL('@', ANSI_RED, ANSI_YELLOW));
-        for (volatile int i = 0; i < 200000; i++);
-        user_exit();
-    }
+    // check bounds
+    if (new_r < 0 || new_r >= HEIGHT || new_c < 0 || new_c >= WIDTH)
+        return; // can’t move in this direction
+    // check self-collision
+    if (hits_body(new_r, new_c, grow))
+        return; // blocked by own body
 
-    // normal move: drop tail
+    // normal move
     if (!grow) {
         point_t old_tail = pos[tail];
         clear_cell(old_tail.r, old_tail.c);
@@ -92,7 +91,6 @@ static void move_snake(int grow) {
         len++;
     }
 
-    // new head
     int new_head_idx = (tail + len - 1) % MAXLEN;
     pos[new_head_idx] = (point_t){new_r, new_c};
 
@@ -131,7 +129,7 @@ int main(void) {
                 break;
         }
 
-        // prevent reversing into itself
+        // prevent direct reversal
         if (len > 1) {
             point_t neck = get_at(len - 2);
             int cur_dr = head.r - neck.r;
@@ -145,7 +143,7 @@ int main(void) {
         dir_r = new_dr;
         dir_c = new_dc;
 
-        move_snake(grow);
+        try_move_snake(grow);
         moves++;
     }
 }
