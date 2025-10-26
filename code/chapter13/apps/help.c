@@ -9,8 +9,8 @@ char help[] =
     "* The default window is ur.\n"
     "* Change default by just [ul|ur|ll|lr]\n"
     "* Exit by typing exit or quit.\n"
-    "* Change window focus using TAB\n"
-    "* Run 'cat README' for more info";
+    "* Change window focus using TAB.\n"
+    "* Run 'cat README' for more info.";
 
 void main(void) {
     printf("%s", help);
