@@ -38,7 +38,7 @@ void uart_tab(void) {
     }
 }
 
-static void uart_char(char c) {
+void uart_char(char c) {
     // assert uart_focus != 0
     struct pcb *pcb = uart_focus;
 
