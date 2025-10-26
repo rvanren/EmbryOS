@@ -3,7 +3,7 @@
 #define WIDTH   39
 #define HEIGHT  11
 #define ITERATION  200
-#define DELAY   10000000   // adjust for animation speed
+#define DELAY   50000000   // adjust for animation speed
 
 int grid[HEIGHT][WIDTH];
 
