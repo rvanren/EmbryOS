@@ -2,12 +2,11 @@
 #include "sched.h"
 #include "platform.h"
 
-extern struct pcb *uart_focus;
-extern struct pcb *uart_wait;
-extern void uart_tab(void);
-extern void uart_char(char c);
+extern struct pcb *uart_focus, *uart_wait;
+extern void uart_tab(void), uart_char(char c);
 
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
+
 #define UART ((volatile struct uart *) UART_BASE)
 #define FULL (1 << 31)
 
