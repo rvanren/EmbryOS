@@ -12,10 +12,6 @@ static int length = 3;
 static int dir_r = 0, dir_c = 1;
 static int moves = 0;
 
-// ----------------------------------------------------------------------
-// Drawing helpers
-// ----------------------------------------------------------------------
-
 static void draw_cell(int r, int c, char ch) {
     user_put(r, c, CELL(ch, ANSI_GREEN, ANSI_BLACK));
 }
@@ -33,20 +29,12 @@ static void init_snake(void) {
         draw_cell(snake[i].r, snake[i].c, 'o');
 }
 
-// ----------------------------------------------------------------------
-// Collision
-// ----------------------------------------------------------------------
-
 static int hits_body(int r, int c) {
     for (int i = 0; i < length; i++)
         if (snake[i].r == r && snake[i].c == c)
             return 1;
     return 0;
 }
-
-// ----------------------------------------------------------------------
-// Movement logic
-// ----------------------------------------------------------------------
 
 static void move_snake(void) {
     point_t old_head = snake[length - 1];
@@ -60,29 +48,24 @@ static void move_snake(void) {
 
     int grow = (moves % GROW_INTERVAL == GROW_INTERVAL - 1 && length < MAXLEN);
 
-    if (!grow) {
-        clear_cell(snake[0].r, snake[0].c);   // erase tail
-        for (int i = 0; i < length - 1; i++)
-            snake[i] = snake[i + 1];
-    } else {
+    if (grow) {
+        // shift right, duplicate tail
         for (int i = length; i > 0; i--)
             snake[i] = snake[i - 1];
         length++;
+    } else {
+        // remember tail before shifting
+        point_t old_tail = snake[0];
+        for (int i = 0; i < length - 1; i++)
+            snake[i] = snake[i + 1];
+        clear_cell(old_tail.r, old_tail.c);   // erase the old tail *after* shifting
     }
 
     snake[length - 1] = (point_t){new_r, new_c};
 
-    // Redraw previous head as body
+    // redraw old head as body
     draw_cell(old_head.r, old_head.c, 'o');
-
-    // Redraw all other body segments (just to be safe)
-    for (int i = 0; i < length - 1; i++)
-        draw_cell(snake[i].r, snake[i].c, 'o');
 }
-
-// ----------------------------------------------------------------------
-// Main
-// ----------------------------------------------------------------------
 
 int main(void) {
     init_snake();
@@ -91,8 +74,8 @@ int main(void) {
         int key = user_get(
             snake[length - 1].r,
             snake[length - 1].c,
-            CELL('@', ANSI_YELLOW, ANSI_BLACK), // focused
-            CELL('@', ANSI_BLUE,   ANSI_BLACK)  // unfocused
+            CELL('@', ANSI_YELLOW, ANSI_BLACK),
+            CELL('@', ANSI_BLUE,   ANSI_BLACK)
         );
 
         int new_dr = dir_r, new_dc = dir_c;
@@ -109,7 +92,7 @@ int main(void) {
                 break;
         }
 
-        // prevent reversing into itself
+        // prevent 180-degree turns
         if (length > 1) {
             point_t head = snake[length - 1];
             point_t neck = snake[length - 2];
