@@ -18,12 +18,12 @@ char cat_help[] =
     "Usage: cat file1 file2 ...\n"
     "Outputs the contents in the files.";
 
-char life_help[] = "Game of Life demo with Gosper Gun";
+char life_help[] = "Game of Life demo";
 
-char ls_help[] = "List the file names and sizes";
+char ls_help[] = "List file names and sizes";
 
 char snake_help[] =
-    "Snake Game: use arrows to move snake around.\n"
+    "Snake Game: use arrows to move snake.\n"
     "Type q to quit";
 
 void main(int argc, char **argv) {
