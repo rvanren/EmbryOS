@@ -55,16 +55,18 @@ void window_readline(struct window *window, char *line, int size) {
             window_putchar(window, '\n');
             return;
         }
-        window_putchar(window, (32 <= c && c < 127) ? c : ' ');
         if (c == '\b' || c == '\177') {
             if (n > 0) {
+                user_put(NROWS - 1, window->cur_col,    // erase cursor
+                        CELL(' ', window->cur_fg, window->cur_bg));
                 window->cur_col--;
-                user_put(NROWS - 1, window->cur_col,
+                user_put(NROWS - 1, window->cur_col,    // erase last char
                         CELL(' ', window->cur_fg, window->cur_bg));
                 n--;
             }
         }
         else {
+            window_putchar(window, (32 <= c && c < 127) ? c : ' ');
             if (n < size - 1) line[n] = c;
             n++;
         }
