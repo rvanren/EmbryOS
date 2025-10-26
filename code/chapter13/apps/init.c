@@ -14,6 +14,7 @@ void main(void) {
     dir_create("ls", 6);
     dir_create("cat", 7);
     dir_create("snake", 8);
+    dir_create("splash", 9);
 
     int readme = user_create();
     char contents[] = "This is EmbryOS\n";
