@@ -58,7 +58,7 @@ static void move_snake(void) {
         draw_cell(snake[i].r, snake[i].c, 'o');
 }
 
-int main(void) {
+void main(void) {
     init_snake();
 
     while (1) {
