@@ -14,7 +14,6 @@ struct rect {
 // Process Control Block: contains information for a particular process
 struct pcb {
     struct pcb *next;    // queue management
-    int priority;        // priority level
     int executable;      // file containing executable
     struct rect area;    // allowed screen region
     cell_t cf, cu;       // focused cursor, unfocused cursor
