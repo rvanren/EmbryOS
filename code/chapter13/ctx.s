@@ -63,4 +63,3 @@ ctx_start:
     mv sp, a1             # switch to new stack
     la a0, exec_user      # load address of exec_user into a0
     jalr a0               # call exec_user()
-
