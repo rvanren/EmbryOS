@@ -25,16 +25,7 @@ void window_scroll(struct window *window) {
 
 void window_putchar(struct window *window, char c) {
     if (c == '\b') {
-        if (window->cur_col > 0) {
-            window->cur_col--;
-            user_put(NROWS - 1, window->cur_col,
-                    CELL(' ', window->cur_fg, window->cur_bg));
-            window->cells[NROWS - 1][window->cur_col] =
-                    CELL(' ', window->cur_fg, window->cur_bg);
-            if (window->cur_col > 0)
-                user_put(NROWS - 1, window->cur_col - 1,
-                    window->cells[NROWS - 1][window->cur_col - 1]);
-        }
+        if (window->cur_col > 0) window->cur_col--;
         return;
     }
     if (c == '\n' || window->cur_col == NCOLS) {
@@ -68,6 +59,8 @@ void window_readline(struct window *window, char *line, int size) {
         if (c == '\b' || c == '\177') {
             if (n > 0) {
                 window->cur_col--;
+                user_put(NROWS - 1, window->cur_col,
+                        CELL(' ', window->cur_fg, window->cur_bg));
                 n--;
             }
         }
