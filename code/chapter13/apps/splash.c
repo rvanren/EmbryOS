@@ -54,7 +54,5 @@ int main(void) {
     // final stable screen
     clear();
     put_centered("EmbryOS", HEIGHT / 2);
-    put_centered("ready.", HEIGHT / 2 + 2);
-
-    for (;;); // keep displayed
+    put_centered("Life Has Begun", HEIGHT / 2 + 2);
 }
