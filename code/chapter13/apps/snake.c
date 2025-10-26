@@ -45,7 +45,7 @@ static int hits_body(int r, int c) {
 }
 
 // ----------------------------------------------------------------------
-// Movement (fixed growth logic)
+// Movement (robust growth logic)
 // ----------------------------------------------------------------------
 
 static void move_snake(void) {
@@ -63,24 +63,22 @@ static void move_snake(void) {
 
     int grow = (moves % GROW_INTERVAL == GROW_INTERVAL - 1 && length < MAXLEN);
 
-    if (grow) {
-        // only extend length *after* duplicating current positions
-        for (int i = 0; i < length; i++)
-            snake[i] = snake[i]; // no-op, just placeholder for clarity
+    // erase tail only if not growing
+    if (!grow) {
+        clear_cell(snake[0].r, snake[0].c);
+    } else {
         if (length < MAXLEN)
             length++;
-        // shift right by one (make space for new head)
-        for (int i = 0; i < length - 1; i++)
-            snake[i] = snake[i + 1];
-    } else {
-        // erase tail before shifting
-        clear_cell(snake[0].r, snake[0].c);
-        for (int i = 0; i < length - 1; i++)
-            snake[i] = snake[i + 1];
     }
 
+    // shift all segments one position forward
+    for (int i = 0; i < length - 1; i++)
+        snake[i] = snake[i + 1];
+
+    // add new head
     snake[length - 1] = (point_t){new_r, new_c};
 
+    // redraw body
     for (int i = 0; i < length - 1; i++)
         draw_cell(snake[i].r, snake[i].c, 'o');
 }
