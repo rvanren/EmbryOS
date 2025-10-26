@@ -2,6 +2,11 @@
 #include "stdio.h"
 #include "dir.h"
 
+char README[] =
+    "This is EmbryOS\n"
+    "You can switch focus between windows using TAB\n"
+    "Type help in the shell for help";
+
 void main(void) {
     char line[128];
 
@@ -17,8 +22,7 @@ void main(void) {
     dir_create("splash", 9);
 
     int readme = user_create();
-    char contents[] = "This is EmbryOS\n";
-    user_write(readme, 0, contents, sizeof(contents) - 1);
+    user_write(readme, 0, README, sizeof(README) - 1);
     dir_create("README", readme);
     user_spawn(dir_lookup("shell"),   0, 0, 40, 12, 0, 0);
     user_spawn(dir_lookup("splash"), 40, 0, 40, 12, 0, 0);
