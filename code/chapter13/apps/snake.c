@@ -1,5 +1,4 @@
-#include "user.h"
-#include "ansi.h"
+#include "syslib.h"
 
 #define WIDTH   39
 #define HEIGHT  11
