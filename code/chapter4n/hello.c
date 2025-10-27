@@ -55,7 +55,6 @@ int main(void) {
 
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
-    intr_set_handler(INTR_TIMER, timer_handler);
 
 #ifdef CH7
     extern void syscall_handler(struct trap_frame *);
@@ -68,6 +67,7 @@ int main(void) {
 
 #ifdef CH5
     mtime_init();
+    intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
 #endif
 
