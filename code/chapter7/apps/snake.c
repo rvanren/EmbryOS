@@ -189,7 +189,3 @@ void snake_main(void) {
         S.moves++;
     }
 }
-
-#ifdef CH8
-void main() { snake_main(); }
-#endif
