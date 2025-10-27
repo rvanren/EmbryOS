@@ -33,6 +33,6 @@ void pmp_load(struct pcb *pcb) {
 #endif
 
 void pmp_init() {
-    extern user_setup();
+    extern void user_setup();
     user_setup();
 }
