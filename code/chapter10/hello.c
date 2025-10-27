@@ -8,10 +8,6 @@
 #include "plic.h"
 #include "pmp.h"
 
-#ifdef CH11
-#include "files.h"
-#endif
-
 #include "mtime.h"
 
 #define QUANTUM          50000        // 50 milliseconds
@@ -32,12 +28,7 @@ void exception_handler(struct trap_frame *tf) {
 int main(void) {
     frame_init(); intr_init(); uart_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-    plic_init();
-    pmp_init();
-
-#ifdef CH11
-    files_init();
-#endif
+    plic_init(); pmp_init();
 
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
