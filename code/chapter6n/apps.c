@@ -5,6 +5,7 @@
 #include "pmp.h"
 #include "kprintf.h"
 #include "string.h"
+#include "interrupt.h"
 
 #ifdef CH11
 #include "flat.h"
