@@ -2,10 +2,13 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "pmp.h"
 #include "kprintf.h"
 #include "string.h"
 #include "interrupt.h"
+
+#ifdef CH10
+#include "pmp.h"
+#endif
 
 #ifdef CH11
 #include "flat.h"
