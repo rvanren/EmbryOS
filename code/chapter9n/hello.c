@@ -7,6 +7,7 @@
 #include "syscall.h"
 #include "uart.h"
 #include "plic.h"
+#include "pmp.h"
 
 #ifdef CH11
 #include "files.h"
