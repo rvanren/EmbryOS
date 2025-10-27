@@ -96,7 +96,9 @@ void exec_user(void) {
 #ifdef CH7
     enter_user(apps[self->executable - 2]);
 #else
+    intr_enable();
     apps[self->executable - 2]();
+    intr_disable();
     proc_exit();
 #endif
 #endif
