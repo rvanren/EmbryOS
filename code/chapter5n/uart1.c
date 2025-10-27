@@ -1,3 +1,5 @@
+#ifdef CH6
+
 #include <stdint.h>
 #include "uart.h"
 #include "sched.h"
@@ -41,3 +43,5 @@ void uart_char(char c) {
     pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
     pcb->kbd_size++;
 }
+
+#endif
