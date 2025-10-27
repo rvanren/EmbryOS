@@ -7,14 +7,6 @@
 #include "frame.h"
 #include "plic.h"
 
-#ifdef CH7
-#include "pmp.h"
-#endif
-
-#ifdef CH11
-#include "files.h"
-#endif
-
 #include "mtime.h"
 
 #define QUANTUM          50000        // 50 milliseconds
@@ -37,21 +29,8 @@ int main(void) {
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     plic_init();
 
-#ifdef CH7
-    pmp_init();
-#endif
-
-#ifdef CH11
-    files_init();
-#endif
-
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
-
-#ifdef CH7
-    extern void syscall_handler(struct trap_frame *);
-    intr_set_handler(INTR_SYSCALL, syscall_handler);
-#endif
 
     intr_set_handler(INTR_EXTERNAL, plic_handler);
     mtime_init();
