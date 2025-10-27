@@ -1,6 +1,7 @@
 #include <stdarg.h>
 #include "stdio.h"
 
+#ifdef notdef
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
     int i = 0;
@@ -49,3 +50,10 @@ void printf(const char *fmt, ...) {
     }
     va_end(ap);
 }
+
+#else
+
+#define kprintf printf
+#define uart_putchar(c) putchar((c))
+
+#endif
