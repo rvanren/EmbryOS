@@ -8,8 +8,9 @@
 
 #ifdef CH11
 #include "flat.h"
-
 extern struct flat flat_fs;
+#else
+#include "app_info.h"
 #endif
 
 __attribute__((noreturn))
