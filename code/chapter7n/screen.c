@@ -1,4 +1,4 @@
-#include "stdio.h"
+#include "screen.h"
 #include "kprintf.h"
 #include "uart.h"
 
