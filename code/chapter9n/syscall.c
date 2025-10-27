@@ -25,7 +25,9 @@ void syscall_handler(struct trap_frame *tf) {
         proc_exit();
         break;
     case SYS_SPAWN:
+#ifdef CH11
         proc_check_legal(self, (uintptr_t) tf->a5, tf->a6);
+#endif
         sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, (void *) (uintptr_t) tf->a5, tf->a6);
         break;
     case SYS_PUT:
