@@ -4,6 +4,7 @@
 #include "uart.h"
 #include "screen.h"
 #include "interrupt.h"
+#include "frame.h"
 
 #ifdef CH6
 #include "plic.h"
