@@ -49,8 +49,3 @@ void proc_exit(void);
 
 // Free all processes previously marked for exit.
 void proc_reap_zombies(void);
-
-#ifdef CH11
-// Check if the given address range is legal
-void proc_check_legal(struct pcb *self, uintptr_t start, int size);
-#endif
