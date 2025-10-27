@@ -7,11 +7,15 @@
 #include "interrupt.h"
 
 void exception_handler(struct trap_frame *tf) {
+#ifdef CH4
     struct pcb *self = run_queue[proc_current]->next;
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
+#endif
     kprintf("trap: cause=%d mepc=%x mtval=%x<",
                         tf->mcause & 0xFFF, tf->mepc, tf->mtval);
+#ifdef CH4
     proc_exit();
+#endif
 }
 
 #ifdef CH5
