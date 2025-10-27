@@ -39,6 +39,7 @@ void uart_char(char c) {
         }
         proc_enqueue(&run_queue[0], pcb);
     }
+    uart_putchar('!');
     pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
     pcb->kbd_size++;
 }
