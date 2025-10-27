@@ -152,7 +152,7 @@ static int read_direction_or_quit(struct snake *S, int *dr, int *dc, int *quit) 
 /* -------------------------------------------------------- */
 /* Main loop                                                 */
 /* -------------------------------------------------------- */
-int main(void) {
+void snake_main(void) {
     struct snake S;
     init_snake(&S);
 
@@ -162,10 +162,7 @@ int main(void) {
         int quit = 0;
 
         int have_dir = read_direction_or_quit(&S, &dr, &dc, &quit);
-        if (quit) {
-            user_exit();
-            return 0;
-        }
+        if (quit) user_exit();
 
         if (!have_dir)
             continue;  // ignore non-direction keys
@@ -192,3 +189,7 @@ int main(void) {
         S.moves++;
     }
 }
+
+#ifdef CH8
+void main() { snake_main(); }
+#endif

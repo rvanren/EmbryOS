@@ -77,7 +77,7 @@ static void updateGrid(struct life *L) {
 //----------------------------------------------
 // Main
 //----------------------------------------------
-void main(void) {
+void life_main(void) {
     struct life L;
     initGosperGun(&L, 0, 0);
     for (int t = 0; t < ITERATION; t++) {
@@ -86,3 +86,7 @@ void main(void) {
         for (volatile int i = 0; i < DELAY; i++) ;
     }
 }
+
+#ifdef CH8
+void main() { life_main(); }
+#endif

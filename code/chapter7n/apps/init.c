@@ -15,7 +15,7 @@ char README[] =
     "* snake       - snake game\n";
 #endif
 
-void main(void) {
+void init_main(void) {
 #ifdef CH12
     printf("Initializing directory...\n");
 
@@ -48,3 +48,7 @@ void main(void) {
 
     user_spawn(dir_lookup("splash"), 40,  0, 40, 12, 0, 0);
 }
+
+#ifdef CH8
+void main() { init_main(); }
+#endif
