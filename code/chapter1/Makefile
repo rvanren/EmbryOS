@@ -14,7 +14,7 @@ DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s hello.c kprintf.c shared/string.c uart2.c -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s hello.c kprintf.c uart2.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
