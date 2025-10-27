@@ -8,7 +8,7 @@ void proc_check_legal(struct pcb *self, uintptr_t start, int size) {
     uintptr_t end = start + size - 1;
     if (end < start) {
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        printf("bad system call size<");
+        kprintf("bad system call size<");
         proc_exit();
     }
     uintptr_t base_lo  = (uintptr_t) self->base;
@@ -18,7 +18,7 @@ void proc_check_legal(struct pcb *self, uintptr_t start, int size) {
     if (!((start >= base_lo && end <= base_hi) ||
                     (start >= stack_lo && end <= stack_hi))) {
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        printf("bad system call address<");
+        kprintf("bad system call address<");
         proc_exit();
     }
 }
