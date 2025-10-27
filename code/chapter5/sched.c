@@ -19,6 +19,7 @@ void sched_block(struct pcb *current) {
         proc_current++;
     struct pcb *next = run_queue[proc_current]->next;
     if (next != current) ctx_switch(&current->sp, next->sp);
+    proc_reap_zombies();
 }
 
 void sched_yield(void) {
@@ -32,12 +33,13 @@ void sched_yield(void) {
     sched_block(current);
 }
 
-void sched_run(void (*fn)(void), struct rect area) {
+void sched_run(int executable, struct rect area, void *args, int size) {
     struct pcb *current = run_queue[proc_current]->next;
-    struct pcb *pcb = proc_create(area);
+    struct pcb *pcb = proc_create(executable, area, args, size);
     proc_enqueue(&run_queue[0], pcb);
     proc_current = 0;
-    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE, fn);
+    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE);
+    proc_reap_zombies();
 }
 
 void sched_idle() {
@@ -46,8 +48,6 @@ void sched_idle() {
     proc_current = 2;
     for (;;) {
         sched_yield();
-        intr_enable();
-        __asm__ volatile ("wfi");  // wait-for-interrupt
-        intr_disable();
+        intr_enable(); __asm__ volatile ("wfi"); intr_disable();
     }
 }
