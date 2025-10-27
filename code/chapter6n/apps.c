@@ -26,11 +26,11 @@ void init_crt(){ init_main(); user_exit(); }
 void splash_crt(){ splash_main(); user_exit(); }
 void life_crt(){ life_main(); user_exit(); }
 void snake_crt(){ snake_main(); user_exit(); }
-static void *apps[] = { init_crt, splash_crt, life_crt, snake_crt };
+static void (*apps[])() = { init_crt, splash_crt, life_crt, snake_crt };
 
 __attribute__((noreturn)) void enter_user(void (*entry)());
 #else
-static void *apps[] = { init_main, splash_main, life_main, snake_main };
+static void (*apps[])() = { init_main, splash_main, life_main, snake_main };
 #endif
 #endif
 #endif
