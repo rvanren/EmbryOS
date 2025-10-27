@@ -55,6 +55,7 @@ int intr_init() {
     asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
 
 #ifndef CH10
+    extern void user_setup();
     user_setup();
 #endif
 }
