@@ -35,7 +35,11 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); plic_init(); uart_init();
+    frame_init(); intr_init(); uart_init();
+
+#ifdef CH6
+    plic_init();
+#endif
 
 #ifdef CH7
     pmp_init();
