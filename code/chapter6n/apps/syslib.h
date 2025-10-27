@@ -91,6 +91,7 @@ static inline void user_delete(int file) {
 #include "kprintf.h"
 
 static inline void user_exit() {
+    struct pcb *self = run_queue[proc_current]->next;
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
     kprintf("process ended<");
     proc_exit();
@@ -101,10 +102,12 @@ static inline void user_spawn(int app, int row, char col, int wd, int ht, const 
 }
 
 static inline void user_put(int row, int col, cell_t cell) {
+    struct pcb *self = run_queue[proc_current]->next;
     proc_put(self, row, col, cell);
 }
 
 static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
+    struct pcb *self = run_queue[proc_current]->next;
     return uart_get(self, row, col, cursor_f, cursor_u);
 }
 
