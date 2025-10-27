@@ -7,6 +7,12 @@ static inline void user_exit() {
     asm volatile("ecall" : : "r"(a7));
 }
 
+static inline void user_spawn(int app, int row, char col, int wd, int ht,
+                              const void *args, int sz) {
+    register int syscall_id asm("a7") = SYS_SPAWN;
+    asm volatile("ecall" : : "r"(syscall_id) : "memory");
+}
+
 static inline void user_spawn(int app, int row, char col, int wd, int ht, const void *args, int sz) {
     register int a7 asm("a7") = SYS_SPAWN;
     register int a0 asm("a0") = app;
@@ -28,13 +34,9 @@ static inline void user_put(int row, int col, cell_t cell) {
 }
 
 static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
-    register int a7 asm("a7") = SYS_GET;
-    register int a0 asm("a0") = row;
-    register int a1 asm("a1") = col;
-    register int a2 asm("a2") = cursor_f;
-    register int a3 asm("a3") = cursor_u;
-    asm volatile("ecall" : "=r"(a0) : "r"(a0), "r"(a1), "r"(a2), "r"(a3), "r"(a7));
-    return a0;
+    register int syscall_id asm("a7") = SYS_GET;
+    asm volatile("ecall" : "+r"(row) : "r"(syscall_id) : "memory");
+    return row;
 }
 
 static inline int user_create(void) {
