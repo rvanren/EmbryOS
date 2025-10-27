@@ -4,7 +4,7 @@
 #include "sched.h"
 #include "kprintf.h"
 #include "string.h"
-#include "syslib.h"
+#include "syscall.h"
 
 #ifdef CH10
 #include "pmp.h"
@@ -20,6 +20,10 @@ __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
 #else
+static inline void user_exit() {
+    register int a7 asm("a7") = SYS_EXIT;
+    asm volatile("ecall" : : "r"(a7));
+}
 void init_main(), splash_main(), life_main(), shell_main(), snake_main();
 void init_crt(){ init_main(); user_exit(); }
 void splash_crt(){ splash_main(); user_exit(); }
