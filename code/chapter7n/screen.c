@@ -11,7 +11,7 @@ void screen_put(int row, int col, cell_t cell) {
     kprintf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
-    putchar(CELL_CH(ch));
+    uart_putchar(CELL_CH(ch));
 }
 
 void screen_fill(int x, int y, int w, int h, cell_t cell) {
