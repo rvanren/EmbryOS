@@ -87,6 +87,8 @@ static inline void user_delete(int file) {
 
 #include "process.h"
 #include "sched.h"
+
+#ifdef CH4
 #include "uart.h"
 #include "kprintf.h"
 #include "interrupt.h"
@@ -128,5 +130,14 @@ static inline void user_yield() {
     sched_yield();
     intr_enable();
 }
+
+#else
+
+static inline void user_put(int row, int col, cell_t cell) {
+    struct pcb *self = run_queue[proc_current]->next;
+    proc_put(self, row, col, cell);
+}
+
+#endif
 
 #endif
