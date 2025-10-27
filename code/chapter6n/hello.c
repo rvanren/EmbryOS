@@ -29,8 +29,6 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    extern void syscall_handler(struct trap_frame *);
-
     frame_init(); intr_init(); plic_init(); uart_init(); mtime_init(); pmp_init();
 
 #ifdef CH11
@@ -40,7 +38,12 @@ int main(void) {
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
     intr_set_handler(INTR_TIMER, timer_handler);
+
+#ifdef CH7
+    extern void syscall_handler(struct trap_frame *);
     intr_set_handler(INTR_SYSCALL, syscall_handler);
+#endif
+
     intr_set_handler(INTR_EXTERNAL, interrupt_handler);
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     mtime_reset(QUANTUM);
