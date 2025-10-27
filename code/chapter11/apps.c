@@ -42,13 +42,6 @@ void exec_user(void) {
     memset(self->stack, 0, PAGE_SIZE);
 
     uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
-#ifdef CH13
-    // Initialize stack page
-    sp -= self->size;
-    sp &= ~0xF;   // align down to 16 bytes
-    memcpy((void *) sp, self->args, self->size);
-#endif
-
     pmp_load(self);  // Load PMP registers to isolate app
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
