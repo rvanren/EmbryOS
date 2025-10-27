@@ -16,8 +16,6 @@ char README[] =
 #endif
 
 void main(void) {
-    char line[128];
-
 #ifdef CH12
     printf("Initializing directory...\n");
 

@@ -65,12 +65,11 @@ static void updateGrid(void) {
             grid[r][c] = newGrid[r][c];
 }
 
-int main(void) {
+void main(void) {
     initGosperGun(0, 0);
     for (int t = 0; t < ITERATION; t++) {
         drawGrid();
         updateGrid();
         for (volatile int i = 0; i < DELAY; i++) ;
     }
-    return 0;
 }

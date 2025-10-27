@@ -35,11 +35,20 @@ void exec(char *line) {
         printf("Unknown application '%s'\n", argv[i]);
         return;
     }
+#ifdef CH13
     user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h,
                             argv[i], ptr - argv[i]);
+#else
+    user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h, 0, 0);
+#endif
 }
 
-void main(void) {
+#ifdef CH9
+void main(void)
+#else
+void shell_main(void)
+#endif
+{
     rects[0] = (struct rect){ "ul",  0,  0, 39, 11 };
     rects[1] = (struct rect){ "ur", 40,  0, 39, 11 };
     rects[2] = (struct rect){ "ll",  0, 12, 39, 11 };

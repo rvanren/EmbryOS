@@ -14,8 +14,6 @@ char README[] =
     "* snake       - snake game\n";
 
 void main(void) {
-    char line[128];
-
     printf("Initializing directory...\n");
 
     // This should correspond to the order in apps.mk

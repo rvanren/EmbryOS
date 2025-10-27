@@ -15,7 +15,14 @@ char README[] =
     "* snake       - snake game\n";
 #endif
 
-void main(void) {
+#ifdef CH9
+void main(void)
+#else
+void init_main(void)
+#endif
+{
+
+#ifdef CH12
     printf("Initializing directory...\n");
 
     // This should correspond to the order in apps.mk
@@ -26,6 +33,7 @@ void main(void) {
     dir_create("snake",  6);
     dir_create("crash",  7);
     dir_create("ls",     8);
+#endif
 
 #ifdef CH13
     dir_create("cat",    9);

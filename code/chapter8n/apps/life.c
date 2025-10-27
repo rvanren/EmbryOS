@@ -65,7 +65,12 @@ static void updateGrid(void) {
             grid[r][c] = newGrid[r][c];
 }
 
-void main(void) {
+#ifdef CH9
+void main(void)
+#else
+void life_main(void)
+#endif
+{
     initGosperGun(0, 0);
     for (int t = 0; t < ITERATION; t++) {
         drawGrid();
