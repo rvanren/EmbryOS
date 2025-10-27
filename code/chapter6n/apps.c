@@ -99,4 +99,5 @@ void exec_user(void) {
     apps[self->executable - 2]();
     proc_exit();
 #endif
+#endif
 }
