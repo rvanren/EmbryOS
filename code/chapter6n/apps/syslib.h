@@ -118,6 +118,7 @@ static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
     struct pcb *self = run_queue[proc_current]->next;
     int c = uart_get(self, row, col, cursor_f, cursor_u);
     intr_enable();
+    return c;
 }
 
 #endif

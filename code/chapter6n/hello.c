@@ -29,7 +29,11 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init(); pmp_init();
+    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
+
+#ifdef CH7
+    pmp_init();
+#endif
 
 #ifdef CH11
     files_init();
