@@ -1,23 +1,24 @@
     .section .text
     .globl enter_user
     .type  enter_user,@function
-# void enter_user(void *entry, uintptr_t gp_val, uintptr_t user_sp, uintptr_t ksp)
-# a0=entry, a1=gp_val, a2=user_sp, a3=ksp
+# void enter_user(void *entry, uintptr_t gp_val,
+#                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp)
+# a0=entry, a1=gp_val, a2=user_sp, a3=arg_size, a4=ksp
 enter_user:
-    # Save incoming args into temps BEFORE clobbering aX
-    mv   t3, a0           # entry
-    mv   t4, a1           # gp_val
-    mv   t5, a2           # user_sp
-    mv   t6, a3           # ksp
+    # Save incoming args into safe temps
+    mv   s2, a0           # entry
+    mv   s3, a1           # gp_val
+    mv   s4, a2           # user_sp (points to args)
+    mv   s5, a3           # arg_size
+    mv   s6, a4           # ksp
 
     # Program per-process kernel stack for future traps
-    csrw mscratch, t6
+    csrw mscratch, s6
 
-    # (Optional but recommended) briefly disable M-mode interrupts during handoff
-    # so we can't trap in M while gp=USER:
-    csrrc t0, mstatus,  (1 << 3)     # clear MIE
+    # Disable M-mode interrupts during handoff
+    csrrc t0, mstatus, (1 << 3)
 
-    # Zero all integer regs EXCEPT gp/sp and the temps we still need (t3..t6)
+    # Zero all integer regs except gp/sp and the temps we still need
     li   t0, 0
     mv   ra, t0
     mv   tp, t0
@@ -33,29 +34,22 @@ enter_user:
     mv   a5, t0
     mv   a6, t0
     mv   a7, t0
-    mv   s2, t0
-    mv   s3, t0
-    mv   s4, t0
-    mv   s5, t0
-    mv   s6, t0
-    mv   s7, t0
-    mv   s8, t0
-    mv   s9, t0
-    mv   s10, t0
-    mv   s11, t0
-    # DO NOT clobber t3,t4,t5,t6 (they hold entry,gp,sp,ksp)
+    # leave s2–s6 intact
 
-    # Load USER gp/sp from saved temps
-    mv   gp, t4
-    mv   sp, t5
+    # Load user gp/sp
+    mv   gp, s3
+    mv   sp, s4
 
-    # Set return target and privilege: MPP=U, mepc=entry
+    # Initialize user arguments
+    mv   a0, s4           # arg_buf pointer
+    mv   a1, s5           # arg_buf size
+
+    # Switch privilege: MPP=U, mepc=entry
     csrr t0, mstatus
     li   t1, 0x1800                 # MSTATUS_MPP_MASK (bits 12..11)
     not  t2, t1
     and  t0, t0, t2                 # clear MPP -> U
     csrw mstatus, t0
-    csrw mepc, t3
+    csrw mepc, s2
 
-    # mret to user
     mret

@@ -42,8 +42,11 @@ SECTIONS
     } >ram :data
 
     .frames (NOLOAD) : ALIGN(4096) {
+        PROVIDE(ramdisk = .);
+        . = . + (4096 * 32);    /* 32 pages (128 KiB) */
+        PROVIDE(__ramdisk_end = .);
         PROVIDE(frames = .);
-        . = . + (4096 * 64);    /* 64 pages (256 KiB) */
+        . = . + (4096 * 32);    /* 32 pages (256 KiB) */
         PROVIDE(__frames_end = .);
     } >ram :data
 }

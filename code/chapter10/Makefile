@@ -20,7 +20,7 @@ APP_ELFS = $(addprefix $(APPS_DIR)/,$(addsuffix .elf,$(APPS)))
 
 all: apps_gen.c $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) start.s ctx.s trap.s enter_user.s hello.c apps.c frame.c stdio.c sched.c screen.c process.c proc_clean.c interrupt.c plic.c syscall.c mtime.c pmp.c uart.c apps_gen.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c apps.c frame.c kprintf.c shared/string.c sched.c screen.c process.c proc_clean.c interrupt.c plic.c syscall.c mtime.c pmp.c uart1.c uart2.c apps_gen.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
@@ -48,27 +48,22 @@ $(APP_OBJS) $(APP_ELFS):
 # --- auto-generate apps_gen.c ---
 apps_gen.c: $(APP_ELFS)
 	@echo "// auto-generated" > $@
-	@echo "#include <stdint.h>" >> $@
-	@echo "extern void run_user(const char *start, const char *end, uintptr_t gp_offset);" >> $@
+	@echo '#include "app_info.h"' >> $@
 	@echo "" >> $@
 	@for f in $^; do \
 	    name=$$(basename $$f .elf); \
-	    func=$$(echo $$name | sed 's/^/task_/'); \
 	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
-	    echo "void $${func}(void) {" >> $@; \
-	    echo "    extern char _binary_$${name}_bin_start[], _binary_$${name}_bin_end[];" >> $@; \
-	    echo "    run_user(_binary_$${name}_bin_start, _binary_$${name}_bin_end, 0x$${off});" >> $@; \
-	    echo "}" >> $@; \
-	    echo "" >> $@; \
+	    echo "extern char _binary_$${name}_bin_start[], _binary_$${name}_bin_end[];" >> $@; \
 	done; \
-	echo "void (*applications[])() = {" >> $@; \
+	echo "" >> $@; \
+	echo "struct app_info app_table[] = {" >> $@; \
 	for f in $^; do \
 	    name=$$(basename $$f .elf); \
-	    func=$$(echo $$name | sed 's/^/task_/'); \
-	    echo "    $${func}," >> $@; \
+	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
+	    echo "    { _binary_$${name}_bin_start, _binary_$${name}_bin_end, 0x$${off} }," >> $@; \
 	done; \
 	echo "};" >> $@; \
-	echo "int n_applications = sizeof(applications)/sizeof(applications[0]);" >> $@; \
+	echo "int n_applications = sizeof(app_table)/sizeof(app_table[0]);" >> $@; \
 	echo "Generated $@"
 
 clean:

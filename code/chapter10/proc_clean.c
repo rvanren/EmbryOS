@@ -5,6 +5,7 @@
 #include "sched.h"
 #include "ctx.h"
 #include "interrupt.h"
+#include "uart.h"
 
 static struct pcb *zombies = 0;   // list of PCBs pending free
 
@@ -20,6 +21,7 @@ void proc_reap_zombies(void) {
 
 void proc_exit(void) {
     struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
+    uart_exit(pcb);
     pcb->next = zombies;
     zombies = pcb;
     sched_block(pcb);

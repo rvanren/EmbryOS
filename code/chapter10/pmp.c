@@ -16,21 +16,19 @@ enum {
   PMP_L = 1 << 7,
 };
 
-static inline uintptr_t pmp_napot_addr(uintptr_t base, size_t size) {
-  return (base >> 2) | ((size >> 1) - 1);
-}
-
-void pmp_config(struct pcb *pcb) {
-    pcb->pmp.addr[0] = pmp_napot_addr((uintptr_t) pcb->base, PAGE_SIZE);
-    pcb->pmp.addr[1] = pmp_napot_addr((uintptr_t) pcb->stack, PAGE_SIZE);
-    pcb->pmp.cfg[0]  = PMP_A_NAPOT | PMP_R | PMP_W | PMP_X;
-    pcb->pmp.cfg[1]  = PMP_A_NAPOT | PMP_R | PMP_W;
+static inline uintptr_t pmp_napot_addr(uintptr_t base, uintptr_t size) {
+  return (base >> 2) | ((size - 1) >> 3);
 }
 
 // Set PMP registers (before each mret)
 void pmp_load(struct pcb *pcb) {
-    write_csr(pmpaddr0, pcb->pmp.addr[0]);
-    write_csr(pmpaddr1, pcb->pmp.addr[1]);
-    write_csr(pmpcfg0, ((uintptr_t) pcb->pmp.cfg[0]) |
-                        ((uintptr_t) pcb->pmp.cfg[1] << 8));
+#ifndef NO_PMP
+    write_csr(pmpaddr0, pmp_napot_addr((uintptr_t) pcb->base, PAGE_SIZE)); 
+    write_csr(pmpaddr1, pmp_napot_addr((uintptr_t) pcb->stack, PAGE_SIZE)); 
+    write_csr(pmpcfg0, ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)) |
+                        ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W) << 8));
+#endif
+}
+
+void pmp_init(void) {
 }
