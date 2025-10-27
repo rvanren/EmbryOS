@@ -38,7 +38,6 @@ void exec_user(void) {
     memset(self->stack, 0, PAGE_SIZE);
 
     uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
-    pmp_load(self); // Load PMP registers
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
 }
