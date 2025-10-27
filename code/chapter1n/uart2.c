@@ -2,11 +2,6 @@
 #include "sched.h"
 #include "platform.h"
 
-#ifdef CH6
-extern struct pcb *uart_focus, *uart_wait;
-extern void uart_tab(void), uart_char(char c);
-#endif
-
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
 #define UART ((volatile struct uart *) UART_BASE)
@@ -23,6 +18,10 @@ void uart_putchar(char c) {
 }
 
 #ifdef CH6
+
+extern struct pcb *uart_focus, *uart_wait;
+extern void uart_tab(void), uart_char(char c);
+
 void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;
@@ -55,10 +54,8 @@ int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     return c;
 }
 
-#endif
-
 void uart_exit(struct pcb *self) {
-#ifdef CH6
     if (self == uart_focus) uart_focus = 0;
-#endif
 }
+
+#endif
