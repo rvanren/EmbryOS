@@ -2,8 +2,11 @@
 #include "trap.h"
 #include "interrupt.h"
 #include "sched.h"
-#include "pmp.h"
 #include "kprintf.h"
+
+#ifdef CH10
+#include "pmp.h"
+#endif
 
 #define MIE_MASK (1u << 3)
 
