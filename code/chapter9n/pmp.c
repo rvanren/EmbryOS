@@ -29,5 +29,5 @@ void pmp_load(struct pcb *pcb) {
     write_csr(pmpcfg0, ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)) |
                         ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W) << 8));
 #endif
-#endif
 }
+#endif
