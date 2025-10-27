@@ -33,7 +33,8 @@ void uart_isr(void) {
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {
         if (!self->kbd_warm) {
-            if (uart_focus != 0) uart_put(uart_focus, uart_focus->cu);
+            if (uart_focus != 0 && uart_focus->kbd_waiting)
+                uart_put(uart_focus, uart_focus->cu);
             uart_focus = self;
             self->kbd_warm = 1;
         }
