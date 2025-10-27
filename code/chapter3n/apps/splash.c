@@ -3,10 +3,6 @@
 #define WIDTH   39
 #define HEIGHT  11
 
-static void delay(void) {
-    for (volatile int i = 0; i < 100000000; i++); // tune as needed
-}
-
 static void clear(void) {
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++)
@@ -48,7 +44,7 @@ void splash_main(void) {
 
         // draw the logo in the middle
         put_centered(title, cy);
-        delay();
+        user_delay(200);
     }
 
     // final stable screen
