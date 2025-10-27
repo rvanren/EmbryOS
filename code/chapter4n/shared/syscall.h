@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "platform.h"
 
 enum syscall {
     SYS_EXIT,       // exit process
@@ -32,3 +33,10 @@ typedef uint16_t cell_t;
 #define CELL_CH(c)          (c & 0xFF)
 #define CELL_FG(c)          (((c) >> CELL_FOREGROUND) & 0x7)
 #define CELL_BG(c)          (((c) >> CELL_BACKGROUND) & 0x7)
+
+static inline void user_delay(int ms) {  // pseudo system call
+    while (ms > 0) {
+        for (volatile int i = 0; i < DELAY_MS; i++) ;
+        ms--;
+    }
+}

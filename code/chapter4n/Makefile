@@ -16,7 +16,7 @@ APPS_DIR   = apps
 include $(APPS_DIR)/apps.mk          # import APPS from one place
 
 APP_SRCS = $(addprefix $(APPS_DIR)/,$(addsuffix .c,$(APPS)))
-APP_LIB = apps/dir.c apps/putchar.c
+APP_LIB = apps/dir.c
 
 all: $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"

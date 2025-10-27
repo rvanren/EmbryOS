@@ -1,10 +1,10 @@
-#include "frame.h"
 #include "sched.h"
 #include "kprintf.h"
-#include "ctx.h"
 #include "syscall.h"
 #include "uart.h"
+#include "screen.h"
 #include "interrupt.h"
+#include "frame.h"
 
 #ifdef CH6
 #include "plic.h"
@@ -70,6 +70,9 @@ int main(void) {
     intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
 #endif
+
+    screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
+                        CELL(' ', ANSI_WHITE, ANSI_BLACK));
 
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();

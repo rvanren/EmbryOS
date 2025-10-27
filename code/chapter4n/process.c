@@ -5,8 +5,6 @@
 #include "screen.h"
 
 struct pcb *proc_init(struct rect area){
-    screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
-                        CELL(' ', ANSI_WHITE, ANSI_BLACK));
     struct pcb *pcb = frame_alloc();
     memset(pcb, 0, sizeof(*pcb));
     pcb->executable = -1;
