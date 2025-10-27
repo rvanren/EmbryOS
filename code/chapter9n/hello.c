@@ -30,7 +30,7 @@ void exception_handler(struct trap_frame *tf) {
 int main(void) {
     extern void syscall_handler(struct trap_frame *);
 
-    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
+    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init(); pmp_init();
 
 #ifdef CH11
     files_init();
