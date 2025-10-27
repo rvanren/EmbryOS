@@ -1,8 +1,3 @@
-#include <stdarg.h>
-#include "stdio.h"
-
-#ifdef notdef
-
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
     int i = 0;
@@ -11,18 +6,18 @@ static void print_unsigned(unsigned int x, unsigned int base) {
         buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
         x /= base;
     } while (x != 0);
-    while (--i >= 0) putchar(buf[i]);
+    while (--i >= 0) PUTCHAR(buf[i]);
 }
 
-void printf(const char *fmt, ...) {
+void PRINTF(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     for (; *fmt; fmt++) {
-        if (*fmt != '%') { putchar(*fmt); continue; }
+        if (*fmt != '%') { PUTCHAR(*fmt); continue; }
         fmt++;
         switch (*fmt) {
         case 'd': { int x = va_arg(ap, int);
-            if (x < 0) { putchar('-'); x = -x; }
+            if (x < 0) { PUTCHAR('-'); x = -x; }
             print_unsigned((unsigned int) x, 10);
             break;
         }
@@ -35,28 +30,19 @@ void printf(const char *fmt, ...) {
             break;
         }
         case 's': { char *s = va_arg(ap, char *);
-            while (*s) putchar(*s++);
+            while (*s) PUTCHAR(*s++);
             break;
         }
         case 'c': { int c = va_arg(ap, int);
-            putchar(c);
+            PUTCHAR(c);
             break;
         }
         case '%':
-            putchar('%');
+            PUTCHAR('%');
             break;
         default:
-            putchar('%'); putchar(*fmt);
+            PUTCHAR('%'); PUTCHAR(*fmt);
         }
     }
     va_end(ap);
 }
-
-#else
-
-#define PRINTF printf
-#define PUTCHAR(c) putchar((c))
-
-#include "printf_template.c"
-
-#endif
