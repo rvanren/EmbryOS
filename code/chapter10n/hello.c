@@ -3,11 +3,14 @@
 #include "stdio.h"
 #include "interrupt.h"
 #include "ctx.h"
-#include "files.h"
 #include "mtime.h"
 #include "syscall.h"
 #include "uart.h"
 #include "plic.h"
+
+#ifdef CH11
+#include "files.h"
+#endif
 
 #define QUANTUM          50000        // 50 milliseconds
 
@@ -27,7 +30,12 @@ void exception_handler(struct trap_frame *tf) {
 int main(void) {
     extern void syscall_handler(struct trap_frame *);
 
-    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init(); files_init();
+    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
+
+#ifdef CH11
+    files_init();
+#endif
+
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
     intr_set_handler(INTR_TIMER, timer_handler);
