@@ -4,8 +4,6 @@
 #include "ctx.h"
 #include "syscall.h"
 #include "uart.h"
-
-#ifdef CH4
 #include "interrupt.h"
 
 void exception_handler(struct trap_frame *tf) {
@@ -15,7 +13,6 @@ void exception_handler(struct trap_frame *tf) {
                         tf->mcause & 0xFFF, tf->mepc, tf->mtval);
     proc_exit();
 }
-#endif
 
 #ifdef CH5
 #include "mtime.h"
@@ -41,12 +38,9 @@ void timer_handler(struct trap_frame *tf) {
 #endif
 
 int main(void) {
-    frame_init(); uart_init();
-
-#ifdef CH4
+    uart_init();
     intr_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-#endif
 
 #ifdef CH6
     plic_init();
@@ -60,8 +54,11 @@ int main(void) {
     files_init();
 #endif
 
+#ifdef CH4
+    frame_init();
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
+#endif
 
 #ifdef CH7
     extern void syscall_handler(struct trap_frame *);
@@ -78,6 +75,8 @@ int main(void) {
     mtime_reset(QUANTUM);
 #endif
 
+#ifdef CH4
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();
+#endif
 }

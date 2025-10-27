@@ -1,5 +1,3 @@
-#ifdef CH4
-
 #pragma once
 
 #include "trap.h"
@@ -17,5 +15,3 @@ int intr_init();            // initialize this module
 
 // Set the handler for the given type of interrupt
 void intr_set_handler(enum intr_class which, trap_entry_t handler);
-
-#endif
