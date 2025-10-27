@@ -21,7 +21,9 @@ void proc_reap_zombies(void) {
 
 void proc_exit(void) {
     struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
+#ifdef CH6
     uart_exit(pcb);
+#endif
     pcb->next = zombies;
     zombies = pcb;
     sched_block(pcb);
