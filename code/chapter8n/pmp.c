@@ -16,16 +16,23 @@ enum {
   PMP_L = 1 << 7,
 };
 
-static inline uintptr_t pmp_napot_addr(uintptr_t base) {
-  return (base >> 2) | ((PAGE_SIZE - 1) >> 3);
+static inline uintptr_t pmp_napot_addr(uintptr_t base, uintptr_t size) {
+  return (base >> 2) | ((size - 1) >> 3);
 }
 
+#ifdef CH10
 // Set PMP registers (before each mret)
 void pmp_load(struct pcb *pcb) {
 #ifndef NO_PMP
-    write_csr(pmpaddr0, pmp_napot_addr((uintptr_t) pcb->base)); 
-    write_csr(pmpaddr1, pmp_napot_addr((uintptr_t) pcb->stack)); 
+    write_csr(pmpaddr0, pmp_napot_addr((uintptr_t) pcb->base, PAGE_SIZE)); 
+    write_csr(pmpaddr1, pmp_napot_addr((uintptr_t) pcb->stack, PAGE_SIZE)); 
     write_csr(pmpcfg0, ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)) |
                         ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W) << 8));
 #endif
+}
+#endif
+
+void pmp_init(void) {
+    write_csr(pmpaddr0, pmp_napot_addr(0x80000000, 0x400000)); 
+    write_csr(pmpcfg0, (uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X));
 }

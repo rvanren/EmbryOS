@@ -2,12 +2,9 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
+#include "pmp.h"
 #include "stdio.h"
 #include "string.h"
-
-#ifdef CH10
-#include "pmp.h"
-#endif
 
 #ifdef CH11
 #include "flat.h"
@@ -70,7 +67,8 @@ void exec_user(void) {
 #endif
 
 #ifdef CH10
-    pmp_load(self);  // Load PMP registers
+    // Load PMP registers
+    pmp_load(self);
 #endif
 
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
