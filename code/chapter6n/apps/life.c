@@ -1,9 +1,9 @@
 #include "syslib.h"
 
-#define WIDTH     39
-#define HEIGHT    11
-#define ITERATION 20
-#define DELAY     50000000   // adjust for animation speed
+#define WIDTH      39
+#define HEIGHT     11
+#define ITERATIONS 100
+#define DELAY      50000000   // adjust for animation speed
 
 struct cell { int x, y; };
 
@@ -80,7 +80,7 @@ static void updateGrid(struct life *L) {
 void life_main(void) {
     struct life L;
     initGosperGun(&L, 0, 0);
-    for (int t = 0; t < ITERATION; t++) {
+    for (int t = 0; t < ITERATIONS; t++) {
         drawGrid(&L);
         updateGrid(&L);
         for (volatile int i = 0; i < DELAY; i++) ;
