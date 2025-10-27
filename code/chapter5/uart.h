@@ -11,7 +11,3 @@ void uart_isr();        // the UART interrupt service routine
 void uart_exit(struct pcb *pcb);  // called when process exits
 void uart_init(void);   // initialize this module
 void uart_putchar(char c);   // write a character to the screen
-
-#ifdef CH6
-int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu);
-#endif

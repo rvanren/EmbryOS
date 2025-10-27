@@ -86,7 +86,3 @@ void life_main(void) {
         for (volatile int i = 0; i < DELAY; i++) ;
     }
 }
-
-#ifdef CH8
-void main() { life_main(); }
-#endif
