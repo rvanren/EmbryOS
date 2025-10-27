@@ -1,7 +1,7 @@
 #include <stddef.h>
 #include "frame.h"
 #include "process.h"
-#include "stdio.h"
+#include "kprintf.h"
 
 void proc_check_legal(struct pcb *self, uintptr_t start, int size) {
     if (size == 0) return;
