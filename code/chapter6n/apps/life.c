@@ -2,7 +2,7 @@
 
 #define WIDTH     39
 #define HEIGHT    11
-#define ITERATION 200
+#define ITERATION 20
 #define DELAY     50000000   // adjust for animation speed
 
 struct cell { int x, y; };
