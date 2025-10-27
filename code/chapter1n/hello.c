@@ -102,8 +102,9 @@ int main(void) {
     extern void splash_main();
     splash_main();
 #else
-    kprintf("EmbryOS: Life Has Begun\n");
-#endif
-    for (;;) __asm__ volatile ("wfi");
+    for (;;) {
+        kprintf("EmbryOS: Life Has Begun\n");
+        user_delay(1000);
+    }
 #endif
 }
