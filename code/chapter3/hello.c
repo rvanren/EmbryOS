@@ -8,6 +8,7 @@
 void exception_handler(struct trap_frame *tf) {
     kprintf("trap: cause=%d mepc=%x mtval=%x<",
                         tf->mcause & 0xFFF, tf->mepc, tf->mtval);
+    for (;;) ;
 }
 
 int main(void) {
