@@ -3,8 +3,8 @@
 #include "process.h"
 
 // There are three priorities (0 being the highest):
-//  0: interactive processes, which are new processes or processes who just woke up
-//     from having been blocked on input
+//  0: interactive processes, which are new processes or processes who just
+//     woke up from having been blocked on input
 //  1: background processes, which are processes that have been pre-empted
 //  2: the "main" process that waits for interrupts in case everything else is idle
 #define N_PRIORITIES 3
@@ -27,8 +27,8 @@ void sched_block(struct pcb *pcb);
 // it is moved to run_queue[1].
 void sched_yield(void);
 
-// Start a new process with the given initial function and screen area.
-void sched_run(void (*fn)(void), struct rect area);
+// Start a new process with the given executable, screen area, and arguments.
+void sched_run(int executable, struct rect area, void *args, int size);
 
 // This function is called when everything's idle.  It waits for the next
 // interrupt.

@@ -1,24 +1,24 @@
 #include <stdint.h>
 #include "trap.h"
 #include "interrupt.h"
-#include "stdio.h"
+#include "sched.h"
+#include "kprintf.h"
+
+#ifdef CH10
+#include "pmp.h"
+#endif
 
 #define MIE_MASK (1u << 3)
 
 static void no_handler(struct trap_frame *tf) {
-    printf("Bad interrupt\n");
+    kprintf("Bad interrupt\n");
     for (;;) ;
 }
 
 static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
-void intr_enable(void) {
-    __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
-}
-
-void intr_disable(void) {
-    __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK));
-}
+void intr_enable(void) { __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK)); }
+void intr_disable(void) { __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK)); }
 
 void software_trap_handler(struct trap_frame *tf) {
     int mcause, mepc;
@@ -28,18 +28,21 @@ void software_trap_handler(struct trap_frame *tf) {
         case  3: break;
         case  7: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: printf("Unknown interrupt cause %x\n", mcause);
+        default: kprintf("Unknown interrupt cause %x\n", mcause);
         }
     }
     else {
         switch (mcause & 0xFFF) {
         case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
         default:
-            printf("trap: cause=%d mepc=%x mtval=%x\n",
-                            mcause & 0xFFF, tf->mepc, tf->mtval);
             (*handlers[INTR_EXCEPTION])(tf);
         }
     }
+
+#ifdef CH10
+    struct pcb *self = run_queue[proc_current]->next;
+    if (self->base != 0) pmp_load(self);
+#endif
 }
 
 void intr_set_handler(enum intr_class which, trap_entry_t handler) {

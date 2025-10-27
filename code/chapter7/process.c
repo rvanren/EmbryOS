@@ -1,30 +1,31 @@
 #include <stdint.h>
+#include "string.h"
 #include "frame.h"
 #include "process.h"
 #include "screen.h"
 
 struct pcb *proc_init(struct rect area){
-    screen_clear(0, 0, SCREEN_COLS, SCREEN_ROWS, 0);
     struct pcb *pcb = frame_alloc();
-    pcb->priority = 0;
+    memset(pcb, 0, sizeof(*pcb));
+    pcb->executable = -1;
     pcb->area = area;
-    pcb->next = 0;
     return pcb;
 }
 
-struct pcb *proc_create(struct rect area) {
+struct pcb *proc_create(int executable, struct rect area, void *args, int size) {
     struct pcb *pcb = frame_alloc();
-    pcb->priority = 0;
+    memset(pcb, 0, sizeof(*pcb));
+    pcb->executable = executable;
     pcb->area = area;
-    pcb->next = 0;
+    pcb->args = args;
+    pcb->size = size;
     return pcb;
 }
 
-void proc_put(struct pcb *pcb, int row, int col, char ch, int fg, int bg) {
+void proc_put(struct pcb *pcb, int row, int col, cell_t cell) {
     if (row < 0 || row >= pcb->area.h) return;
     if (col < 0 || col >= pcb->area.w) return;
-    screen_move(pcb->area.y + row, pcb->area.x + col);
-    screen_put(ch, fg, bg);
+    screen_put(pcb->area.y + row, pcb->area.x + col, cell);
 }
 
 void proc_enqueue(struct pcb **q, struct pcb *pcb) {
