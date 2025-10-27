@@ -7,4 +7,5 @@ _start:
     li sp, 0x80400000     # set the stack pointer to top of stack
     call main             # call C main() code
 _end:
-    j _end                # just loop for ever
+    wfi                   # go to sleep
+    j _end                # go back to sleep

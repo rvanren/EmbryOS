@@ -1,7 +1,10 @@
+.SUFFIXES:
+
 QEMU        = qemu-system-riscv32
-RISCV_CC    = riscv-none-elf-gcc
+CC          = riscv-none-elf-gcc
 OBJDUMP     = riscv-none-elf-objdump
 OBJCOPY     = riscv-none-elf-objcopy
+NM          = riscv-none-elf-nm
 YELLOW      = \033[1;33m
 END         = \033[0m
 
@@ -11,7 +14,7 @@ DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(RISCV_CC) $(CFLAGS) start.s ctx.s trap.s hello.c frame.c stdio.c sched.c screen.c process.c interrupt.c mtime.c uart.c -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s trap.s hello.c kprintf.c uart2.c screen.c interrupt.c apps/splash.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
@@ -20,4 +23,5 @@ qemu: all
 	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
 
 clean:
+	@printf "$(YELLOW)-------- clean --------$(END)\n"
 	rm -f hello.bin hello.lst hello.elf
