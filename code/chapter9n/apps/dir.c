@@ -59,9 +59,7 @@ int dir_lookup(const char *name) {
     if (strcmp(name, "life")   == 0) return 4;
     if (strcmp(name, "shell")  == 0) return 5;
     if (strcmp(name, "snake")  == 0) return 6;
-#ifdef CH10
     if (strcmp(name, "crash")  == 0) return 7;
-#endif
     return -1;
 }
 

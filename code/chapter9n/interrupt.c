@@ -3,10 +3,7 @@
 #include "interrupt.h"
 #include "sched.h"
 #include "stdio.h"
-
-#ifdef CH10
 #include "pmp.h"
-#endif
 
 #define MIE_MASK (1u << 3)
 
@@ -40,9 +37,7 @@ void software_trap_handler(struct trap_frame *tf) {
     }
 
     struct pcb *self = run_queue[proc_current]->next;
-#ifdef CH10
     if (self->base != 0) pmp_load(self);
-#endif
 }
 
 void intr_set_handler(enum intr_class which, trap_entry_t handler) {

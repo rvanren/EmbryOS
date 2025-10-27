@@ -4,10 +4,7 @@
 #include "sched.h"
 #include "stdio.h"
 #include "string.h"
-
-#ifdef CH10
 #include "pmp.h"
-#endif
 
 #ifdef CH11
 #include "flat.h"
@@ -69,9 +66,7 @@ void exec_user(void) {
     memcpy((void *) sp, self->args, self->size);
 #endif
 
-#ifdef CH10
     pmp_load(self);  // Load PMP registers
-#endif
 
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
