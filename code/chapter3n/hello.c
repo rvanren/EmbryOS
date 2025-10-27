@@ -5,6 +5,7 @@
 #include "syscall.h"
 #include "uart.h"
 #include "interrupt.h"
+#include "screen.h"
 
 void exception_handler(struct trap_frame *tf) {
 #ifdef CH4
@@ -78,6 +79,9 @@ int main(void) {
     intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
 #endif
+
+    screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
+                        CELL(' ', ANSI_WHITE, ANSI_BLACK));
 
 #ifdef CH4
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
