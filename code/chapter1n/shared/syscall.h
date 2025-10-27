@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include "platform.h"
 
 enum syscall {
     SYS_EXIT,       // exit process
