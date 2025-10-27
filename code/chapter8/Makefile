@@ -15,18 +15,56 @@ DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 APPS_DIR   = apps
 include $(APPS_DIR)/apps.mk          # import APPS from one place
 
-APP_SRCS = $(addprefix $(APPS_DIR)/,$(addsuffix .c,$(APPS)))
-APP_LIB = apps/dir.c
+APP_OBJS = $(addprefix $(APPS_DIR)/,$(addsuffix .bin.o,$(APPS)))
+APP_ELFS = $(addprefix $(APPS_DIR)/,$(addsuffix .elf,$(APPS)))
 
 all: apps_gen.c $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c apps_gen.c apps.c frame.c kprintf.c shared/string.c sched.c screen.c process.c proc_clean.c interrupt.c plic.c uart1.c uart2.c mtime.c pmp.c syscall.c $(APP_SRCS) $(APP_LIB) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared start.s ctx.s trap.s enter_user.s hello.c apps.c frame.c shared/printf.c shared/string.c sched.c screen.c process.c proc_clean.c interrupt.c plic.c syscall.c mtime.c pmp.c uart1.c uart2.c apps_gen.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
 	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
+
+# --- Build user binary ---
+
+###############################################################################
+# Delegate user apps build to apps/Makefile
+###############################################################################
+
+RISCV_CC   = riscv-none-elf-gcc
+OBJCOPY    = riscv-none-elf-objcopy
+NM         = riscv-none-elf-nm
+
+APP_OBJS = $(addprefix $(APPS_DIR)/,$(addsuffix .bin.o,$(APPS)))
+APP_ELFS = $(addprefix $(APPS_DIR)/,$(addsuffix .elf,$(APPS)))
+
+# Build user apps first
+$(APP_OBJS) $(APP_ELFS):
+	$(MAKE) -C $(APPS_DIR)
+
+# --- auto-generate apps_gen.c ---
+apps_gen.c: $(APP_ELFS)
+	@echo "// auto-generated" > $@
+	@echo '#include "app_info.h"' >> $@
+	@echo "" >> $@
+	@for f in $^; do \
+	    name=$$(basename $$f .elf); \
+	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
+	    echo "extern char _binary_$${name}_bin_start[], _binary_$${name}_bin_end[];" >> $@; \
+	done; \
+	echo "" >> $@; \
+	echo "struct app_info app_table[] = {" >> $@; \
+	for f in $^; do \
+	    name=$$(basename $$f .elf); \
+	    off=$$($(NM) $$f | awk '/ __global_pointer\$$/ {print $$1}'); \
+	    echo "    { _binary_$${name}_bin_start, _binary_$${name}_bin_end, 0x$${off} }," >> $@; \
+	done; \
+	echo "};" >> $@; \
+	echo "int n_applications = sizeof(app_table)/sizeof(app_table[0]);" >> $@; \
+	echo "Generated $@"
 
 clean:
 	@printf "$(YELLOW)-------- clean --------$(END)\n"
