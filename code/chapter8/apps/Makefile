@@ -17,8 +17,8 @@ APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
 # build both .elf and .o so that top-level can nm the .elf
 all: $(APP_ELFS) $(APP_OBJS)
 
-init.elf: init.c ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c ../shared/string.c dir.c ../shared/printf.c putchar.c
+init.elf: init.c ../shared/string.c ../shared/string.h dir.c dir.h
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c ../shared/string.c dir.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 %.elf: %.c crt0.s crt1.c user.lds ../shared/string.h ../shared/string.c
