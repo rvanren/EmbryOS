@@ -56,4 +56,6 @@ void printf(const char *fmt, ...) {
 #define kprintf printf
 #define uart_putchar(c) putchar((c))
 
+#include "../kprintf.c"
+
 #endif
