@@ -1,3 +1,5 @@
+#ifdef CH9
+
 #include <stdarg.h>
 #include "stdio.h"
 
@@ -49,3 +51,5 @@ void printf(const char *fmt, ...) {
     }
     va_end(ap);
 }
+
+#endif
