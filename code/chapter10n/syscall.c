@@ -5,12 +5,18 @@
 #include "process.h"
 #include "sched.h"
 #include "uart.h"
-#include "flat.h"
 #include "frame.h"
+
+#ifdef CH11
+#include "flat.h"
+#endif
 
 void syscall_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
+
+#ifdef CH11
     extern struct flat flat_fs;
+#endif
 
     switch (tf->a7) {
     case SYS_EXIT:
@@ -28,6 +34,7 @@ void syscall_handler(struct trap_frame *tf) {
     case SYS_GET:
         tf->a0 = uart_get(self, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
+#ifdef CH11
     case SYS_CREATE:
         tf->a0 = flat_create(&flat_fs);
         break;
@@ -45,6 +52,7 @@ void syscall_handler(struct trap_frame *tf) {
     case SYS_DELETE:
         flat_delete(&flat_fs, tf->a0);
         break;
+#endif
     default:
         printf("Unknown syscall %d\n", tf->a7);
     }
