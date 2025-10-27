@@ -85,10 +85,9 @@ static inline void user_delete(int file) {
 
 #else
 
+#ifdef CH4
 #include "process.h"
 #include "sched.h"
-
-#ifdef CH4
 #include "uart.h"
 #include "kprintf.h"
 #include "interrupt.h"

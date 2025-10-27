@@ -1,13 +1,16 @@
-#include "frame.h"
 #include "sched.h"
 #include "kprintf.h"
-#include "ctx.h"
 #include "syscall.h"
 #include "uart.h"
 #include "screen.h"
 
 #ifdef CH3
 #include "interrupt.h"
+
+#ifdef CH4
+#include "frame.h"
+#include "ctx.h"
+#endif
 
 void exception_handler(struct trap_frame *tf) {
 #ifdef CH4
@@ -95,6 +98,5 @@ int main(void) {
 #else
     extern void splash_main();
     splash_main();
-    for (;;) __asm__ volatile ("wfi");
 #endif
 }

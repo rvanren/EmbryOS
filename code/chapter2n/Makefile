@@ -12,14 +12,9 @@ LDFLAGS     = -nostdlib
 CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-APPS_DIR   = apps
-include $(APPS_DIR)/apps.mk          # import APPS from one place
-
-APP_SRCS = $(addprefix $(APPS_DIR)/,$(addsuffix .c,$(APPS)))
-
-all: $(APP_OBJS)
+all:
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s hello.c kprintf.c shared/string.c screen.c uart2.c $(APP_SRCS) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s hello.c kprintf.c uart2.c screen.c apps/splash.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
