@@ -35,7 +35,7 @@ void exec(char *line) {
         printf("Unknown application '%s'\n", argv[i]);
         return;
     }
-#ifdef notdef
+#ifdef CH13
     user_spawn(f, rects[r].x, rects[r].y, rects[r].w, rects[r].h,
                             argv[i], ptr - argv[i]);
 #else

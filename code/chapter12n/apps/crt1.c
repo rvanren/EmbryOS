@@ -6,7 +6,7 @@
 
 void _crt_init(const char *argbuf, size_t arglen) {
     extern int main(int argc, char **argv);
-#ifdef notdef
+#ifdef CH13
     int argc = 0;
     char *argv[MAX_ARGS];
     const char *p = argbuf;

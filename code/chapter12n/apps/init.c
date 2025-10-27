@@ -2,15 +2,13 @@
 #include "stdio.h"
 #include "dir.h"
 
-#ifdef notdef
+#ifdef CH13
 char README[] =
 //   XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
     "This is EmbryOS\n"
     "Type help in the shell for help\n"
     "These are the current apps:\n"
-#ifdef notdef
     "* cat [files] - output files\n"
-#endif
     "* life        - Game of Life\n"
     "* ls          - directory listing\n"
     "* shell       - command shell\n"
@@ -31,7 +29,7 @@ void main(void) {
     dir_create("snake",  7);
     dir_create("crash",  8);
 
-#ifdef notdef
+#ifdef CH13
     dir_create("cat",    9);
     dir_create("help",  10);
 
