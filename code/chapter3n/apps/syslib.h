@@ -133,9 +133,10 @@ static inline void user_yield() {
 
 #else
 
+#include "screen.h"
+
 static inline void user_put(int row, int col, cell_t cell) {
-    struct pcb *self = run_queue[proc_current]->next;
-    proc_put(self, row, col, cell);
+    screen_put(row, col, cell);
 }
 
 #endif

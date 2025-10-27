@@ -86,5 +86,9 @@ int main(void) {
 #ifdef CH4
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();
+#else
+    extern splash_init();
+    splash_init();
+    for (;;) __asm__ volatile ("wfi");
 #endif
 }
