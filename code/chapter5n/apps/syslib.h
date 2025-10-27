@@ -125,7 +125,6 @@ static inline int user_yield() {
     intr_disable();
     sched_yield();
     intr_enable();
-    return c;
 }
 
 #endif
