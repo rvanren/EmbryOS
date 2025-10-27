@@ -26,9 +26,6 @@ void main(void) {
     dir_create("snake",  5);
     dir_create("shell",  6);
     dir_create("crash",  7);
-#endif
-
-#ifdef CH12
     dir_create("ls",     8);
 #endif
 
