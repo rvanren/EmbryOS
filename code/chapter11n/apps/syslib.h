@@ -37,6 +37,8 @@ static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
     return a0;
 }
 
+#ifdef CH12
+
 static inline int user_create(void) {
     register int a7 asm("a7") = SYS_CREATE;
     register int a0 asm("a0");
@@ -76,3 +78,5 @@ static inline void user_delete(int file) {
     register int a0 asm("a0") = file;
     asm volatile("ecall" : : "r"(a0));
 }
+
+#endif

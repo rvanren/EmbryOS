@@ -18,6 +18,7 @@ char README[] =
 void main(void) {
     char line[128];
 
+#ifdef CH12
     printf("Initializing directory...\n");
 
     // This should correspond to the order in apps.mk
@@ -28,6 +29,7 @@ void main(void) {
     dir_create("shell",  6);
     dir_create("snake",  7);
     dir_create("crash",  8);
+#endif
 
 #ifdef CH13
     dir_create("cat",    9);

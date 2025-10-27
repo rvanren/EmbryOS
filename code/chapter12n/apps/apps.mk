@@ -1,3 +1,3 @@
 # The list of applications to be compiled into the kernel image is here
 # Note that init must be first
-APPS = init splash life ls shell snake crash
+APPS = init splash life shell snake crash ls

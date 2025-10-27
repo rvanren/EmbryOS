@@ -2,6 +2,8 @@
 #include "string.h"
 #include "dir.h"
 
+#ifdef CH12
+
 #define DIR_FILE 1
 
 int dir_lookup(const char *name) {
@@ -49,3 +51,15 @@ void dir_list(void (*fn)(const char *name, int file)) {
             fn(e.name, e.file);
     }
 }
+
+#else
+
+int dir_lookup(const char *name) {
+    if (strcmp(name, "splash") == 0) return 3;
+    if (strcmp(name, "life")   == 0) return 4;
+    if (strcmp(name, "shell")  == 0) return 5;
+    if (strcmp(name, "snake")  == 0) return 6;
+    if (strcmp(name, "crash")  == 0) return 7;
+}
+
+#endif
