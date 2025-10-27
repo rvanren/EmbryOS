@@ -16,11 +16,11 @@ APPS_DIR   = apps
 include $(APPS_DIR)/apps.mk          # import APPS from one place
 
 APP_SRCS = $(addprefix $(APPS_DIR)/,$(addsuffix .c,$(APPS)))
-APP_LIB = apps/dir.c apps/window1.c apps/window2.c
+APP_LIB = apps/dir.c apps/putchar.c apps/window1.c apps/window2.c
 
 all: $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared start.s ctx.s trap.s user_setup.s enter_user.s hello.c apps.c frame.c shared/printf.c shared/string.c sched.c screen.c process.c proc_clean.c procsys.c interrupt.c plic.c syscall.c mtime.c uart1.c uart2.c $(APP_SRCS) $(APP_LIB) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared start.s ctx.s trap.s user_setup.s enter_user.s hello.c apps.c frame.c kprintf.c shared/printf.c shared/string.c sched.c screen.c process.c proc_clean.c procsys.c interrupt.c plic.c syscall.c mtime.c uart1.c uart2.c $(APP_SRCS) $(APP_LIB) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 

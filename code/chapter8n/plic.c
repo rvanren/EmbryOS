@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "trap.h"
 #include "interrupt.h"
-#include "stdio.h"
 #include "process.h"
 #include "uart.h"
 #include "plic.h"
