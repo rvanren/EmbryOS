@@ -85,6 +85,6 @@ void exec_user(void) {
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
 #else
-    enter_user(self->executable - 2);
+    enter_user(apps[self->executable - 2]);
 #endif
 }
