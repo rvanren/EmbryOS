@@ -3,7 +3,7 @@
 #define WIDTH      39
 #define HEIGHT     11
 #define ITERATIONS 100
-#define DELAY      50000000   // adjust for animation speed
+#define DELAY      200   // adjust for animation speed
 
 struct cell { int x, y; };
 
@@ -86,7 +86,7 @@ void life_main(void) {
 #endif
         drawGrid(&L);
         updateGrid(&L);
-        for (volatile int i = 0; i < DELAY; i++) ;
+        user_delay(DELAY);
     }
 }
 
