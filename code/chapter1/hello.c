@@ -1,4 +1,3 @@
-#include "frame.h"
 #include "sched.h"
 #include "kprintf.h"
 #include "ctx.h"
@@ -11,6 +10,10 @@
 
 #ifdef CH3
 #include "interrupt.h"
+
+#ifdef CH4
+#include "frame.h"
+#endif
 
 void exception_handler(struct trap_frame *tf) {
 #ifdef CH4
