@@ -5,6 +5,7 @@
 #define MAX_ARGS    16
 
 void _crt_init(const char *argbuf, size_t arglen) {
+#ifdef notdef
     extern int main(int argc, char **argv);
     int argc = 0;
     char *argv[MAX_ARGS];
@@ -18,5 +19,8 @@ void _crt_init(const char *argbuf, size_t arglen) {
     argv[argc] = NULL;
 
     main(argc, argv);
+#else
+    main(0, 0);
+#endif
     user_exit();
 }

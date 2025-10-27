@@ -38,7 +38,7 @@ void exec_user(void) {
     memset(&self->base[size], 0, PAGE_SIZE - size);
     memset(self->stack, 0, PAGE_SIZE);
 
-    // Initialized stack page
+    // Initialize stack page
     uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
     sp -= self->size;
     sp &= ~0xF;   // align down to 16 bytes

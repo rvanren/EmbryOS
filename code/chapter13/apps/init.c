@@ -21,13 +21,13 @@ void main(void) {
     // This should correspond to the order in apps.mk
     dir_create("init",   2);    // init must be 2
     dir_create("splash", 3);
-    dir_create("cat",    4);
-    dir_create("crash",  5);
-    dir_create("help",   6);
-    dir_create("life",   7);
-    dir_create("ls",     8);
-    dir_create("shell",  9);
-    dir_create("snake", 10);
+    dir_create("life",   4);
+    dir_create("ls",     5);
+    dir_create("shell",  6);
+    dir_create("snake",  7);
+    dir_create("crash",  8);
+    dir_create("cat",    9);
+    dir_create("help",  10);
 
     int readme = user_create();
     user_write(readme, 0, README, sizeof(README) - 1);
