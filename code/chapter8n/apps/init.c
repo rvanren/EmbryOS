@@ -39,10 +39,12 @@ void main(void) {
 #endif
 
 #ifdef CH9
-    user_spawn(dir_lookup("shell"),   0, 0, 40, 12, 0, 0);
+    user_spawn(dir_lookup("shell"),   0,  0, 40, 12, 0, 0);
 #else
-    user_spawn(dir_lookup("snake"),   0, 0, 40, 12, 0, 0);
+    user_spawn(dir_lookup("snake"),   0,  0, 40, 12, 0, 0);
+    user_spawn(dir_lookup("life"),    0, 12, 40, 12, 0, 0);
+    user_spawn(dir_lookup("life"),   40, 12, 40, 12, 0, 0);
 #endif
 
-    user_spawn(dir_lookup("splash"), 40, 0, 40, 12, 0, 0);
+    user_spawn(dir_lookup("splash"), 40,  0, 40, 12, 0, 0);
 }
