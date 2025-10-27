@@ -86,6 +86,7 @@ static inline void user_delete(int file) {
 #else
 
 #include "process.h"
+#include "sched.h"
 #include "uart.h"
 #include "kprintf.h"
 
@@ -104,7 +105,7 @@ static inline void user_put(int row, int col, cell_t cell) {
 }
 
 static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
-    return = uart_get(self, row, col, cursor_f, cursor_u);
+    return uart_get(self, row, col, cursor_f, cursor_u);
 }
 
 #endif
