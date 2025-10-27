@@ -33,6 +33,10 @@ cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c cat.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
+help.elf: help.c window1.c window2.c window.h ../shared/string.c ../shared/string.h ../shared/stdio.h ../shared/printf.c putchar.c
+	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c help.c window1.c window2.c ../shared/string.c ../shared/printf.c putchar.c
+	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
+
 %.elf: %.c crt0.s crt1.c user.lds ../shared/string.h ../shared/string.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ../shared/string.c $<
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
