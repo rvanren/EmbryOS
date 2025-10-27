@@ -106,19 +106,14 @@ static int read_direction_or_quit(int *dr,int *dc,int *quit){
     return 0;
 }
 
-#ifdef CH9
-void main(void)
-#else
-void snake_main(void)
-#endif
-{
+/* ----- main loop with "move only on valid direction" ----- */
+int main(void){
     init_snake();
 
-    // main loop with "move only on valid direction"
     while(1){
         int dr=dir_r, dc=dir_c, quit=0;
         int have_dir = read_direction_or_quit(&dr,&dc,&quit);
-        if(quit){ user_exit(); return; }
+        if(quit){ user_exit(); return 0; }
 
         // Only proceed if we got a *new* direction command
         if(!have_dir){

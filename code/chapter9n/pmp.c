@@ -20,6 +20,7 @@ static inline uintptr_t pmp_napot_addr(uintptr_t base) {
   return (base >> 2) | ((PAGE_SIZE - 1) >> 3);
 }
 
+#ifdef CH10
 // Set PMP registers (before each mret)
 void pmp_load(struct pcb *pcb) {
 #ifndef NO_PMP
@@ -27,5 +28,6 @@ void pmp_load(struct pcb *pcb) {
     write_csr(pmpaddr1, pmp_napot_addr((uintptr_t) pcb->stack)); 
     write_csr(pmpcfg0, ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W | PMP_X)) |
                         ((uintptr_t) (PMP_A_NAPOT | PMP_R | PMP_W) << 8));
+#endif
 #endif
 }

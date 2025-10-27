@@ -22,12 +22,7 @@ static void put_centered(const char *s, int row) {
         user_put(row, start + i, CELL(s[i], ANSI_WHITE, ANSI_BLACK));
 }
 
-#ifdef CH9
-void main(void)
-#else
-void splash_main(void)
-#endif
-{
+int main(void) {
     clear();
 
     const char *title = "EmbryOS";

@@ -65,16 +65,12 @@ static void updateGrid(void) {
             grid[r][c] = newGrid[r][c];
 }
 
-#ifdef CH9
-void main(void)
-#else
-void life_main(void)
-#endif
-{
+int main(void) {
     initGosperGun(0, 0);
     for (int t = 0; t < ITERATION; t++) {
         drawGrid();
         updateGrid();
         for (volatile int i = 0; i < DELAY; i++) ;
     }
+    return 0;
 }

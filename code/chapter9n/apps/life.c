@@ -1,11 +1,9 @@
 #include "syslib.h"
 
-#define WIDTH   39
-#define HEIGHT  11
-#define ITERATION  200
-#define DELAY   50000000   // adjust for animation speed
-
-int grid[HEIGHT][WIDTH];
+#define WIDTH     39
+#define HEIGHT    11
+#define ITERATION 200
+#define DELAY     50000000   // adjust for animation speed
 
 struct cell { int x, y; };
 
@@ -19,57 +17,72 @@ static const struct cell gosper_gun[] = {
 };
 static const int gosper_gun_cells = sizeof(gosper_gun) / sizeof(gosper_gun[0]);
 
-static void clearGrid(void) {
+//----------------------------------------------
+// Encapsulated state
+//----------------------------------------------
+struct life {
+    int grid[HEIGHT][WIDTH];
+};
+
+//----------------------------------------------
+// Operations
+//----------------------------------------------
+static void clearGrid(struct life *L) {
     for (int r = 0; r < HEIGHT; r++)
-        for (int c = 0; c < WIDTH; c++) grid[r][c] = 0;
+        for (int c = 0; c < WIDTH; c++)
+            L->grid[r][c] = 0;
 }
 
-static void initGosperGun(int offset_x, int offset_y) {
-    clearGrid();
+static void initGosperGun(struct life *L, int offset_x, int offset_y) {
+    clearGrid(L);
     for (int i = 0; i < gosper_gun_cells; i++) {
         int x = gosper_gun[i].x + offset_x;
         int y = gosper_gun[i].y + offset_y;
         if (x >= 0 && x < WIDTH && y >= 0 && y < HEIGHT)
-            grid[y][x] = 1;
+            L->grid[y][x] = 1;
     }
 }
 
-static void drawGrid(void) {
+static void drawGrid(const struct life *L) {
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++)
             user_put(r, c, CELL(' ', ANSI_WHITE,
-                    grid[r][c] ? ANSI_YELLOW : ANSI_GREEN));
+                    L->grid[r][c] ? ANSI_YELLOW : ANSI_GREEN));
 }
 
-static int countAliveNeighbours(int r, int c) {
+static int countAliveNeighbours(const struct life *L, int r, int c) {
     int count = 0;
     for (int dy = -1; dy <= 1; dy++)
         for (int dx = -1; dx <= 1; dx++) {
             if (dx == 0 && dy == 0) continue;
             int y = (r + dy + HEIGHT) % HEIGHT;
             int x = (c + dx + WIDTH) % WIDTH;
-            count += grid[y][x];
+            count += L->grid[y][x];
         }
     return count;
 }
 
-static void updateGrid(void) {
+static void updateGrid(struct life *L) {
     int newGrid[HEIGHT][WIDTH];
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++) {
-            int n = countAliveNeighbours(r, c);
-            newGrid[r][c] = grid[r][c] ? (n == 2 || n == 3) : (n == 3);
+            int n = countAliveNeighbours(L, r, c);
+            newGrid[r][c] = L->grid[r][c] ? (n == 2 || n == 3) : (n == 3);
         }
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++)
-            grid[r][c] = newGrid[r][c];
+            L->grid[r][c] = newGrid[r][c];
 }
 
+//----------------------------------------------
+// Main
+//----------------------------------------------
 void main(void) {
-    initGosperGun(0, 0);
+    struct life L;
+    initGosperGun(&L, 0, 0);
     for (int t = 0; t < ITERATION; t++) {
-        drawGrid();
-        updateGrid();
+        drawGrid(&L);
+        updateGrid(&L);
         for (volatile int i = 0; i < DELAY; i++) ;
     }
 }

@@ -2,9 +2,8 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "kprintf.h"
+#include "stdio.h"
 #include "string.h"
-#include "syscall.h"
 
 #ifdef CH10
 #include "pmp.h"
@@ -14,39 +13,21 @@
 #include "flat.h"
 extern struct flat flat_fs;
 #else
-#ifdef CH9
 #include "app_info.h"
+#endif
+
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
-#else
-static inline void user_exit() {
-    register int a7 asm("a7") = SYS_EXIT;
-    asm volatile("ecall" : : "r"(a7));
-}
-void init_main(), splash_main(), life_main(), shell_main(), snake_main();
-void init_crt(){ init_main(); user_exit(); }
-void splash_crt(){ splash_main(); user_exit(); }
-void life_crt(){ life_main(); user_exit(); }
-void shell_crt(){ shell_main(); user_exit(); }
-void snake_crt(){ snake_main(); user_exit(); }
-static void *apps[] = {
-    init_crt, splash_crt, life_crt, shell_crt, snake_crt
-};
-
-__attribute__((noreturn)) void enter_user(void (*entry)());
-#endif
-#endif
 
 void exec_user(void) {
     struct pcb *self = run_queue[proc_current]->next;
 
-#ifdef CH9
     self->base = frame_alloc();
     self->stack = frame_alloc();
     if (self->base == 0 || self->stack == 0) {
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("out of memory<");
+        printf("out of memory<");
         proc_exit();
     }
 
@@ -57,7 +38,7 @@ void exec_user(void) {
     uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
     if (size > PAGE_SIZE) {
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("executable too large<");
+        printf("executable too large<");
         proc_exit();
     }
 
@@ -70,7 +51,7 @@ void exec_user(void) {
     uint32_t size = ai->end - ai->start;
     if (size > PAGE_SIZE) {
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("executable too large<");
+        printf("executable too large<");
         proc_exit();
     }
 
@@ -94,7 +75,4 @@ void exec_user(void) {
 
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
-#else
-    enter_user(apps[self->executable - 2]);
-#endif
 }

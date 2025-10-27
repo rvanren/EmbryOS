@@ -15,12 +15,8 @@ char README[] =
     "* snake       - snake game\n";
 #endif
 
-#ifdef CH9
-void main(void)
-#else
-void init_main(void)
-#endif
-{
+void main(void) {
+    char line[128];
 
 #ifdef CH12
     printf("Initializing directory...\n");
