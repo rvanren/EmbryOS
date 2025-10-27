@@ -8,7 +8,7 @@ NM        = riscv-none-elf-nm
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 CFLAGS = -g -I../shared -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
-LDFLAGS = -Wl,--no-relax -T user.lds
+LDFLAGS = -Wl,--no-relax -Wl,--no-warn-rwx-segments -T user.lds
 
 APP_ELFS  = $(addsuffix .elf,$(APPS))
 APP_BINS  = $(addsuffix .bin,$(APPS))
