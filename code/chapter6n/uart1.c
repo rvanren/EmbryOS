@@ -6,7 +6,7 @@
 struct pcb *uart_wait = 0;    // circular wait queue
 struct pcb *uart_focus;       // keyboard focus
 
-static void uart_put(struct pcb *pcb, cell_t c) {
+void uart_put(struct pcb *pcb, cell_t c) {
     proc_put(pcb, pcb->kbd_row, pcb->kbd_col, c);
 }
 
