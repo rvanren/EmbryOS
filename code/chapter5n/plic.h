@@ -1,3 +1,5 @@
+#ifdef CH6
+
 #include "trap.h"
 
 // Platform-Level Interrupt Controller interface.  It
@@ -7,7 +9,9 @@
 //  - allows the OS to acknowledge ("complete") them.
 
 // This function is called when there is an external interrupt
-void interrupt_handler(struct trap_frame *tf);
+void plic_handler(struct trap_frame *tf);
 
 // Initializes the plic module
 void plic_init();
+
+#endif

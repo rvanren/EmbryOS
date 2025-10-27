@@ -13,7 +13,7 @@
 
 #define MIE_MASK (1u << 3)
 
-void interrupt_handler(struct trap_frame *tf) {
+void plic_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
     if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM = claim;
