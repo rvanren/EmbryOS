@@ -52,7 +52,3 @@ int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     self->kbd_size--;
     return c;
 }
-
-void uart_exit(struct pcb *self) {
-    if (self == uart_focus) uart_focus = 0;
-}

@@ -41,3 +41,7 @@ void uart_char(char c) {
     pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
     pcb->kbd_size++;
 }
+
+void uart_exit(struct pcb *self) {
+    if (self == uart_focus) uart_focus = 0;
+}
