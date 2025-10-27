@@ -81,9 +81,6 @@ void life_main(void) {
     struct life L;
     initGosperGun(&L, 0, 0);
     for (int t = 0; t < ITERATIONS; t++) {
-#ifdef CH6
-        user_yield();
-#endif
         drawGrid(&L);
         updateGrid(&L);
         for (volatile int i = 0; i < DELAY; i++) ;

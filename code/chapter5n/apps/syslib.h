@@ -121,10 +121,4 @@ static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
     return c;
 }
 
-static inline int user_yield() {
-    intr_disable();
-    sched_yield();
-    intr_enable();
-}
-
 #endif

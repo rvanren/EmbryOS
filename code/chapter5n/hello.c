@@ -3,11 +3,14 @@
 #include "kprintf.h"
 #include "interrupt.h"
 #include "ctx.h"
-#include "mtime.h"
 #include "syscall.h"
 #include "uart.h"
 #include "plic.h"
+#include "mtime.h"
+
+#ifdef CH7
 #include "pmp.h"
+#endif
 
 #ifdef CH11
 #include "files.h"
@@ -29,7 +32,7 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); plic_init(); uart_init(); mtime_init();
+    frame_init(); intr_init(); plic_init(); uart_init();
 
 #ifdef CH7
     pmp_init();
@@ -41,6 +44,7 @@ int main(void) {
 
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
+    mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
 
 #ifdef CH7
