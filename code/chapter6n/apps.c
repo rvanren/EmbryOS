@@ -100,6 +100,8 @@ void exec_user(void) {
     intr_enable();
     apps[self->executable - 2]();
     intr_disable();
+    proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
+    kprintf("process ended<");
     proc_exit();
 #endif
 #endif
