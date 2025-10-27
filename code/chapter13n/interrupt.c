@@ -2,13 +2,13 @@
 #include "trap.h"
 #include "interrupt.h"
 #include "sched.h"
+#include "kprintf.h"
 #include "pmp.h"
-#include "stdio.h"
 
 #define MIE_MASK (1u << 3)
 
 static void no_handler(struct trap_frame *tf) {
-    printf("Bad interrupt\n");
+    kprintf("Bad interrupt\n");
     for (;;) ;
 }
 
@@ -25,7 +25,7 @@ void software_trap_handler(struct trap_frame *tf) {
         case  3: break;
         case  7: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: printf("Unknown interrupt cause %x\n", mcause);
+        default: kprintf("Unknown interrupt cause %x\n", mcause);
         }
     }
     else {

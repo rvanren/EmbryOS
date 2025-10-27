@@ -7,7 +7,7 @@ NM        = riscv-none-elf-nm
 
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-CFLAGS = -g -I../shared -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
+CFLAGS = -g -I../shared -I.. -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
 LDFLAGS = -Wl,--no-relax -T user.lds
 
 APP_ELFS  = $(addsuffix .elf,$(APPS))
@@ -19,10 +19,6 @@ all: $(APP_ELFS) $(APP_OBJS)
 
 init.elf: init.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-help.elf: help.c window1.c window2.c window.h ../shared/string.c ../shared/string.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c help.c window1.c window2.c ../shared/string.c ../shared/printf.c putchar.c
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
 shell.elf: shell.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c

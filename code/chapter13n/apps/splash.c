@@ -3,10 +3,6 @@
 #define WIDTH   39
 #define HEIGHT  11
 
-static void delay(void) {
-    for (volatile int i = 0; i < 100000000; i++); // tune as needed
-}
-
 static void clear(void) {
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++)
@@ -22,7 +18,7 @@ static void put_centered(const char *s, int row) {
         user_put(row, start + i, CELL(s[i], ANSI_WHITE, ANSI_BLACK));
 }
 
-int main(void) {
+void splash_main(void) {
     clear();
 
     const char *title = "EmbryOS";
@@ -48,7 +44,7 @@ int main(void) {
 
         // draw the logo in the middle
         put_centered(title, cy);
-        delay();
+        user_delay(200);
     }
 
     // final stable screen
@@ -57,3 +53,5 @@ int main(void) {
     put_centered("Life Has Begun", HEIGHT / 2 + 1);
     put_centered("type 'help' for help", HEIGHT / 2 + 2);
 }
+
+void main() { splash_main(); }

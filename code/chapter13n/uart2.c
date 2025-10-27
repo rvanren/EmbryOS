@@ -2,23 +2,23 @@
 #include "sched.h"
 #include "platform.h"
 
-extern struct pcb *uart_focus, *uart_wait;
-extern void uart_tab(void), uart_char(char c);
-
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
 #define UART ((volatile struct uart *) UART_BASE)
 #define FULL (1 << 31)
 
-void putchar(char c) {
-    while (UART->txdata & FULL) ;
-    UART->txdata = c;
-}
-
 void uart_init(void) {
     UART->rxctrl = 1;     // enable receiver (bit 0)
     UART->ie = (1 << 1);  // enable RX interrupt (bit 1)
 }
+
+void uart_putchar(char c) {
+    while (UART->txdata & FULL) ;
+    UART->txdata = c;
+}
+
+extern struct pcb *uart_focus, *uart_wait;
+extern void uart_tab(void), uart_char(char c);
 
 void uart_isr(void) {
     for (;;) {
@@ -26,13 +26,18 @@ void uart_isr(void) {
         if (val & FULL) break;
         if ((val & 0xFF) == '\t') uart_tab();
         else if (uart_focus != 0) uart_char(val & 0xFF);
-        else putchar(7);    // beep
+        else uart_putchar(7);    // beep
     }
 }
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {
-        if (!self->kbd_warm) { uart_focus = self; self->kbd_warm = 1; }
+        if (!self->kbd_warm) {
+            if (uart_focus != 0 && uart_focus->kbd_waiting)
+                uart_put(uart_focus, uart_focus->cu);
+            uart_focus = self;
+            self->kbd_warm = 1;
+        }
         proc_put(self, row, col, self == uart_focus ? cf : cu);
         self->cf = cf; self->cu = cu;
         self->kbd_waiting = 1;

@@ -8,9 +8,6 @@
 #define NAME_LEN 14
 struct dirent { char name[NAME_LEN]; uint16_t file; };
 
-// Lookup the file number for the given name.  -1 on error
-int dir_lookup(const char *name);
-
 // Create a new entry in the directory, mapping name to file
 int dir_create(const char *name, int file);
 
@@ -19,3 +16,6 @@ void dir_delete(const char *name);
 
 // List the directory
 void dir_list(void (*fn)(const char *name, int file));
+
+// Lookup the file number for the given name.  -1 on error
+int dir_lookup(const char *name);
