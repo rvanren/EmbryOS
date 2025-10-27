@@ -1,7 +1,7 @@
 #include "trap.h"
 #include "syscall.h"
 #include "process.h"
-#include "stdio.h"
+#include "kprintf.h"
 #include "process.h"
 #include "sched.h"
 #include "uart.h"
@@ -21,7 +21,7 @@ void syscall_handler(struct trap_frame *tf) {
     switch (tf->a7) {
     case SYS_EXIT:
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        printf("process ended<");
+        kprintf("process ended<");
         proc_exit();
         break;
     case SYS_SPAWN:
@@ -56,6 +56,6 @@ void syscall_handler(struct trap_frame *tf) {
         break;
 #endif
     default:
-        printf("Unknown syscall %d\n", tf->a7);
+        kprintf("Unknown syscall %d\n", tf->a7);
     }
 }
