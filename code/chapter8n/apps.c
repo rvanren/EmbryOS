@@ -4,6 +4,7 @@
 #include "sched.h"
 #include "kprintf.h"
 #include "string.h"
+#include "syslib.h"
 
 #ifdef CH10
 #include "pmp.h"
@@ -20,8 +21,13 @@ void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
 #else
 void init_main(), splash_main(), life_main(), shell_main(), snake_main();
+void init_crt(){ init_main(); user_exit(); }
+void splash_crt(){ splash_main(); user_exit(); }
+void life_crt(){ life_main(); user_exit(); }
+void shell_crt(){ shell_main(); user_exit(); }
+void snake_crt(){ snake_main(); user_exit(); }
 static void *apps[] = {
-    init_main, splash_main, life_main, shell_main, snake_main
+    init_crt, splash_crt, life_crt, shell_crt, snake_crt
 };
 
 __attribute__((noreturn)) void enter_user(void (*entry)());
