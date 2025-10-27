@@ -42,7 +42,7 @@ void main(void) {
     user_spawn(dir_lookup("shell"),   0,  0, 40, 12, 0, 0);
 #else
     user_spawn(dir_lookup("snake"),   0,  0, 40, 12, 0, 0);
-    user_spawn(dir_lookup("life"),    0, 12, 40, 12, 0, 0);
+    user_spawn(dir_lookup("snake"),   0, 12, 40, 12, 0, 0);
     user_spawn(dir_lookup("life"),   40, 12, 40, 12, 0, 0);
 #endif
 
