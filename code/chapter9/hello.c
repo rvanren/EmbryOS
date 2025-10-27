@@ -7,11 +7,6 @@
 #include "frame.h"
 #include "plic.h"
 #include "pmp.h"
-
-#ifdef CH11
-#include "files.h"
-#endif
-
 #include "mtime.h"
 
 #define QUANTUM          50000        // 50 milliseconds
@@ -34,10 +29,6 @@ int main(void) {
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     plic_init();
     pmp_init();
-
-#ifdef CH11
-    files_init();
-#endif
 
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
