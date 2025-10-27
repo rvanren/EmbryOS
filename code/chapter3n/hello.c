@@ -87,8 +87,8 @@ int main(void) {
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();
 #else
-    extern void splash_init();
-    splash_init();
+    extern void splash_main();
+    splash_main();
     for (;;) __asm__ volatile ("wfi");
 #endif
 }
