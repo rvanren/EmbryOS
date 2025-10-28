@@ -1,8 +1,8 @@
-#ifdef UART_16550
-
 #include <stdint.h>
 #include "uart.h"
 #include "platform.h"
+
+#ifdef UART_16550
 
 #define UART_RBR    0x00  // Receiver Buffer Register (read)
 #define UART_THR    0x00  // Transmit Holding Register (write)

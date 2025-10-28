@@ -1,7 +1,7 @@
-#ifdef UART_SIFIVE
-
-#include "uart.h"
 #include "platform.h"
+#include "uart.h"
+
+#ifdef UART_SIFIVE
 
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
