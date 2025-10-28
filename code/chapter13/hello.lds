@@ -1,52 +1,62 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
+/* --- configurable system parameters --- */
+STACK_SIZE       = 4096;      /* per-hart stack size */
+PAGE_SIZE        = 8192;      /* page size */
+FRAME_PAGES      = 32;        /* number of 4 KiB frames reserved */
+BLOCK_SIZE       = 512;       /* size of a disk block */
+RAMDISK_BLOCKS   = 32;        /* number of 4 KiB pages for ramdisk */
+
 MEMORY
 {
-    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000
-}
-
-PHDRS
-{
-    text PT_LOAD FLAGS(5);   /* R + X = 0x5 */
-    data PT_LOAD FLAGS(6);   /* R + W = 0x6 */
+    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000  /* 2 MiB for example */
 }
 
 SECTIONS
 {
-    .init : ALIGN(8) {
+    . = ORIGIN(ram);
+
+    .text : {
         *(.text.enter)
-    } >ram :text
-
-    .text : ALIGN(8) {
         *(.text .text.*)
-    } >ram :text
-
-    .rodata : ALIGN(8) {
-        *(.rdata)
         *(.rodata .rodata.*)
-        . = ALIGN(8);
-        *(.srodata .srodata.*)
-    } >ram :text
+    } >ram
 
     .data : ALIGN(8) {
         *(.data .data.*)
-        . = ALIGN(8);
-        *(.sdata .sdata.* .sdata2.*)
-    } >ram :data
+        *(.sdata .sdata.*)
+    } >ram
 
     .bss (NOLOAD) : ALIGN(8) {
-        *(.sbss*)
         *(.bss .bss.*)
         *(COMMON)
-    } >ram :data
+    } >ram
 
-    .frames (NOLOAD) : ALIGN(4096) {
+    /* Reserve space for ramdisk */
+    .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
         PROVIDE(ramdisk = .);
-        . = . + (4096 * 32);    /* 32 pages (128 KiB) */
+        . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
         PROVIDE(__ramdisk_end = .);
+    } >ram
+
+    /* Reserve frames for page allocator */
+    .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
         PROVIDE(frames = .);
-        . = . + (4096 * 32);    /* 32 pages (256 KiB) */
+        . = . + (PAGE_SIZE * FRAME_PAGES);
         PROVIDE(__frames_end = .);
-    } >ram :data
+    } >ram
+
+    /* Per-hart kernel stacks */
+    .stacks (NOLOAD) : ALIGN(16) {
+        PROVIDE(stack_start = .);
+        . = . + STACK_SIZE;
+        PROVIDE(stack_end = .);
+    } >ram
+
+    /* Symbol marking top of usable RAM */
+    PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
+    PROVIDE(stack_start);
+    PROVIDE(stack_end);
+    PROVIDE(STACK_SIZE);
 }
