@@ -8,8 +8,8 @@
 #define PLIC_BASE       0x0C000000UL
 #define CLINT_BASE      0x02000000UL
 
-#define HART_ID         1
-#define HART_CTX        0
+#define HART_ID         1   // hart ID of the core that runs the kernel
+#define HART_CTX        1   // its S-mode context
 
 #define DELAY_MS        326087	// 1 ms of delay (see syscall.h)
 
