@@ -12,7 +12,7 @@
 #define CLINT_BASE      0x02000000UL
 
 #define HART_ID         1   // hart ID of the core that runs the kernel
-#define HART_CTX        0   // its M-mode context
+#define HART_CTX        0
 
 // #define NO_PMP       // define if no PMP
 
@@ -28,7 +28,7 @@
 #define CLINT_BASE      0x02000000UL
 
 #define HART_ID         0    // QEMU virt boots on hart 0
-#define HART_CTX        0   // its M-mode context
+#define HART_CTX        2
 
 // #define NO_PMP       // define if no PMP
 

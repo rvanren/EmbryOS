@@ -9,13 +9,7 @@
 #define PLIC_PRIORITY(src)   (PLIC_BASE + 4 * (src))
 #define PLIC_THRESHOLD(ctx)  (PLIC_BASE + 0x200000 + 0x1000 * (ctx))
 #define PLIC_CLAIM(ctx)      (PLIC_BASE + 0x200004 + 0x1000 * (ctx))
-
-#ifdef SIFIVE
 #define PLIC_ENABLE(ctx)     (PLIC_BASE + 0x002000 + 0x0080 * (ctx))
-#endif
-#ifdef VIRT
-#define PLIC_ENABLE(ctx)     (PLIC_BASE + 0x002000 + 0x0100 * (ctx))
-#endif
 
 void plic_handler(struct trap_frame *tf) {
     kprintf("AAA");
