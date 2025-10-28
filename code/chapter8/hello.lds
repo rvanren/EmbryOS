@@ -1,52 +1,59 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
+/* --- configurable system parameters --- */
+STACK_SIZE       = 4096;
+PAGE_SIZE        = 8192;
+FRAME_PAGES      = 32;
+BLOCK_SIZE       = 512;
+RAMDISK_BLOCKS   = 2048;
+
 MEMORY
 {
-    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000
-}
-
-PHDRS
-{
-    text PT_LOAD FLAGS(5);   /* R + X = 0x5 */
-    data PT_LOAD FLAGS(6);   /* R + W = 0x6 */
+    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000  /* 2 MiB for example */
 }
 
 SECTIONS
 {
-    .init : ALIGN(8) {
+    . = ORIGIN(ram);
+
+    .text : {
         *(.text.enter)
-    } >ram :text
-
-    .text : ALIGN(8) {
         *(.text .text.*)
-    } >ram :text
-
-    .rodata : ALIGN(8) {
-        *(.rdata)
         *(.rodata .rodata.*)
-        . = ALIGN(8);
-        *(.srodata .srodata.*)
-    } >ram :text
+    } >ram
 
     .data : ALIGN(8) {
         *(.data .data.*)
-        . = ALIGN(8);
-        *(.sdata .sdata.* .sdata2.*)
-    } >ram :data
+        *(.sdata .sdata.*)
+    } >ram
 
     .bss (NOLOAD) : ALIGN(8) {
-        *(.sbss*)
         *(.bss .bss.*)
         *(COMMON)
-    } >ram :data
+    } >ram
 
-    .frames (NOLOAD) : ALIGN(4096) {
+    /* Reserve space for ramdisk */
+    .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
         PROVIDE(ramdisk = .);
-        . = . + (4096 * 32);    /* 32 pages (128 KiB) */
+        . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
         PROVIDE(__ramdisk_end = .);
+    } >ram
+
+    /* Reserve frames for page allocator */
+    .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
         PROVIDE(frames = .);
-        . = . + (4096 * 32);    /* 32 pages (256 KiB) */
+        . = . + (PAGE_SIZE * FRAME_PAGES);
         PROVIDE(__frames_end = .);
-    } >ram :data
+    } >ram
+
+    /* Per-hart kernel stacks */
+    .stacks (NOLOAD) : ALIGN(16) {
+        PROVIDE(stack_start = .);
+        . = . + STACK_SIZE;
+        PROVIDE(stack_end = .);
+    } >ram
+
+    /* Symbol marking top of usable RAM */
+    PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
 }
