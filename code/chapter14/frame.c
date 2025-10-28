@@ -7,11 +7,11 @@ union free_frame {
     char bytes[PAGE_SIZE];
 };
 
-extern union free_frame frames[], __frames_end[];
+extern union free_frame frames[], frames_end[];
 static union free_frame *free_list = frames;
 
 void frame_init(void) {
-    int nframes = __frames_end - frames;
+    int nframes = frames_end - frames;
     for (int i = 0; i < nframes - 1; i++)
         frames[i].next = &frames[i + 1];
     frames[nframes - 1].next = 0;

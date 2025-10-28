@@ -2,11 +2,10 @@ OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
 /* --- configurable system parameters --- */
-MAX_CPU          = 4;         /* maximum number of harts */
 STACK_SIZE       = 4096;      /* per-hart stack size */
 PAGE_SIZE        = 8192;      /* page size */
 FRAME_PAGES      = 32;        /* number of 4 KiB frames reserved */
-BLOCK_SIZE       = 512;       /* size of a diskblock
+BLOCK_SIZE       = 512;       /* size of a disk block */
 RAMDISK_BLOCKS   = 32;        /* number of 4 KiB pages for ramdisk */
 
 MEMORY
@@ -50,14 +49,14 @@ SECTIONS
 
     /* Per-hart kernel stacks */
     .stacks (NOLOAD) : ALIGN(16) {
-        PROVIDE(stacks_start = .);
-        . = . + (STACK_SIZE * MAX_CPU);
-        PROVIDE(stacks_end = .);
+        PROVIDE(stack_start = .);
+        . = . + STACK_SIZE;
+        PROVIDE(stack_end = .);
     } >ram
 
     /* Symbol marking top of usable RAM */
     PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
-    PROVIDE(stacks_start);
-    PROVIDE(stacks_end);
+    PROVIDE(stack_start);
+    PROVIDE(stack_end);
     PROVIDE(STACK_SIZE);
 }

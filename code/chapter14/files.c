@@ -6,7 +6,7 @@
 
 #define MAX_APPS    32
 
-extern struct block ramdisk[], __ramdisk_end[];
+extern struct block ramdisk[], ramdisk_end[];
 
 struct bd ramdisk_iface;
 struct ramdisk_state ramdisk_state;
@@ -16,7 +16,7 @@ struct flat flat_fs;
 
 void files_init(void) {
     ramdisk_init(&ramdisk_iface, &ramdisk_state,
-                 ramdisk, __ramdisk_end - ramdisk);
+                 ramdisk, ramdisk_end - ramdisk);
     simple_init(&simple_iface, &simple_state,
                 &ramdisk_iface, 0, 1);
     flat_init(&flat_fs, &simple_iface, 1);

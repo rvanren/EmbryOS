@@ -26,7 +26,7 @@ void exception_handler(struct trap_frame *tf) {
     proc_exit();
 }
 
-void kinit_primary(void) {
+int main(void) {
     frame_init(); intr_init(); uart_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     plic_init(); pmp_init(); files_init();
@@ -43,14 +43,7 @@ void kinit_primary(void) {
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
-}
 
-void kstart(int hartid) {
-    if (hartid == 0) {
-        sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
-        sched_idle();
-    }
-    else {
-        for (;;) ;
-    }
+    sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
+    sched_idle();
 }
