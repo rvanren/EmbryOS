@@ -4,11 +4,7 @@
 struct pcb *io_wait = 0;    // circular wait queue
 struct pcb *io_focus;       // keyboard focus
 
-void io_put(struct pcb *pcb, cell_t c) {
-    proc_put(pcb, pcb->kbd_row, pcb->kbd_col, c);
-}
-
-void io_tab(void) {
+static void io_tab(void) {
     if (io_wait == 0) { if (io_focus == 0) io_putchar(7); }
     else if (io_focus == 0) {
         io_focus = io_wait;
@@ -22,7 +18,7 @@ void io_tab(void) {
     }
 }
 
-void io_char(char c) {
+static void io_char(char c) {
     struct pcb *pcb = io_focus;
     if (pcb->kbd_size >= KBD_BUF_SIZE) { io_putchar(7 /* beep */); return; }
     if (pcb->kbd_waiting) {
@@ -38,6 +34,12 @@ void io_char(char c) {
     }
     pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
     pcb->kbd_size++;
+}
+
+void io_received(char c) {
+    if (c == '\t') io_tab();
+    else if (io_focus != 0) io_char(c);
+    else io_putchar(7);    // beep
 }
 
 void io_exit(struct pcb *self) {
