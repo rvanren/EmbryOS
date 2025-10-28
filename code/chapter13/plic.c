@@ -14,6 +14,7 @@
 #define PLIC_CLAIM      (PLIC_BASE + 0x201004)
 
 void plic_handler(struct trap_frame *tf) {
+    kprintf("X");
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
     if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM = claim;
@@ -81,7 +82,7 @@ void plic_handler(struct trap_frame *tf) {
 void plic_init(void)
 {
     // 1. Give this source a non-zero priority
-    *(volatile uint32_t *)plic_priority_addr(0) = 1;
+    *(volatile uint32_t *)plic_priority_addr(UART_IRQ) = 1;
 
     // 2. Enable this source for this context
     *(volatile uint32_t *)plic_enable_addr(HART_CTX) |= (1u << UART_IRQ);
