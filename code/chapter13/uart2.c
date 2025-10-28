@@ -5,7 +5,13 @@
 extern struct pcb *uart_focus, *uart_wait;
 extern void uart_tab(void), uart_char(char c);
 
-#ifdef SIFIVE
+void uart_received(char c) {
+    if (c == '\t') uart_tab();
+    else if (uart_focus != 0) uart_char(c);
+    else uart_putchar(7);    // beep
+}
+
+#ifdef UART_SIFIVE
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
 #define UART ((volatile struct uart *) UART_BASE)
@@ -25,14 +31,12 @@ void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;
         if (val & FULL) break;
-        if ((val & 0xFF) == '\t') uart_tab();
-        else if (uart_focus != 0) uart_char(val & 0xFF);
-        else uart_putchar(7);    // beep
+        uart_received(val & 0xFF);
     }
 }
-#endif // SIFIVE
+#endif
 
-#ifdef VIRT
+#ifdef UART_16550
 #include <stdint.h>
 
 // 16550A register offsets (byte addressed)
@@ -59,14 +63,11 @@ void uart_isr(void) {
     for (;;) {
         if ((UART[UART_LSR] & LSR_DATA_READY) == 0)
             break;
-        char c = UART[UART_RBR];
-        if (c == '\t') uart_tab();
-        else if (uart_focus != 0) uart_char(c);
-        else uart_putchar(7);   // beep
+        uart_received(UART[UART_RBR]);
     }
 }
 
-#endif // VIRT
+#endif
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {

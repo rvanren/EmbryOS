@@ -12,7 +12,6 @@
 #define PLIC_ENABLE(ctx)     (PLIC_BASE + 0x002000 + 0x0080 * (ctx))
 
 void plic_handler(struct trap_frame *tf) {
-    kprintf("AAA");
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM(HART_CTX);
     if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM(HART_CTX) = claim;
