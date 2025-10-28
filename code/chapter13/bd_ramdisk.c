@@ -1,6 +1,7 @@
 #include "bd.h"
 #include "string.h"
 #include "bd_ramdisk.h"
+#include "die.h"
 
 static int ramdisk_size(void *st, int inode) {
     struct ramdisk_state *d = st;
@@ -12,11 +13,13 @@ static void ramdisk_free(void *st, int inode) { }
 
 static void ramdisk_read(void *st, int inode, int blk, void *dst) {
     struct ramdisk_state *d = st;
+    if (blk < 0 || blk >= st->nblocks) die("ramdisk_read");
     memcpy(dst, d->data + blk * BLOCK_SIZE, BLOCK_SIZE);
 }
 
 static void ramdisk_write(void *st, int inode, int blk, const void *src) {
     struct ramdisk_state *d = st;
+    if (blk < 0 || blk >= st->nblocks) die("ramdisk_write");
     memcpy(d->data + blk * BLOCK_SIZE, src, BLOCK_SIZE);
 }
 
