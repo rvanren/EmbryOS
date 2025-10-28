@@ -11,7 +11,7 @@ void io_received(char c) {
     else io_putchar(7);    // beep
 }
 
-void io_putchar(c) { uart_putchar(c); }
+void io_putchar(char c) { uart_putchar(c); }
 
 int io_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {
