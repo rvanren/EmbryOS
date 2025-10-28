@@ -44,6 +44,6 @@ void syscall_handler(struct trap_frame *tf) {
         flat_delete(&flat_fs, tf->a0);
         break;
     default:
-        die("Unknown syscall");
+        die("unknown syscall");
     }
 }
