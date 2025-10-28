@@ -86,8 +86,8 @@ void plic_init(void)
     *(volatile uint32_t *)plic_priority_addr(UART_IRQ) = 1;
 
     // 2. Enable this source for this context
-    *(volatile uint32_t *)plic_enable_addr(context) |= (1u << UART_IRQ);
+    *(volatile uint32_t *)plic_enable_addr(HART_CTX) |= (1u << UART_IRQ);
 
     // 3. Accept all priorities ≥ 1
-    *(volatile uint32_t *)plic_threshold_addr(context) = 0;
+    *(volatile uint32_t *)plic_threshold_addr(HART_CTX) = 0;
 }
