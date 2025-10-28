@@ -1,6 +1,6 @@
 #include "screen.h"
 #include "kprintf.h"
-#include "uart.h"
+#include "io.h"
 
 void screen_put(int row, int col, cell_t cell) {
     if (row < 0) row = 0;
@@ -11,7 +11,7 @@ void screen_put(int row, int col, cell_t cell) {
     kprintf("\033[3%dm\033[4%dm", CELL_FG(cell) % 8, CELL_BG(cell) % 8);
     char ch = CELL_CH(cell);
     if (ch < 32 || ch > 126) return;  // ignore non-printable
-    uart_putchar(CELL_CH(ch));
+    io_putchar(CELL_CH(ch));
 }
 
 void screen_fill(int x, int y, int w, int h, cell_t cell) {

@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "uart.h"
+#include "io.h"
 #include "platform.h"
 
 #ifdef UART_16550
@@ -26,7 +27,7 @@ void uart_putchar(char c) {
 void uart_isr(void) {
     for (;;) {
         if ((UART[UART_LSR] & LSR_DATA_READY) == 0) break;
-        uart_received(UART[UART_RBR]);
+        io_received(UART[UART_RBR]);
     }
 }
 

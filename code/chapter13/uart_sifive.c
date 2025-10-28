@@ -1,4 +1,5 @@
 #include "platform.h"
+#include "io.h"
 #include "uart.h"
 
 #ifdef UART_SIFIVE
@@ -22,7 +23,7 @@ void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;
         if (val & FULL) break;
-        uart_received(val & 0xFF);
+        io_received(val & 0xFF);
     }
 }
 
