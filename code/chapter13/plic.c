@@ -19,9 +19,9 @@ void plic_handler(struct trap_frame *tf) {
 
 void plic_init() {
     // Give this source a non-zero priority
-    *(volatile uint32_t *)(PLIC_PRIORITY(UART_IRQ) = 1;
+    *(volatile uint32_t *)(PLIC_PRIORITY(UART_IRQ))  = 1;
     // Enable this source for this context
-    *(volatile uint32_t *)(PLIC_ENABLE(HART_CTX) = (1 << UART_IRQ);
+    *(volatile uint32_t *)(PLIC_ENABLE(HART_CTX))    = (1 << UART_IRQ);
     // Accept all priorities ≥ 1
     *(volatile uint32_t *)(PLIC_THRESHOLD(HART_CTX)) = 0;
 }
