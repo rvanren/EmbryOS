@@ -50,15 +50,10 @@ void uart_init(void) {
     UART[UART_IER] = 0x01;  // enable received data interrupt
 }
 
-#endif // VIRT
-
 void uart_putchar(char c) {
     while ((UART[UART_LSR] & LSR_TX_EMPTY) == 0) ;
     UART[UART_THR] = c;
 }
-
-extern struct pcb *uart_focus, *uart_wait;
-extern void uart_tab(void), uart_char(char c);
 
 void uart_isr(void) {
     for (;;) {
@@ -70,6 +65,8 @@ void uart_isr(void) {
         else uart_putchar(7);   // beep
     }
 }
+
+#endif // VIRT
 
 int uart_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
     while (self->kbd_size == 0) {
