@@ -6,15 +6,14 @@
 #include "plic.h"
 #include "platform.h"
 
-#ifndef ORIG
+#ifdef ORIG
 
-#define PLIC_ENABLE     (PLIC_BASE + 0x2080)      // enable bits for hart 0 M-mode
-#define PLIC_PRIORITY   (PLIC_BASE + 0x0000)
+#define PLIC_ENABLE     (PLIC_BASE + 0x002080)    // enable bits for hart 0 M-mode
+#define PLIC_PRIORITY   (PLIC_BASE + 0x000000)
 #define PLIC_THRESHOLD  (PLIC_BASE + 0x200000)
 #define PLIC_CLAIM      (PLIC_BASE + 0x201004)
 
 void plic_handler(struct trap_frame *tf) {
-    kprintf("X");
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
     if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM = claim;
@@ -85,7 +84,7 @@ void plic_init(void)
     *(volatile uint32_t *)plic_priority_addr(UART_IRQ) = 1;
 
     // 2. Enable this source for this context
-    *(volatile uint32_t *)plic_enable_addr(HART_CTX) = (1u << UART_IRQ);
+    *(volatile uint32_t *)plic_enable_addr(1) = (1u << UART_IRQ);
 
     // 3. Accept all priorities ≥ 1
     *(volatile uint32_t *)plic_threshold_addr(HART_CTX) = 0;
