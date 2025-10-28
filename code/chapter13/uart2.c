@@ -2,6 +2,10 @@
 #include "sched.h"
 #include "platform.h"
 
+extern struct pcb *uart_focus, *uart_wait;
+extern void uart_tab(void), uart_char(char c);
+
+#ifdef SIFIVE
 struct uart { uint32_t txdata, rxdata, txctrl, rxctrl, ie, ip; };
 
 #define UART ((volatile struct uart *) UART_BASE)
@@ -17,9 +21,6 @@ void uart_putchar(char c) {
     UART->txdata = c;
 }
 
-extern struct pcb *uart_focus, *uart_wait;
-extern void uart_tab(void), uart_char(char c);
-
 void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;
@@ -27,6 +28,46 @@ void uart_isr(void) {
         if ((val & 0xFF) == '\t') uart_tab();
         else if (uart_focus != 0) uart_char(val & 0xFF);
         else uart_putchar(7);    // beep
+    }
+}
+#endif // SIFIVE
+
+#ifdef VIRT
+#include <stdint.h>
+
+// 16550A register offsets (byte addressed)
+#define UART_RBR    0x00  // Receiver Buffer Register (read)
+#define UART_THR    0x00  // Transmit Holding Register (write)
+#define UART_LSR    0x05  // Line Status Register
+#define UART_IER    0x01  // Interrupt Enable Register
+
+#define LSR_DATA_READY 0x01
+#define LSR_TX_EMPTY   0x20
+
+static volatile uint8_t *UART = (volatile uint8_t *) UART_BASE;
+
+void uart_init(void) {
+    UART[UART_IER] = 0x01;  // enable received data interrupt
+}
+
+#endif // VIRT
+
+void uart_putchar(char c) {
+    while ((UART[UART_LSR] & LSR_TX_EMPTY) == 0) ;
+    UART[UART_THR] = c;
+}
+
+extern struct pcb *uart_focus, *uart_wait;
+extern void uart_tab(void), uart_char(char c);
+
+void uart_isr(void) {
+    for (;;) {
+        if ((UART[UART_LSR] & LSR_DATA_READY) == 0)
+            break;
+        char c = UART[UART_RBR];
+        if (c == '\t') uart_tab();
+        else if (uart_focus != 0) uart_char(c);
+        else uart_putchar(7);   // beep
     }
 }
 

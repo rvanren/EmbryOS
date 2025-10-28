@@ -4,6 +4,7 @@
 
 #ifdef SIFIVE
 
+// SiFive UART
 #define UART_BASE       0x10010000UL
 #define UART_IRQ        4
 
@@ -19,6 +20,7 @@
 
 #ifdef VIRT
 
+// NS16550A (UART 16550)
 #define UART_BASE       0x10000000UL
 #define UART_IRQ        10
 
