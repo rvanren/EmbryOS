@@ -56,7 +56,4 @@ SECTIONS
 
     /* Symbol marking top of usable RAM */
     PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
-    PROVIDE(stack_start);
-    PROVIDE(stack_end);
-    PROVIDE(STACK_SIZE);
 }
