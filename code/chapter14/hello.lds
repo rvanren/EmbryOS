@@ -59,4 +59,5 @@ SECTIONS
     PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
     PROVIDE(stacks_start);
     PROVIDE(stacks_end);
+    PROVIDE(STACK_SIZE);
 }
