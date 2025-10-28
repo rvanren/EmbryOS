@@ -47,8 +47,8 @@ SECTIONS
         PROVIDE(__frames_end = .);
     } >ram
 
-    /* Per-hart kernel stacks */
-    .stacks (NOLOAD) : ALIGN(16) {
+    /* Kernel stack */
+    .stack (NOLOAD) : ALIGN(16) {
         PROVIDE(stack_start = .);
         . = . + STACK_SIZE;
         PROVIDE(stack_end = .);
