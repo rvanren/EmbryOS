@@ -1,4 +1,5 @@
 #include "process.h"
+#include "sched.h"
 #include "kprintf.h"
 #include "die.h"
 
