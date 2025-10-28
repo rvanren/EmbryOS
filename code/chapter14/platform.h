@@ -8,6 +8,8 @@
 #define PLIC_BASE       0x0C000000UL
 #define CLINT_BASE      0x02000000UL
 
+#define HART_ID         1   // id of hart running kernel
+
 #define DELAY_MS        326087	// 1 ms of delay (see syscall.h)
 
 // #define NO_PMP       // define if no PMP

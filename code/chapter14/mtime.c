@@ -15,5 +15,5 @@ uint64_t mtime_get() {
 }
 
 void mtime_reset(uint64_t quantum) {
-    *((volatile uint64_t *) MTIME_CMP(1)) = mtime_get() + quantum;
+    *((volatile uint64_t *) MTIME_CMP(HART_ID)) = mtime_get() + quantum;
 }
