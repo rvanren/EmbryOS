@@ -6,7 +6,7 @@
 #include "plic.h"
 #include "platform.h"
 
-#ifdef ORIG
+#ifndef ORIG
 
 #define PLIC_ENABLE     (PLIC_BASE + 0x2080)      // enable bits for hart 0 M-mode
 #define PLIC_PRIORITY   (PLIC_BASE + 0x0000)
@@ -26,7 +26,7 @@ void plic_init() {
     *(volatile uint32_t *)(PLIC_THRESHOLD) = 0;
 }
 
-#endif
+#else
 
 #include <stdint.h>
 #include "trap.h"     // for struct trap_frame, CAUSE_MACHINE_EXTERNAL_INTERRUPT, etc.
@@ -85,8 +85,10 @@ void plic_init(void)
     *(volatile uint32_t *)plic_priority_addr(UART_IRQ) = 1;
 
     // 2. Enable this source for this context
-    *(volatile uint32_t *)plic_enable_addr(HART_CTX) |= (1u << UART_IRQ);
+    *(volatile uint32_t *)plic_enable_addr(HART_CTX) = (1u << UART_IRQ);
 
     // 3. Accept all priorities ≥ 1
     *(volatile uint32_t *)plic_threshold_addr(HART_CTX) = 0;
 }
+
+#endif
