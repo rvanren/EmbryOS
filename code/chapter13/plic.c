@@ -60,7 +60,7 @@ static inline uintptr_t plic_claim_addr(int context)
    --------------------------------------------------------------------- */
 
 void plic_handler(struct trap_frame *tf) {
-    volatile uint32_t *claim_reg = (uint32_t *)plic_claim_addr(HART_CTX);
+    volatile uint32_t *claim_reg = (uint32_t *)plic_claim_addr(1);
     uint32_t claim = *claim_reg;      // claim next pending interrupt
 
     switch (claim) {
