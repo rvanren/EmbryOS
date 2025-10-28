@@ -13,7 +13,7 @@ _start:
 
     # Load linker symbols for stack region
     la      sp, stacks_end           # top of all stacks
-    li      t0, STACK_SIZE
+    la      t0, STACK_SIZE
     mul     t1, a0, t0
     sub     sp, sp, t1               # sp = top - hartid * STACK_SIZE
 
