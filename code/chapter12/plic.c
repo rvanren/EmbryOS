@@ -11,8 +11,6 @@
 #define PLIC_THRESHOLD  (PLIC_BASE + 0x200000)
 #define PLIC_CLAIM      (PLIC_BASE + 0x201004)
 
-#define MIE_MASK (1u << 3)
-
 void plic_handler(struct trap_frame *tf) {
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM;
     if (claim == UART_IRQ) uart_isr();
