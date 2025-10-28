@@ -2,11 +2,11 @@ OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
 /* --- configurable system parameters --- */
-STACK_SIZE       = 4096;      /* per-hart stack size */
-PAGE_SIZE        = 8192;      /* page size */
-FRAME_PAGES      = 32;        /* number of 4 KiB frames reserved */
-BLOCK_SIZE       = 512;       /* size of a disk block */
-RAMDISK_BLOCKS   = 32;        /* number of 4 KiB pages for ramdisk */
+STACK_SIZE       = 4096;
+PAGE_SIZE        = 8192;
+FRAME_PAGES      = 32;
+BLOCK_SIZE       = 512;
+RAMDISK_BLOCKS   = 2048;
 
 MEMORY
 {
