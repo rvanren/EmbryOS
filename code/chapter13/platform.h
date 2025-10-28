@@ -13,8 +13,6 @@
 #define HART_ID         1   // hart ID of the core that runs the kernel
 #define HART_CTX        1   // its S-mode context
 
-#define DELAY_MS        326087	// 1 ms of delay (see syscall.h)
-
 // #define NO_PMP       // define if no PMP
 
 #endif
@@ -30,8 +28,8 @@
 #define HART_ID         0    // QEMU virt boots on hart 0
 #define HART_CTX        1
 
-#define DELAY_MS        326087	// 1 ms of delay (see syscall.h)
-
 // #define NO_PMP       // define if no PMP
 
 #endif
+
+#define DELAY_MS        326087	// 1 ms of delay (see syscall.h)
