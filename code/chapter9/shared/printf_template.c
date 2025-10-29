@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
     int i = 0;
