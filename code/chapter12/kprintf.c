@@ -1,4 +1,3 @@
-#include <stdarg.h>
 #include "kprintf.h"
 #include "io.h"
 

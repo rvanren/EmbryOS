@@ -50,5 +50,5 @@ void flat_init(struct flat *fs, struct bd *lower, int format) {
         stat_put(fs, 0, &st0);
     }
     else fs->stat_inode = 1;
-    // if (fs->stat_inode != 1) panic("unexpected stat inode");
+    // assert fs->stat_inode == 1
 }
