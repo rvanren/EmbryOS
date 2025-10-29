@@ -4,14 +4,20 @@
 #include "process.h"
 #include "interrupt.h"
 
-static struct pcb *run_queue;
+static struct pcb *run_queue, *zombies;
 
 void sched_init(struct pcb *first) {
     proc_enqueue(&run_queue, first);
 }
 
-struct pcb *sched_self() {
-    return runqueue->next;
+struct pcb *sched_self() { return runqueue->next; }
+
+void proc_reap_zombies(void) {
+    while (zombies != 0) {
+        struct pcb *pcb = zombies;
+        zombies = zombies->next;
+        frame_release(pcb);
+    }
 }
 
 void sched_block(struct pcb *current) {
