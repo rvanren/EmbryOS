@@ -23,7 +23,7 @@ void syscall_handler(struct trap_frame *tf) {
         proc_put(self, tf->a0, tf->a1, tf->a2);
         break;
     case SYS_GET:
-        tf->a0 = uart_get(self, tf->a0, tf->a1, tf->a2, tf->a3);
+        tf->a0 = io_get(self, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
     default:
         kprintf("Unknown syscall %d\n", tf->a7);
