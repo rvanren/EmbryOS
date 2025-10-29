@@ -1,6 +1,6 @@
 #include "sched.h"
 #include "ctx.h"
-#include "frame.h"
+#include "platform.h"
 #include "process.h"
 #include "interrupt.h"
 
