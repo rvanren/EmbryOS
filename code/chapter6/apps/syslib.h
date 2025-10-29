@@ -3,7 +3,7 @@
 #include "syscall.h"
 #include "process.h"
 #include "sched.h"
-#include "uart.h"
+#include "io.h"
 #include "kprintf.h"
 #include "interrupt.h"
 
@@ -32,7 +32,7 @@ static inline void user_put(int row, int col, cell_t cell) {
 static inline int user_get(int row, int col, cell_t cursor_f, cell_t cursor_u) {
     intr_disable();
     struct pcb *self = run_queue[proc_current]->next;
-    int c = uart_get(self, row, col, cursor_f, cursor_u);
+    int c = io_get(self, row, col, cursor_f, cursor_u);
     intr_enable();
     return c;
 }
