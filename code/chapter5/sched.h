@@ -33,3 +33,6 @@ void sched_exit(void);
 // This function is called when everything's idle.  It waits for the next
 // interrupt.
 void sched_idle();
+
+// Helper routine that switches to the next runnable process.
+void sched_block(struct pcb *current);
