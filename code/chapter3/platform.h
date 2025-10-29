@@ -2,6 +2,9 @@
 
 // Platform-dependent constants go here
 
+#define PAGE_SHIFT      13
+#define PAGE_SIZE       (1 << PAGE_SHIFT)
+
 #ifdef SIFIVE
 
 #define UART_BASE       0x10010000UL
