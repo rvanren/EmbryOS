@@ -2,11 +2,11 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "kprintf.h"
 #include "string.h"
 #include "interrupt.h"
 #include "pmp.h"
 #include "flat.h"
+#include "die.h"
 
 extern struct flat flat_fs;
 
@@ -20,20 +20,12 @@ void exec_user(void) {
 
     self->base = frame_alloc();
     self->stack = frame_alloc();
-    if (self->base == 0 || self->stack == 0) {
-        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("out of memory<");
-        proc_exit();
-    }
+    if (self->base == 0 || self->stack == 0) die("out of memory");
 
     uint32_t gp_offset;
     flat_read(&flat_fs, self->executable, 0, &gp_offset, sizeof(gp_offset));
     uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
-    if (size > PAGE_SIZE) {
-        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("executable too large<");
-        proc_exit();
-    }
+    if (size > PAGE_SIZE) die("executable too large");
 
     // Initialize code/data page
     flat_read(&flat_fs, self->executable, sizeof(gp_offset), self->base, size);
