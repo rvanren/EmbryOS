@@ -4,7 +4,7 @@
 #include "process.h"
 #include "interrupt.h"
 
-struct pcb *run_queue;
+static struct pcb *run_queue;
 
 void sched_init(struct pcb *first) {
     proc_enqueue(&run_queue, first);
