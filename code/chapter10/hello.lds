@@ -5,6 +5,8 @@ ENTRY(_start)
 STACK_SIZE       = 4096;
 PAGE_SIZE        = 8192;
 FRAME_PAGES      = 32;
+BLOCK_SIZE       = 512;
+RAMDISK_BLOCKS   = 2048;
 
 /* Split program headers so .text/.rodata are RX and .data/.bss are RW */
 PHDRS {
@@ -40,6 +42,12 @@ SECTIONS {
   } >ram :data
 
   /* --- Reserved kernel areas --- */
+  .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
+    PROVIDE(ramdisk = .);
+    . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
+    PROVIDE(__ramdisk_end = .);
+  } >ram :data
+
   .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
     PROVIDE(frames = .);
     . = . + (PAGE_SIZE * FRAME_PAGES);
