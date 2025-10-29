@@ -27,9 +27,8 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); uart_init();
+    frame_init(); intr_init(); uart_init(); plic_init(); pmp_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-    plic_init(); pmp_init(); files_init();
 
     struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
     sched_init(pcb);
@@ -40,6 +39,7 @@ int main(void) {
     mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
+    files_init();
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
