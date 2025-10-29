@@ -31,10 +31,5 @@ void sched_run(int executable, struct rect area, void *args, int size) {
 }
 
 void sched_idle() {
-    struct pcb *pcb = proc_dequeue(&run_queue);
-    proc_enqueue(&run_queue, pcb);
-    for (;;) {
-        sched_yield();
-        intr_enable(); __asm__ volatile ("wfi"); intr_disable();
-    }
+    for (;;) sched_yield();
 }
