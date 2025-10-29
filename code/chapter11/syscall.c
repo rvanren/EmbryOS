@@ -9,7 +9,7 @@
 #include "flat.h"
 
 void syscall_handler(struct trap_frame *tf) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
     extern struct flat flat_fs;
 
     switch (tf->a7) {

@@ -36,7 +36,7 @@ void software_trap_handler(struct trap_frame *tf) {
         }
     }
 
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
     if (self->base != 0) pmp_load(self);
 }
 
