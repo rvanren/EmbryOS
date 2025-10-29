@@ -8,52 +8,57 @@ FRAME_PAGES      = 32;
 BLOCK_SIZE       = 512;
 RAMDISK_BLOCKS   = 2048;
 
-MEMORY
-{
-    ram (arw!xi) : ORIGIN = 0x80000000, LENGTH = 0x200000  /* 2 MiB for example */
+/* Split program headers so .text/.rodata are RX and .data/.bss are RW */
+PHDRS {
+  text PT_LOAD FLAGS(5);   /* PF_R | PF_X */
+  data PT_LOAD FLAGS(6);   /* PF_R | PF_W */
 }
 
-SECTIONS
-{
-    . = ORIGIN(ram);
+MEMORY {
+  ram (rwx) : ORIGIN = 0x80000000, LENGTH = 0x200000  /* 2 MiB example */
+}
 
-    .text : {
-        *(.text.enter)
-        *(.text .text.*)
-        *(.rodata .rodata.*)
-    } >ram
+SECTIONS {
+  . = ORIGIN(ram);
 
-    .data : ALIGN(8) {
-        *(.data .data.*)
-        *(.sdata .sdata.*)
-    } >ram
+  /* --- Code and read-only data --- */
+  .text : {
+    *(.text.start*)
+    *(.text.enter)
+    *(.text .text.*)
+    *(.rodata .rodata.*)
+  } >ram AT>ram :text     /* note: :text AFTER >ram */
 
-    .bss (NOLOAD) : ALIGN(8) {
-        *(.bss .bss.*)
-        *(COMMON)
-    } >ram
+  /* --- Writable data --- */
+  .data : ALIGN(8) {
+    *(.data .data.*)
+    *(.sdata .sdata.*)
+  } >ram AT>ram :data
 
-    /* Reserve space for ramdisk */
-    .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
-        PROVIDE(ramdisk = .);
-        . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
-        PROVIDE(__ramdisk_end = .);
-    } >ram
+  /* --- Zero-initialized --- */
+  .bss (NOLOAD) : ALIGN(8) {
+    *(.bss .bss.*)
+    *(COMMON)
+  } >ram :data
 
-    /* Reserve frames for page allocator */
-    .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
-        PROVIDE(frames = .);
-        . = . + (PAGE_SIZE * FRAME_PAGES);
-        PROVIDE(__frames_end = .);
-    } >ram
+  /* --- Reserved kernel areas --- */
+  .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
+    PROVIDE(ramdisk = .);
+    . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
+    PROVIDE(__ramdisk_end = .);
+  } >ram :data
 
-    /* Kernel stack */
-    .stack (NOLOAD) : ALIGN(16) {
-        PROVIDE(stack_start = .);
-        . = . + STACK_SIZE;
-        PROVIDE(stack_end = .);
-    } >ram
+  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
+    PROVIDE(frames = .);
+    . = . + (PAGE_SIZE * FRAME_PAGES);
+    PROVIDE(__frames_end = .);
+  } >ram :data
 
-    /* Symbol marking top of usable RAM */
-    PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));  /* top of RAM */
+  .stack (NOLOAD) : ALIGN(16) {
+    PROVIDE(stack_start = .);
+    . = . + STACK_SIZE;
+    PROVIDE(stack_end = .);
+  } >ram :data
+
+  PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));
 }
