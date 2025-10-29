@@ -20,7 +20,7 @@ void proc_reap_zombies(void) {
 }
 
 void proc_exit(void) {
-    struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
+    struct pcb *pcb = proc_dequeue(&run_queue);
     pcb->next = zombies;
     zombies = pcb;
     sched_block(pcb);

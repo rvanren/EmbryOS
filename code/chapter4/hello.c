@@ -7,7 +7,7 @@
 #include "frame.h"
 
 void exception_handler(struct trap_frame *tf) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = run_queue->next;
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
     kprintf("trap: cause=%d mepc=%x mtval=%x<",
                         tf->mcause & 0xFFF, tf->mepc, tf->mtval);
