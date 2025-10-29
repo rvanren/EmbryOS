@@ -20,13 +20,13 @@ APP_ELFS = $(addprefix $(APPS_DIR)/,$(addsuffix .elf,$(APPS)))
 
 all: apps_gen.c $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c apps.c frame.c kprintf.c die.c shared/string.c sched.c screen.c process.c proc_clean.c procsys.c interrupt.c plic.c syscall.c mtime.c pmp.c io.c io2.c uart_sifive.c uart_16550.c apps_gen.c files.c flat1.c flat2.c bd_ramdisk.c bd_simple.c bd_simple_ops.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c die.c apps.c frame.c kprintf.c shared/string.c sched.c screen.c process.c proc_clean.c procsys.c interrupt.c plic.c syscall.c mtime.c pmp.c io.c io2.c uart_sifive.c uart_16550.c apps_gen.c files.c flat1.c flat2.c bd_ramdisk.c bd_simple.c bd_simple_ops.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
-	$(QEMU) -nographic -machine sifive_u -smp 2 -bios none -kernel hello.elf
+	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
 	@printf "$(END)\n"
 
 # --- Build user binary ---
@@ -70,7 +70,3 @@ apps_gen.c: $(APP_ELFS)
 clean:
 	@printf "$(YELLOW)-------- clean --------$(END)\n"
 	rm -f hello.bin hello.lst hello.elf
-
-clear:
-	@printf "$(END)\n"
-	clear

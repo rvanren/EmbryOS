@@ -3,11 +3,12 @@
 #include "interrupt.h"
 #include "sched.h"
 #include "kprintf.h"
+#include "pmp.h"
 
 #define MIE_MASK (1u << 3)
 
 static void no_handler(struct trap_frame *tf) {
-    kprintf("Bad interrupt\n");
+    kprintf("Bad interrupt: mcause=%x mepc=%x\n", tf->mcause, tf->mepc);
     for (;;) ;
 }
 
@@ -34,6 +35,9 @@ void software_trap_handler(struct trap_frame *tf) {
             (*handlers[INTR_EXCEPTION])(tf);
         }
     }
+
+    struct pcb *self = run_queue[proc_current]->next;
+    if (self->base != 0) pmp_load(self);
 }
 
 void intr_set_handler(enum intr_class which, trap_entry_t handler) {

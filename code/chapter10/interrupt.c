@@ -8,7 +8,7 @@
 #define MIE_MASK (1u << 3)
 
 static void no_handler(struct trap_frame *tf) {
-    kprintf("Bad interrupt\n");
+    kprintf("Bad interrupt: mcause=%x mepc=%x\n", tf->mcause, tf->mepc);
     for (;;) ;
 }
 
