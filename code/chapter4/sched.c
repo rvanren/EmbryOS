@@ -12,7 +12,7 @@ void sched_init(struct pcb *first) {
 
 struct pcb *sched_self() { return runqueue->next; }
 
-void proc_reap_zombies(void) {
+static void reap_zombies(void) {
     while (zombies != 0) {
         struct pcb *pcb = zombies;
         zombies = zombies->next;
@@ -23,7 +23,7 @@ void proc_reap_zombies(void) {
 void sched_block(struct pcb *current) {
     struct pcb *next = run_queue->next;
     if (next != current) ctx_switch(&current->sp, next->sp);
-    proc_reap_zombies();
+    reap_zombies();
 }
 
 void sched_yield(void) {
@@ -37,7 +37,7 @@ void sched_run(int executable, struct rect area, void *args, int size) {
     struct pcb *pcb = proc_create(executable, area, args, size);
     proc_enqueue(&run_queue, pcb);
     ctx_start(&current->sp, (char *) pcb + PAGE_SIZE);
-    proc_reap_zombies();
+    reap_zombies();
 }
 
 void sched_exit(void) {
