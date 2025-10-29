@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "bd_simple.h"
+#include "die.h"
 
 int simple_alloc(void *st) {
     struct simple_state *s = st;
@@ -36,7 +37,7 @@ void simple_write(void *st, int inode, int blk, const void *src) {
     s->lower->read(s->lower->state, s->inode_below, inode, &ib);
     if (ib.blocks[blk] == 0) {
         int nb = simple_alloc_block(s);
-        if (nb == 0) return; // disk full
+        if (nb == 0) die("disk full");
         ib.blocks[blk] = nb;
         s->lower->write(s->lower->state, s->inode_below, inode, &ib);
     }
