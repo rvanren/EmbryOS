@@ -10,7 +10,7 @@ void init_main(), splash_main(), life_main(), snake_main();
 static void (*apps[])() = { init_main, splash_main, life_main, snake_main };
 
 void exec_user(void) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
     intr_enable();
     apps[self->executable - 2]();
     intr_disable();
