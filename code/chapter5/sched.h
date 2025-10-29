@@ -8,11 +8,6 @@
 //  1: background processes, which are processes that have been pre-empted
 //  2: the "main" process that waits for interrupts in case everything else is idle
 
-// Maintains the priority of the process that is currently running.
-// Its PCB is run_queue[proc_current]->next.  run_queue[proc_current] points
-// to the last process that ran at that priority.
-extern int proc_current;
-
 // Initialize that schedule module with the first process
 void sched_init(struct pcb *first);
 
