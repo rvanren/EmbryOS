@@ -4,5 +4,4 @@
 // simple serial peripherals (external devices) like a keyboard, mouse, or the screen.
 
 void uart_putchar(char c);        // write c to the screen
-void uart_isr();                  // the UART interrupt service routine
 void uart_init(void);             // initialize this module
