@@ -27,6 +27,7 @@ all: $(APP_OBJS)
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
 	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
+	@printf "$(END)\n"
 
 clean:
 	@printf "$(YELLOW)-------- clean --------$(END)\n"
