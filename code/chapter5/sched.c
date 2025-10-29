@@ -71,3 +71,10 @@ void sched_idle() {
         intr_enable(); __asm__ volatile ("wfi"); intr_disable();
     }
 }
+
+void sched_exit(void) {
+    struct pcb *pcb = sched_self();
+    pcb->next = zombies;
+    zombies = pcb;
+    sched_block(pcb);
+}
