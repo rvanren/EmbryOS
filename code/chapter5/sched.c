@@ -64,7 +64,7 @@ void sched_idle() {
 }
 
 void sched_exit(void) {
-    struct pcb *pcb = sched_self();
+    struct pcb *pcb = proc_dequeue(&run_queue[current_priority]);
     pcb->next = zombies;
     zombies = pcb;
     sched_block(pcb);
