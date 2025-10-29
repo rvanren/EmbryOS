@@ -72,4 +72,4 @@ clean:
 
 clear:
 	@printf "$(END)\n"
-    clear
+	clear
