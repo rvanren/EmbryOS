@@ -1,4 +1,4 @@
-    .equ TRAP_FRAME_SIZE, 144   # 36 words × 4 bytes
+    .equ TRAP_FRAME_SIZE, 144   # 36 words x 4 bytes
 
     .section .text
     .globl _trap_handler

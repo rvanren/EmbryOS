@@ -8,12 +8,10 @@
 
 static int current_priority;
 static struct pcb *run_queue[N_PRIORITIES];
-static struct pcb *zombies = 0;   // list of PCBs pending free
+static struct pcb *zombies;   // list of PCBs pending free
 
 void sched_init(struct pcb *first) {
-    for (int i = 0; i < N_PRIORITIES; i++) run_queue[i] = 0;
     proc_enqueue(&run_queue[0], first);
-    current_priority = 0;
 }
 
 struct pcb *sched_self() { return run_queue[current_priority]->next; }
