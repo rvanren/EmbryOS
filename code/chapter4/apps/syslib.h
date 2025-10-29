@@ -12,7 +12,7 @@ static inline void user_exit() {
     struct pcb *self = run_queue->next;
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
     kprintf("process ended<");
-    proc_exit();
+    sched_exit();
     intr_enable();      // should never be called
 }
 

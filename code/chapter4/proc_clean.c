@@ -18,10 +18,3 @@ void proc_reap_zombies(void) {
         frame_release(pcb);
     }
 }
-
-void proc_exit(void) {
-    struct pcb *pcb = proc_dequeue(&run_queue);
-    pcb->next = zombies;
-    zombies = pcb;
-    sched_block(pcb);
-}
