@@ -3,6 +3,8 @@ ENTRY(_start)
 
 /* --- configurable system parameters --- */
 STACK_SIZE       = 4096;
+PAGE_SIZE        = 8192;
+FRAME_PAGES      = 32;
 
 /* Split program headers so .text/.rodata are RX and .data/.bss are RW */
 PHDRS {
@@ -35,6 +37,13 @@ SECTIONS {
   .bss (NOLOAD) : ALIGN(8) {
     *(.bss .bss.*)
     *(COMMON)
+  } >ram :data
+
+  /* --- Reserved kernel areas --- */
+  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
+    PROVIDE(frames = .);
+    . = . + (PAGE_SIZE * FRAME_PAGES);
+    PROVIDE(__frames_end = .);
   } >ram :data
 
   .stack (NOLOAD) : ALIGN(16) {
