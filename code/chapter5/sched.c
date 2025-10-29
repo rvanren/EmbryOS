@@ -26,13 +26,6 @@ static void reap_zombies(void) {
     }
 }
 
-void proc_exit(void) {
-    struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
-    pcb->next = zombies;
-    zombies = pcb;
-    sched_block(pcb);
-}
-
 void sched_block(struct pcb *current) {
     current_priority = 0;
     while (current_priority < N_PRIORITIES && run_queue[current_priority] == 0)
