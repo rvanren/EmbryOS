@@ -2,9 +2,9 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "kprintf.h"
 #include "string.h"
 #include "interrupt.h"
+#include "die.h"
 
 void init_main(), splash_main(), life_main(), snake_main();
 static void (*apps[])() = { init_main, splash_main, life_main, snake_main };
@@ -14,7 +14,5 @@ void exec_user(void) {
     intr_enable();
     apps[self->executable - 2]();
     intr_disable();
-    proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-    kprintf("process ended<");
-    proc_exit();
+    die("process ended");
 }

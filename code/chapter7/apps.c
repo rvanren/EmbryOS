@@ -2,7 +2,6 @@
 #include <stdint.h>
 #include "frame.h"
 #include "sched.h"
-#include "kprintf.h"
 #include "string.h"
 #include "interrupt.h"
 
