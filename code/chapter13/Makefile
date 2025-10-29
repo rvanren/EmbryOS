@@ -69,3 +69,7 @@ apps_gen.c: $(APP_ELFS)
 clean:
 	@printf "$(YELLOW)-------- clean --------$(END)\n"
 	rm -f hello.bin hello.lst hello.elf
+
+clear:
+	@printf "$(END)\n"
+    clear
