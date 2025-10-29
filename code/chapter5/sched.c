@@ -24,13 +24,23 @@ static void reap_zombies(void) {
     }
 }
 
-void sched_block(struct pcb *current) {
+static void sched_block(struct pcb *current) {
     current_priority = 0;
     while (current_priority < N_PRIORITIES && run_queue[current_priority] == 0)
         current_priority++;
     struct pcb *next = run_queue[current_priority]->next;
     if (next != current) ctx_switch(&current->sp, next->sp);
     reap_zombies();
+}
+
+void sched_wait(struct pcb **q) {
+    struct pcb *me = proc_dequeue(&run_queue[current_priority]);
+    proc_enqueue(q, me);
+    sched_block(me);
+}
+
+void sched_resume(struct pcb *pcb) {
+    proc_enqueue(&run_queue[0], pcb);
 }
 
 void sched_yield(void) {

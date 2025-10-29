@@ -14,8 +14,11 @@ void sched_init(struct pcb *first);
 // Get me
 struct pcb *sched_self();
 
-// The current process pcb is replaced by the highest priority process.
-void sched_block(struct pcb *pcb);
+// Move the current process to the given wait queue.
+void sched_wait(struct pcb **q);
+
+// Put the given process back on the run queue
+void sched_resume(struct pcb *pcb);
 
 // The current process voluntarily yields to another. If its priority was 0,
 // it is moved to run_queue[1].
