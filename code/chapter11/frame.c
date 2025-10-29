@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include "platform.h"
 #include "frame.h"
 
 // This is type of unallocated frames.  They point to the next unallocated frame.
