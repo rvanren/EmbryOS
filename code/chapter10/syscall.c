@@ -1,11 +1,11 @@
 #include "trap.h"
 #include "syscall.h"
 #include "process.h"
-#include "kprintf.h"
 #include "process.h"
 #include "sched.h"
 #include "io.h"
 #include "frame.h"
+#include "die.h"
 
 void syscall_handler(struct trap_frame *tf) {
     struct pcb *self = run_queue[proc_current]->next;
@@ -13,8 +13,7 @@ void syscall_handler(struct trap_frame *tf) {
     switch (tf->a7) {
     case SYS_EXIT:
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-        kprintf("process ended<");
-        proc_exit();
+        die("process ended");
         break;
     case SYS_SPAWN:
         sched_run(tf->a0, (struct rect){ tf->a1, tf->a2, tf->a3, tf->a4 }, (void *) (uintptr_t) tf->a5, tf->a6);
@@ -26,6 +25,6 @@ void syscall_handler(struct trap_frame *tf) {
         tf->a0 = io_get(self, tf->a0, tf->a1, tf->a2, tf->a3);
         break;
     default:
-        kprintf("Unknown syscall %d\n", tf->a7);
+        die("unknown system call");
     }
 }
