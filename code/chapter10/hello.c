@@ -7,6 +7,7 @@
 #include "frame.h"
 #include "plic.h"
 #include "pmp.h"
+#include "files.h"
 
 #include "mtime.h"
 
@@ -39,6 +40,7 @@ int main(void) {
     mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
+    files_init();
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
