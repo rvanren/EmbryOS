@@ -12,7 +12,7 @@ void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
 
 void exec_user(void) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
 
     self->base = frame_alloc();
     self->stack = frame_alloc();
