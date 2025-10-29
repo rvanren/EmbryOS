@@ -10,7 +10,7 @@ void sched_init(struct pcb *first) {
     proc_enqueue(&run_queue, first);
 }
 
-struct pcb *sched_self() { return runqueue->next; }
+struct pcb *sched_self() { return run_queue->next; }
 
 static void reap_zombies(void) {
     while (zombies != 0) {
