@@ -1,6 +1,7 @@
+#include <stdint.h>
 #include "platform.h"
-#include "io.h"
 #include "uart.h"
+#include "io.h"
 
 #ifdef UART_SIFIVE
 
