@@ -11,11 +11,6 @@ static struct pcb *run_queue[N_PRIORITIES];
 static struct pcb *zombies;   // list of PCBs pending free
 
 void sched_init(struct pcb *first) {
-    current_priority = 0;
-    run_queue[0] = 0;
-    run_queue[1] = 0;
-    run_queue[2] = 0;
-    zombies = 0;
     proc_enqueue(&run_queue[0], first);
 }
 
@@ -59,7 +54,7 @@ void sched_run(int executable, struct rect area, void *args, int size) {
 }
 
 void sched_idle() {
-    struct pcb *pcb = sched_self();
+    struct pcb *pcb = proc_dequeue(&run_queue[proc_current]);
     proc_enqueue(&run_queue[2], pcb);
     current_priority = 2;
     for (;;) {
