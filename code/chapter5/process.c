@@ -42,7 +42,7 @@ struct pcb *proc_dequeue(struct pcb **q) {
 }
 
 void proc_release(struct pcb *pcb) {
-    if (pcb->base != 0) frame_release(pcb->base);
-    if (pcb->stack != 0) frame_release(pcb->stack);
+    // TODO if (pcb->base != 0) frame_release(pcb->base);
+    // TODO if (pcb->stack != 0) frame_release(pcb->stack);
     frame_release(pcb);
 }
