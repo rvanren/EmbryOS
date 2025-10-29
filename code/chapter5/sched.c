@@ -54,7 +54,7 @@ void sched_run(int executable, struct rect area, void *args, int size) {
 }
 
 void sched_idle() {
-    struct pcb *pcb = proc_dequeue(&run_queue[current_priority]);
+    struct pcb *pcb = sched_self();
     proc_enqueue(&run_queue[2], pcb);
     current_priority = 2;
     for (;;) {
