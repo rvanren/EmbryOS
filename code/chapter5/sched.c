@@ -6,9 +6,9 @@
 
 #define N_PRIORITIES 3
 
+static int current_priority;
 static struct pcb *run_queue[N_PRIORITIES];
 static struct pcb *zombies = 0;   // list of PCBs pending free
-static int current_priority;
 
 void sched_init(struct pcb *first) {
     for (int i = 0; i < N_PRIORITIES; i++) run_queue[i] = 0;

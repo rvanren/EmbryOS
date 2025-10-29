@@ -25,10 +25,7 @@ void exception_handler(struct trap_frame *tf) {
 int main(void) {
     frame_init(); intr_init(); uart_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-
-    struct pcb *pcb = proc_init((struct rect){ 0, 0, 80, 24 });
-    sched_init(pcb);
-
+    sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
     mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
     mtime_reset(QUANTUM);
