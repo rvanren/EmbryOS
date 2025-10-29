@@ -24,10 +24,7 @@ int io_get(struct pcb *self, int row, int col, cell_t cf, cell_t cu) {
         self->cf = cf; self->cu = cu;
         self->kbd_waiting = 1;
         self->kbd_row = row; self->kbd_col = col;
-        proc_dequeue(&run_queue[proc_current]);
-        if (io_wait == 0) io_wait = self->next = self;
-        else { self->next = io_wait->next; io_wait->next = self; }
-        sched_block(self);
+        sched_wait(&io_wait);
     }
     char c = self->kbd_buf[self->kbd_tail];
     self->kbd_tail = (self->kbd_tail + 1) % KBD_BUF_SIZE;

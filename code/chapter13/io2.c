@@ -30,7 +30,7 @@ static void io_char(char c) {
             prev->next = pcb->next;
             if (io_wait == pcb) io_wait = prev;
         }
-        proc_enqueue(&run_queue[0], pcb);
+        sched_resume(pcb);
     }
     pcb->kbd_buf[(pcb->kbd_tail + pcb->kbd_size) % KBD_BUF_SIZE] = c;
     pcb->kbd_size++;
