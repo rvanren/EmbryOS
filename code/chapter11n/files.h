@@ -1,1 +1,0 @@
-void files_init();
