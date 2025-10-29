@@ -1,6 +1,6 @@
 #include <stdarg.h>
 #include "kprintf.h"
-#include "uart.h"
+#include "io.h"
 
 static void print_unsigned(unsigned int x, unsigned int base) {
     char buf[16];
@@ -10,18 +10,18 @@ static void print_unsigned(unsigned int x, unsigned int base) {
         buf[i++] = (digit < 10) ? '0' + digit : 'a' + (digit - 10);
         x /= base;
     } while (x != 0);
-    while (--i >= 0) uart_putchar(buf[i]);
+    while (--i >= 0) io_putchar(buf[i]);
 }
 
 void kprintf(const char *fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     for (; *fmt; fmt++) {
-        if (*fmt != '%') { uart_putchar(*fmt); continue; }
+        if (*fmt != '%') { io_putchar(*fmt); continue; }
         fmt++;
         switch (*fmt) {
         case 'd': { int x = va_arg(ap, int);
-            if (x < 0) { uart_putchar('-'); x = -x; }
+            if (x < 0) { io_putchar('-'); x = -x; }
             print_unsigned((unsigned int) x, 10);
             break;
         }
@@ -34,18 +34,18 @@ void kprintf(const char *fmt, ...) {
             break;
         }
         case 's': { char *s = va_arg(ap, char *);
-            while (*s) uart_putchar(*s++);
+            while (*s) io_putchar(*s++);
             break;
         }
         case 'c': { int c = va_arg(ap, int);
-            uart_putchar(c);
+            io_putchar(c);
             break;
         }
         case '%':
-            uart_putchar('%');
+            io_putchar('%');
             break;
         default:
-            uart_putchar('%'); uart_putchar(*fmt);
+            io_putchar('%'); io_putchar(*fmt);
         }
     }
     va_end(ap);
