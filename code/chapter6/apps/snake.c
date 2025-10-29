@@ -119,10 +119,10 @@ static int read_direction_or_quit(struct snake *S, int *dr, int *dc, int *quit) 
                        CELL('X', ANSI_BLACK, ANSI_YELLOW));
 
     // vi keys
-    if (key == 'h') { *dr = 0;  *dc = -1; return 1; }
-    if (key == 'j') { *dr = 1;  *dc =  0; return 1; }
-    if (key == 'k') { *dr = -1; *dc =  0; return 1; }
-    if (key == 'l') { *dr = 0;  *dc =  1; return 1; }
+    if (key == 'h' || key == 'a') { *dr = 0;  *dc = -1; return 1; }
+    if (key == 'j' || key == 's') { *dr = 1;  *dc =  0; return 1; }
+    if (key == 'k' || key == 'w') { *dr = -1; *dc =  0; return 1; }
+    if (key == 'l' || key == 'd') { *dr = 0;  *dc =  1; return 1; }
 
     // quit
     if (key == 'q' || key == 'Q') { *quit = 1; return 0; }
