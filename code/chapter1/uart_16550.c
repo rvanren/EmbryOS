@@ -1,7 +1,7 @@
 #include <stdint.h>
-#include "uart.h"
-#include "io.h"
 #include "platform.h"
+#include "io.h"
+#include "uart.h"
 
 #ifdef UART_16550
 

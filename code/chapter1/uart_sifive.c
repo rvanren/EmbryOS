@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "platform.h"
 #include "io.h"
 #include "uart.h"
