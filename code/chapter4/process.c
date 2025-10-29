@@ -40,3 +40,7 @@ struct pcb *proc_dequeue(struct pcb **q) {
     pcb->next = 0;
     return pcb;
 }
+
+void proc_release(struct pcb *pcb) {
+    frame_release(pcb);
+}

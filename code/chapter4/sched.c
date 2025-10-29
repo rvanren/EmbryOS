@@ -16,7 +16,7 @@ static void reap_zombies(void) {
     while (zombies != 0) {
         struct pcb *pcb = zombies;
         zombies = zombies->next;
-        frame_release(pcb);
+        proc_release(pcb);
     }
 }
 
