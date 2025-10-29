@@ -44,5 +44,8 @@ void proc_enqueue(struct pcb **q, struct pcb *pcb);
 // Remove and return the current process from the given circular queue q.
 struct pcb *proc_dequeue(struct pcb **q);
 
+// Check the legality of the given user memory region
+void proc_check_legal(struct pcb *self, uintptr_t start, int size);
+
 // Release the given PCB
 void proc_release(struct pcb *pcb);
