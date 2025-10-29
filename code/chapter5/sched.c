@@ -1,6 +1,7 @@
 #include "sched.h"
 #include "ctx.h"
 #include "process.h"
+#include "frame.h"
 
 #define N_PRIORITIES 3
 
