@@ -4,7 +4,7 @@
 #include "kprintf.h"
 #include "process.h"
 #include "sched.h"
-#include "uart.h"
+#include "io.h"
 #include "frame.h"
 
 void syscall_handler(struct trap_frame *tf) {
