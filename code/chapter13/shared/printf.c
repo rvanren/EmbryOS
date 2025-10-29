@@ -1,4 +1,3 @@
-#include <stdarg.h>
 #include "stdio.h"
 
 #define PRINTF printf
