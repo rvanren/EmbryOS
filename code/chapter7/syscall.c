@@ -8,7 +8,7 @@
 #include "die.h"
 
 void syscall_handler(struct trap_frame *tf) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
 
     switch (tf->a7) {
     case SYS_EXIT:

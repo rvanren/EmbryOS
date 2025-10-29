@@ -19,6 +19,6 @@ static void (*apps[])() = { init_crt, splash_crt, life_crt, snake_crt };
 __attribute__((noreturn)) void enter_user(void (*entry)());
 
 void exec_user(void) {
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = sched_self();
     enter_user(apps[self->executable - 2]);
 }
