@@ -9,7 +9,7 @@
 
 static inline void user_exit() {
     intr_disable();
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = run_queue->next;
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
     kprintf("process ended<");
     proc_exit();
@@ -24,7 +24,7 @@ static inline void user_spawn(int app, int row, char col, int wd, int ht, const 
 
 static inline void user_put(int row, int col, cell_t cell) {
     intr_disable();
-    struct pcb *self = run_queue[proc_current]->next;
+    struct pcb *self = run_queue->next;
     proc_put(self, row, col, cell);
     intr_enable();
 }
