@@ -17,6 +17,9 @@ struct pcb *sched_self();
 // Move the current process to the given wait queue.
 void sched_wait(struct pcb **q);
 
+// Put the given process back on the run queue
+void sched_resume(struct pcb *pcb);
+
 // The current process voluntarily yields to another. If its priority was 0,
 // it is moved to run_queue[1].
 void sched_yield(void);

@@ -39,6 +39,10 @@ void sched_wait(struct pcb **q) {
     sched_block(me);
 }
 
+void sched_resume(struct pcb *pcb) {
+    proc_enqueue(&run_queue[0], pcb);
+}
+
 void sched_yield(void) {
     if (current_priority == 0) {
         struct pcb *me = proc_dequeue(&run_queue[0]);
