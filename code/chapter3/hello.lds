@@ -34,5 +34,12 @@ SECTIONS {
     *(COMMON)
   } >ram :data
 
+  /* The heap */
+  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
+    PROVIDE(frames = .);
+    . = . + (PAGE_SIZE * FRAME_PAGES);
+    PROVIDE(__frames_end = .);
+  } >ram :data
+
   . = ALIGN(16);
 }
