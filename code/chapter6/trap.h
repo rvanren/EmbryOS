@@ -17,9 +17,9 @@ struct trap_frame {
     uint32_t a0, a1, a2, a3, a4, a5, a6, a7; //  9 - 16
     uint32_t s2, s3, s4, s5, s6, s7, s8, s9, s10, s11; // 17 - 26
     uint32_t t3, t4, t5, t6;                 // 27 - 30
-    uint32_t mepc;                           // 31
-    uint32_t mstatus;                        // 32
-    uint32_t mcause;                         // 33
-    uint32_t mtval;                          // 34
+    uint32_t sepc;                           // 31
+    uint32_t sstatus;                        // 32
+    uint32_t scause;                         // 33
+    uint32_t stval;                          // 34
     uint32_t usp;                            // 35
 };
