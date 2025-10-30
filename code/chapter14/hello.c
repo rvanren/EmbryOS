@@ -7,6 +7,7 @@
 #include "frame.h"
 #include "plic.h"
 #include "pmp.h"
+#include "vm.h"
 #include "files.h"
 
 #include "mtime.h"

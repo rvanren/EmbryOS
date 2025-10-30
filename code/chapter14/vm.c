@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include "frame.h"
+#include "vm.h"
 
 #define PGSIZE 4096
 #define NPTENTRIES 1024
