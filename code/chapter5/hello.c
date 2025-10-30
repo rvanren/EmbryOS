@@ -10,7 +10,8 @@
 
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
-    mtime_reset(QUANTUM); // add another quantum
+    uint64_t now = get_time();
+    sbi_set_timer(now + QUANTUM);
 }
 
 void exception_handler(struct trap_frame *tf) {
@@ -27,7 +28,8 @@ int main(void) {
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
     mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
-    mtime_reset(QUANTUM);
+    uint64_t now = get_time();
+    sbi_set_timer(now + QUANTUM);
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
