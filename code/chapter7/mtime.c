@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include "interrupt.h"
 #include "platform.h"
 
@@ -6,14 +7,22 @@
 
 #define MTIE_MASK        (1u << 7)
 
-void mtime_init() {
-    asm("csrs mie, %0"::"r"(MTIE_MASK)); // set MTIE=1, unmask timer interrupts
+static inline uint32_t mread_hartid(void) {
+    uint32_t hart;
+    asm volatile ("csrr %0, mhartid" : "=r"(hart));
+    return hart;
 }
 
-uint64_t mtime_get() {
+void mtime_init(void) {
+    asm volatile ("csrs mie, %0" :: "r"(MTIE_MASK));  // enable timer interrupt
+}
+
+uint64_t mtime_get(void) {
     return *((volatile uint64_t *) MTIME_ADDR);
 }
 
 void mtime_reset(uint64_t quantum) {
-    *((volatile uint64_t *) MTIME_CMP(1)) = mtime_get() + quantum;
+    uint32_t hart = mread_hartid();
+    volatile uint64_t *cmp = (volatile uint64_t *) MTIME_CMP(hart);
+    *cmp = mtime_get() + quantum;
 }
