@@ -1,7 +1,6 @@
 #include "sched.h"
 #include "kprintf.h"
 #include "syscall.h"
-#include "uart.h"
 #include "screen.h"
 #include "interrupt.h"
 #include "frame.h"
@@ -15,7 +14,7 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); uart_init();
+    frame_init(); intr_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
 

@@ -42,6 +42,13 @@ void intr_set_handler(enum intr_class which, trap_entry_t handler) {
 
 int intr_init() {
     void _trap_handler();
-    asm("csrw mtvec, %0"::"r"(_trap_handler));
-    asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
+    uintptr_t handler = (uintptr_t) _trap_handler;
+    // Set S-mode trap vector
+    asm volatile ("csrw stvec, %0" :: "r"(handler));
+    // Enable supervisor external interrupts (SEIE bit 9)
+    asm volatile ("csrs sie, %0" :: "r"(1 << 9));
+    // Enable supervisor timer interrupts (STIE bit 5)
+    asm volatile ("csrs sie, %0" :: "r"(1 << 5));
+    // Set SIE bit in sstatus
+    asm volatile ("csrs sstatus, %0" :: "r"(1 << 1));
 }
