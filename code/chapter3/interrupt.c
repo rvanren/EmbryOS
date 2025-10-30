@@ -7,7 +7,7 @@
 #define MIE_MASK (1u << 3)
 
 static void no_handler(struct trap_frame *tf) {
-    kprintf("Bad interrupt: mcause=%x mepc=%x\n", tf->mcause, tf->mepc);
+    kprintf("Bad interrupt: scause=%x sepc=%x\n", tf->scause, tf->sepc);
     for (;;) ;
 }
 
@@ -17,19 +17,19 @@ void intr_enable(void) { __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK));
 void intr_disable(void) { __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK)); }
 
 void software_trap_handler(struct trap_frame *tf) {
-    int mcause, mepc;
-    asm("csrr %0, mcause":"=r"(mcause));
-    if (mcause & (1 << 31)) {   // interrupt?
-        switch (mcause & 0xFFF) {
+    int scause, sepc;
+    asm("csrr %0, scause":"=r"(scause));
+    if (scause & (1 << 31)) {   // interrupt?
+        switch (scause & 0xFFF) {
         case  3: break;
         case  7: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: kprintf("Unknown interrupt cause %x\n", mcause);
+        default: kprintf("Unknown interrupt cause %x\n", scause);
         }
     }
     else {
-        switch (mcause & 0xFFF) {
-        case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
+        switch (scause & 0xFFF) {
+        case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->sepc += 4; break;
         default:
             (*handlers[INTR_EXCEPTION])(tf);
         }
