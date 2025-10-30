@@ -23,12 +23,32 @@ void exception_handler(struct trap_frame *tf) {
     sched_exit();
 }
 
+#define UART0_BASE  0x10000000UL
+#define UART_RBR    0x00  // receive buffer
+#define UART_LSR    0x05  // line status
+#define LSR_DR      0x01  // data ready
+
+static inline int uart_read_ready(void) {
+    return (*(volatile uint8_t *)(UART0_BASE + UART_LSR)) & LSR_DR;
+}
+
+static inline char uart_getc(void) {
+    return *(volatile uint8_t *)(UART0_BASE + UART_RBR);
+}
+
+void external_handler(struct trap_frame *tf) {
+    while (uart_read_ready()) {
+        char c = uart_getc();
+        io_putchar(c);
+    }
+}
+
 int main(void) {
     frame_init(); intr_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     plic_init();
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
-    intr_set_handler(INTR_EXTERNAL, plic_handler);
+    intr_set_handler(INTR_EXTERNAL, external_handler);
     intr_set_handler(INTR_TIMER, timer_handler);
     uint64_t now = mtime_get();
     sbi_set_timer(now + QUANTUM);
