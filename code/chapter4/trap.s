@@ -1,10 +1,25 @@
-    .equ TRAP_FRAME_SIZE, 144   # 36 words x 4 bytes
+# ================================================================
+# S-mode Trap Handler for EmbryOS (under OpenSBI)
+# ================================================================
+# This handler:
+#   - Saves all integer registers (x1–x31)
+#   - Saves S-mode CSRs (sepc, sstatus, scause, stval)
+#   - Calls a C function: software_trap_handler(struct trap_frame *tf)
+#   - Restores registers and returns with sret
+#
+# Stack alignment follows RISC-V psABI (16-byte)
+# ================================================================
+
+    .equ TRAP_FRAME_SIZE, 144   # 36 words × 4 bytes
 
     .section .text
     .globl _trap_handler
 _trap_handler:
-    # allocate space for trap frame
+    # ------------------------------------------------------------
+    # Allocate trap frame (keep SP 16-byte aligned)
+    # ------------------------------------------------------------
     addi sp, sp, -TRAP_FRAME_SIZE
+    andi sp, sp, -16
 
     # --- save all general registers ---
     sw ra,   0(sp)
@@ -39,30 +54,38 @@ _trap_handler:
     sw t5,  116(sp)
     sw t6,  120(sp)
 
-    # --- save machine CSRs ---
-    csrr t0, mepc
-    sw t0, 124(sp)
-    csrr t0, mstatus
-    sw t0, 128(sp)
-    csrr t0, mcause
-    sw t0, 132(sp)
-    csrr t0, mtval
-    sw t0, 136(sp)
+    # ------------------------------------------------------------
+    # Save supervisor CSRs
+    # ------------------------------------------------------------
+    csrr t0, sepc
+    sw   t0, 124(sp)
+    csrr t0, sstatus
+    sw   t0, 128(sp)
+    csrr t0, scause
+    sw   t0, 132(sp)
+    csrr t0, stval
+    sw   t0, 136(sp)
 
-    # usp (user sp) unused for now, set 0 for symmetry
+    # usp (user sp) unused for now
     sw zero, 140(sp)
 
-    # call C-level handler
+    # ------------------------------------------------------------
+    # Call C-level trap handler
+    # ------------------------------------------------------------
     mv a0, sp                   # a0 = &trap_frame
     call software_trap_handler
 
-    # --- restore machine CSRs ---
+    # ------------------------------------------------------------
+    # Restore CSRs
+    # ------------------------------------------------------------
     lw t0, 124(sp)
-    csrw mepc, t0
+    csrw sepc, t0
     lw t0, 128(sp)
-    csrw mstatus, t0
+    csrw sstatus, t0
 
-    # --- restore registers ---
+    # ------------------------------------------------------------
+    # Restore general registers
+    # ------------------------------------------------------------
     lw ra,   0(sp)
     lw sp,   4(sp)
     lw gp,   8(sp)
@@ -95,6 +118,8 @@ _trap_handler:
     lw t5,  116(sp)
     lw t6,  120(sp)
 
-    # free trap frame and return
+    # ------------------------------------------------------------
+    # Free trap frame and return
+    # ------------------------------------------------------------
     addi sp, sp, TRAP_FRAME_SIZE
-    mret
+    sret
