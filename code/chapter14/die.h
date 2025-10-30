@@ -1,0 +1,1 @@
+void die(void *msg);
