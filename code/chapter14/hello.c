@@ -27,7 +27,7 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 int main(void) {
-    frame_init(); intr_init(); uart_init(); plic_init(); pmp_init();
+    frame_init(); intr_init(); uart_init(); plic_init(); pmp_init(); vm_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
 
