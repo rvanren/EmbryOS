@@ -1,6 +1,10 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
+/* --- configurable system parameters --- */
+PAGE_SIZE        = 8192;
+FRAME_PAGES      = 32;
+
 MEMORY {
   ram (rwx) : ORIGIN = 0x80400000, LENGTH = 16M
 }
