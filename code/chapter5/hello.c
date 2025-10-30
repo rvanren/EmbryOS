@@ -26,7 +26,6 @@ int main(void) {
     frame_init(); intr_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
-    mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
     uint64_t now = get_time();
     sbi_set_timer(now + QUANTUM);
