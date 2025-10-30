@@ -1,4 +1,5 @@
 #include "kprintf.h"
+#include "syscall.h"
 
 int main(void) {
     for (;;) {

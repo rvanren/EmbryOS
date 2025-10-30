@@ -9,18 +9,18 @@ YELLOW      = \033[1;33m
 END         = \033[0m
 
 LDFLAGS     = -nostdlib
-CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin -DSIFIVE
+CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s hello.c kprintf.c io.c uart_sifive.c uart_16550.c -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s hello.c kprintf.c io.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
-	$(QEMU) -nographic -machine sifive_u -smp 2 -bios hello.bin
+	$(QEMU) -nographic -machine sifive_u -smp 2 -bios default -kernel hello.bin
 	@printf "$(END)\033[?25h\n"
 
 clean:
