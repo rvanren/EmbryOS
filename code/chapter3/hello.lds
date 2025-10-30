@@ -1,56 +1,38 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
-/* --- configurable system parameters --- */
-STACK_SIZE       = 4096;
-PAGE_SIZE        = 8192;
-FRAME_PAGES      = 32;
+MEMORY {
+  ram (rwx) : ORIGIN = 0x80400000, LENGTH = 16M
+}
 
-/* Split program headers so .text/.rodata are RX and .data/.bss are RW */
+/* ----------------------------------------------------------- */
+/*  Define two ELF program headers: one RX, one RW             */
+/* ----------------------------------------------------------- */
 PHDRS {
   text PT_LOAD FLAGS(5);   /* PF_R | PF_X */
   data PT_LOAD FLAGS(6);   /* PF_R | PF_W */
 }
 
-MEMORY {
-  ram (rwx) : ORIGIN = 0x80000000, LENGTH = 0x200000  /* 2 MiB example */
-}
-
 SECTIONS {
   . = ORIGIN(ram);
 
-  /* --- Code and read-only data --- */
+  /* Code and constants → RX segment */
   .text : {
     *(.text.start*)
-    *(.text.enter)
-    *(.text .text.*)
-    *(.rodata .rodata.*)
-  } >ram AT>ram :text     /* note: :text AFTER >ram */
+    *(.text*)
+    *(.rodata*)
+  } >ram AT>ram :text
 
-  /* --- Writable data --- */
+  /* Writable data → RW segment */
   .data : ALIGN(8) {
-    *(.data .data.*)
-    *(.sdata .sdata.*)
+    *(.data*)
+    *(.sdata*)
   } >ram AT>ram :data
 
-  /* --- Zero-initialized --- */
   .bss (NOLOAD) : ALIGN(8) {
-    *(.bss .bss.*)
+    *(.bss*)
     *(COMMON)
   } >ram :data
 
-  /* --- Reserved kernel areas --- */
-  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
-    PROVIDE(frames = .);
-    . = . + (PAGE_SIZE * FRAME_PAGES);
-    PROVIDE(__frames_end = .);
-  } >ram :data
-
-  .stack (NOLOAD) : ALIGN(16) {
-    PROVIDE(stack_start = .);
-    . = . + STACK_SIZE;
-    PROVIDE(stack_end = .);
-  } >ram :data
-
-  PROVIDE(__stack_top = ORIGIN(ram) + LENGTH(ram));
+  . = ALIGN(16);
 }
