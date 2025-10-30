@@ -1,7 +1,5 @@
-#include "sched.h"
 #include "kprintf.h"
 #include "syscall.h"
-#include "uart.h"
 #include "screen.h"
 #include "interrupt.h"
 #include "frame.h"
