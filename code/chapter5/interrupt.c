@@ -4,32 +4,27 @@
 #include "sched.h"
 #include "kprintf.h"
 
-#define MIE_MASK (1u << 3)
-
 static void no_handler(struct trap_frame *tf) {
-    kprintf("Bad interrupt: mcause=%x mepc=%x\n", tf->mcause, tf->mepc);
+    kprintf("Bad interrupt: scause=%x sepc=%x\n", tf->scause, tf->sepc);
     for (;;) ;
 }
 
 static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
-void intr_enable(void) { __asm__ volatile ("csrs mstatus, %0" :: "r"(MIE_MASK)); }
-void intr_disable(void) { __asm__ volatile ("csrc mstatus, %0" :: "r"(MIE_MASK)); }
-
 void software_trap_handler(struct trap_frame *tf) {
-    int mcause, mepc;
-    asm("csrr %0, mcause":"=r"(mcause));
-    if (mcause & (1 << 31)) {   // interrupt?
-        switch (mcause & 0xFFF) {
+    int scause, sepc;
+    asm("csrr %0, scause":"=r"(scause));
+    if (scause & (1 << 31)) {   // interrupt?
+        switch (scause & 0xFFF) {
         case  3: break;
         case  7: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: kprintf("Unknown interrupt cause %x\n", mcause);
+        default: kprintf("Unknown interrupt cause %x\n", scause);
         }
     }
     else {
-        switch (mcause & 0xFFF) {
-        case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->mepc += 4; break;
+        switch (scause & 0xFFF) {
+        case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->sepc += 4; break;
         default:
             (*handlers[INTR_EXCEPTION])(tf);
         }
@@ -42,6 +37,9 @@ void intr_set_handler(enum intr_class which, trap_entry_t handler) {
 
 int intr_init() {
     void _trap_handler();
-    asm("csrw mtvec, %0"::"r"(_trap_handler));
-    asm("csrs mie, %0" :: "r"(1 << 11)); // MEIE=1 -> allow external interrupts
+    uintptr_t handler = (uintptr_t) _trap_handler;
+    asm volatile ("csrw stvec, %0" :: "r"(handler));  // Set S-mode trap vector
+    asm volatile ("csrs sie, %0" :: "r"(1 << 9));     // Enable supervisor external interrupts (SEIE bit 9)
+    asm volatile ("csrs sie, %0" :: "r"(1 << 5));     // Enable supervisor timer interrupts (STIE bit 5)
+    asm volatile ("csrs sstatus, %0" :: "r"(1 << 1)); // Set SIE bit in sstatus
 }
