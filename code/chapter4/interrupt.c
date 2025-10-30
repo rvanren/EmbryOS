@@ -11,12 +11,6 @@ static void no_handler(struct trap_frame *tf) {
 
 static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
-#define SIE_MASK (1 << 1)   // Bit 1 = SIE (Supervisor Interrupt Enable)
-
-static inline void intr_enable(void) { __asm__ volatile ("csrs sstatus, %0" :: "r"(SIE_MASK)); }
-
-static inline void intr_disable(void) { __asm__ volatile ("csrc sstatus, %0" :: "r"(SIE_MASK)); }
-
 void software_trap_handler(struct trap_frame *tf) {
     int scause, sepc;
     asm("csrr %0, scause":"=r"(scause));
