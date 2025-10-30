@@ -1,6 +1,6 @@
 #include <stdint.h>
 
-static inline uint64_t time_get(void) {
+static inline uint64_t mtime_get(void) {
     uint32_t lo, hi, hi2;
     do {
         asm volatile ("rdtimeh %0" : "=r"(hi));
