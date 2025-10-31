@@ -4,6 +4,7 @@
 #include "screen.h"
 #include "interrupt.h"
 #include "frame.h"
+#include "io.h"
 #include "mtime.h"
 #include "sbi.h"
 
@@ -33,20 +34,19 @@ static inline int uart_read_ready(void) {
 }
 
 static inline char uart_getc(void) {
-    return *(volatile uint8_t *)(UART0_BASE + UART_RBR);
+    return *(volatile char *)(UART0_BASE + UART_RBR);
 }
 
 void external_handler(struct trap_frame *tf) {
     while (uart_read_ready()) {
         char c = uart_getc();
-        io_putchar(c);
+        io_received(c);
     }
 }
 
 int main(void) {
     frame_init(); intr_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-    plic_init();
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
     intr_set_handler(INTR_EXTERNAL, external_handler);
     intr_set_handler(INTR_TIMER, timer_handler);
