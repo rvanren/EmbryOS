@@ -16,14 +16,14 @@ PHDRS {
 SECTIONS {
   . = ORIGIN(ram);
 
-  /* Code and constants → RX segment */
+  /* Code and constants - RX segment */
   .text : {
     *(.text.start*)
     *(.text*)
     *(.rodata*)
   } >ram AT>ram :text
 
-  /* Writable data → RW segment */
+  /* Writable data - RW segment */
   .data : ALIGN(8) {
     *(.data*)
     *(.sdata*)
