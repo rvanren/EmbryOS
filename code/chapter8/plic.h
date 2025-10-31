@@ -10,4 +10,4 @@
 void plic_handler(struct trap_frame *tf);
 
 // Initializes the plic module
-void plic_init();
+void plic_init(uint32_t hartid);

@@ -9,8 +9,12 @@ typedef void (*trap_entry_t)(struct trap_frame *);
 // These are the classes of interrupts
 enum intr_class { INTR_TIMER, INTR_EXTERNAL, INTR_SYSCALL, INTR_EXCEPTION };
 
-void intr_enable(void);     // enable interrupts
-void intr_disable(void);    // disable interrupts
+#define SIE_MASK (1 << 1)   // Bit 1 = SIE (Supervisor Interrupt Enable)
+
+static inline void intr_enable(void) { __asm__ volatile ("csrs sstatus, %0" :: "r"(SIE_MASK)); }
+
+static inline void intr_disable(void) { __asm__ volatile ("csrc sstatus, %0" :: "r"(SIE_MASK)); }
+
 int intr_init();            // initialize this module
 
 // Set the handler for the given type of interrupt

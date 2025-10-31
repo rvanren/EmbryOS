@@ -1,123 +1,125 @@
-    .equ TRAP_FRAME_SIZE, 144
+# ================================================================
+# S-mode Trap Handler for EmbryOS (under OpenSBI)
+# ================================================================
+# This handler:
+#   - Saves all integer registers (x1–x31)
+#   - Saves S-mode CSRs (sepc, sstatus, scause, stval)
+#   - Calls a C function: software_trap_handler(struct trap_frame *tf)
+#   - Restores registers and returns with sret
+#
+# Stack alignment follows RISC-V psABI (16-byte)
+# ================================================================
+
+    .equ TRAP_FRAME_SIZE, 144   # 36 words × 4 bytes
 
     .section .text
     .globl _trap_handler
-    .align 2
 _trap_handler:
-    # If trap came from user mode (MPP==0), swap sp with mscratch
-    csrr   t0, mstatus
-    li     t1, (3 << 11)       # mask for MPP bits
-    and    t0, t0, t1
-    bnez   t0, 1f              # if MPP!=0 -> skip swap
-    csrrw  sp, mscratch, sp    # swap stacks
+    # ------------------------------------------------------------
+    # Allocate trap frame (keep SP 16-byte aligned)
+    # ------------------------------------------------------------
+    addi sp, sp, -TRAP_FRAME_SIZE
+    andi sp, sp, -16
 
-1:  # save general registers
-    addi   sp, sp, -TRAP_FRAME_SIZE
-    sw     ra,   0(sp)
-    sw     sp,   4(sp)
-    sw     gp,   8(sp)
-    sw     tp,   12(sp)
-    sw     t0,   16(sp)
-    sw     t1,   20(sp)
-    sw     t2,   24(sp)
-    sw     s0,   28(sp)
-    sw     s1,   32(sp)
-    sw     a0,   36(sp)
-    sw     a1,   40(sp)
-    sw     a2,   44(sp)
-    sw     a3,   48(sp)
-    sw     a4,   52(sp)
-    sw     a5,   56(sp)
-    sw     a6,   60(sp)
-    sw     a7,   64(sp)
-    sw     s2,   68(sp)
-    sw     s3,   72(sp)
-    sw     s4,   76(sp)
-    sw     s5,   80(sp)
-    sw     s6,   84(sp)
-    sw     s7,   88(sp)
-    sw     s8,   92(sp)
-    sw     s9,   96(sp)
-    sw     s10,  100(sp)
-    sw     s11,  104(sp)
-    sw     t3,   108(sp)
-    sw     t4,   112(sp)
-    sw     t5,   116(sp)
-    sw     t6,   120(sp)
+    # --- save all general registers ---
+    sw ra,   0(sp)
+    sw sp,   4(sp)
+    sw gp,   8(sp)
+    sw tp,  12(sp)
+    sw t0,  16(sp)
+    sw t1,  20(sp)
+    sw t2,  24(sp)
+    sw s0,  28(sp)
+    sw s1,  32(sp)
+    sw a0,  36(sp)
+    sw a1,  40(sp)
+    sw a2,  44(sp)
+    sw a3,  48(sp)
+    sw a4,  52(sp)
+    sw a5,  56(sp)
+    sw a6,  60(sp)
+    sw a7,  64(sp)
+    sw s2,  68(sp)
+    sw s3,  72(sp)
+    sw s4,  76(sp)
+    sw s5,  80(sp)
+    sw s6,  84(sp)
+    sw s7,  88(sp)
+    sw s8,  92(sp)
+    sw s9,  96(sp)
+    sw s10, 100(sp)
+    sw s11, 104(sp)
+    sw t3,  108(sp)
+    sw t4,  112(sp)
+    sw t5,  116(sp)
+    sw t6,  120(sp)
 
-    # save CSRs
-    csrr   t0, mepc
-    sw     t0, 124(sp)
-    csrr   t0, mstatus
-    sw     t0, 128(sp)
-    csrr   t0, mcause
-    sw     t0, 132(sp)
-    csrr   t0, mtval
-    sw     t0, 136(sp)
+    # ------------------------------------------------------------
+    # Save supervisor CSRs
+    # ------------------------------------------------------------
+    csrr t0, sepc
+    sw   t0, 124(sp)
+    csrr t0, sstatus
+    sw   t0, 128(sp)
+    csrr t0, scause
+    sw   t0, 132(sp)
+    csrr t0, stval
+    sw   t0, 136(sp)
 
-    # If we trapped from user mode, mscratch currently holds the user sp.
-    # Save it.
-    csrr   t0, mstatus
-    li     t1, (3 << 11)
-    and    t0, t0, t1
-    bnez   t0, 2f                # if MPP != 0 -> skip saving usp
-    csrr   t2, mscratch
-    sw     t2, 140(sp)           # tf->usp
+    # usp (user sp) unused for now
+    sw zero, 140(sp)
 
-2:  # call C handler: a0 = &trap_frame
-    mv     a0, sp
-    call   software_trap_handler
+    # ------------------------------------------------------------
+    # Call C-level trap handler
+    # ------------------------------------------------------------
+    mv a0, sp                   # a0 = &trap_frame
+    call software_trap_handler
 
-    # restore registers
-    lw     ra,   0(sp)
-    lw     sp,   4(sp)
-    lw     gp,   8(sp)
-    lw     tp,   12(sp)
-    lw     t0,   16(sp)
-    lw     t1,   20(sp)
-    lw     t2,   24(sp)
-    lw     s0,   28(sp)
-    lw     s1,   32(sp)
-    lw     a0,   36(sp)
-    lw     a1,   40(sp)
-    lw     a2,   44(sp)
-    lw     a3,   48(sp)
-    lw     a4,   52(sp)
-    lw     a5,   56(sp)
-    lw     a6,   60(sp)
-    lw     a7,   64(sp)
-    lw     s2,   68(sp)
-    lw     s3,   72(sp)
-    lw     s4,   76(sp)
-    lw     s5,   80(sp)
-    lw     s6,   84(sp)
-    lw     s7,   88(sp)
-    lw     s8,   92(sp)
-    lw     s9,   96(sp)
-    lw     s10,  100(sp)
-    lw     s11,  104(sp)
-    lw     t3,   108(sp)
-    lw     t4,   112(sp)
-    lw     t5,   116(sp)
-    lw     t6,   120(sp)
+    # ------------------------------------------------------------
+    # Restore CSRs
+    # ------------------------------------------------------------
+    lw t0, 124(sp)
+    csrw sepc, t0
+    lw t0, 128(sp)
+    csrw sstatus, t0
 
-    # restore mepc, mstatus
-    lw     t0, 124(sp)
-    csrw   mepc, t0
-    lw     t0, 128(sp)
-    csrw   mstatus, t0
+    # ------------------------------------------------------------
+    # Restore general registers
+    # ------------------------------------------------------------
+    lw ra,   0(sp)
+    lw sp,   4(sp)
+    lw gp,   8(sp)
+    lw tp,  12(sp)
+    lw t0,  16(sp)
+    lw t1,  20(sp)
+    lw t2,  24(sp)
+    lw s0,  28(sp)
+    lw s1,  32(sp)
+    lw a0,  36(sp)
+    lw a1,  40(sp)
+    lw a2,  44(sp)
+    lw a3,  48(sp)
+    lw a4,  52(sp)
+    lw a5,  56(sp)
+    lw a6,  60(sp)
+    lw a7,  64(sp)
+    lw s2,  68(sp)
+    lw s3,  72(sp)
+    lw s4,  76(sp)
+    lw s5,  80(sp)
+    lw s6,  84(sp)
+    lw s7,  88(sp)
+    lw s8,  92(sp)
+    lw s9,  96(sp)
+    lw s10, 100(sp)
+    lw s11, 104(sp)
+    lw t3,  108(sp)
+    lw t4,  112(sp)
+    lw t5,  116(sp)
+    lw t6,  120(sp)
 
-    li     t1, (3 << 11)
-    and    t0, t0, t1
-    bnez   t0, 3f                   # if MPP != 0 -> kernel return
-
-    # returning to user
-    lw     t2, 140(sp)              # tf->usp
-    csrw   mscratch, t2
-    addi   sp, sp, TRAP_FRAME_SIZE
-    csrrw  sp, mscratch, sp         # swap user<->kernel stacks
-    mret
-
-    3:  # returning to kernel
-    addi   sp, sp, TRAP_FRAME_SIZE
-    mret
+    # ------------------------------------------------------------
+    # Free trap frame and return
+    # ------------------------------------------------------------
+    addi sp, sp, TRAP_FRAME_SIZE
+    sret
