@@ -42,6 +42,4 @@ SECTIONS {
   .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
     PROVIDE(frames = .);
   } >ram :data
-
-  . = ALIGN(16);
 }
