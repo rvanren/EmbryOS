@@ -7,6 +7,8 @@
 #include "io.h"
 #include "mtime.h"
 #include "sbi.h"
+#include "plic.h"
+#include "uart.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
@@ -24,21 +26,8 @@ void exception_handler(struct trap_frame *tf) {
     sched_exit();
 }
 
-#define UART0_BASE  0x10000000UL
-#define UART_RBR    0x00  // receive buffer
-#define UART_LSR    0x05  // line status
-#define LSR_DR      0x01  // data ready
-
-static inline int uart_read_ready(void) {
-    return (*(volatile uint8_t *)(UART0_BASE + UART_LSR)) & LSR_DR;
-}
-
-static inline char uart_getc(void) {
-    return *(volatile char *)(UART0_BASE + UART_RBR);
-}
-
 int main(void) {
-    frame_init(); intr_init(); plic_init();
+    frame_init(); intr_init(); plic_init(); uart_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
     intr_set_handler(INTR_EXTERNAL, plic_handler);
