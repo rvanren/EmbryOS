@@ -6,6 +6,8 @@
 #define PAGE_SIZE       (1 << PAGE_SHIFT)
 
 #define UART_16550
+#define UART_BASE       0x10000000UL
+#define UART_IRQ        10
 
 #define PLIC_BASE       0x0C000000UL
 
