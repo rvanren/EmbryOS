@@ -4,21 +4,32 @@
 #include "sched.h"
 #include "string.h"
 #include "interrupt.h"
+#include "die.h"
 
-void init_main(), splash_main(), life_main(), snake_main();
-static inline void user_exit() {
-    register int a7 asm("a7") = SYS_EXIT;
-    asm volatile("ecall" : : "r"(a7));
-}
-void init_crt(){ init_main(); user_exit(); }
-void splash_crt(){ splash_main(); user_exit(); }
-void life_crt(){ life_main(); user_exit(); }
-void snake_crt(){ snake_main(); user_exit(); }
-static void (*apps[])() = { init_crt, splash_crt, life_crt, snake_crt };
-
-__attribute__((noreturn)) void enter_user(void (*entry)());
+#include "app_info.h"
+__attribute__((noreturn))
+void enter_user(void *entry, uintptr_t gp_val,
+                uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
 
 void exec_user(void) {
     struct pcb *self = sched_self();
-    enter_user(apps[self->executable - 2]);
+
+    self->base = frame_alloc();
+    self->stack = frame_alloc();
+    if (self->base == 0 || self->stack == 0) die("out of memory");
+
+    uint32_t gp_offset;
+    struct app_info *ai = &app_table[self->executable - 2];
+    gp_offset = ai->gp;
+
+    uint32_t size = ai->end - ai->start;
+    if (size > PAGE_SIZE) die("executable too large");
+
+    memcpy(self->base, ai->start, size);
+    memset(&self->base[size], 0, PAGE_SIZE - size);
+    memset(self->stack, 0, PAGE_SIZE);
+
+    uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
+    enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
+                            (uintptr_t) self + PAGE_SIZE);
 }

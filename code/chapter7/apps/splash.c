@@ -52,3 +52,5 @@ void splash_main(void) {
     put_centered("EmbryOS", HEIGHT / 2 - 1);
     put_centered("Life Has Begun", HEIGHT / 2 + 1);
 }
+
+void main() { splash_main(); }

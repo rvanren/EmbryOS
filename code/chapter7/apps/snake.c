@@ -189,3 +189,5 @@ void snake_main(void) {
         S.moves++;
     }
 }
+
+void main() { snake_main(); }

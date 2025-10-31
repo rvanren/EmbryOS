@@ -86,3 +86,5 @@ void life_main(void) {
         for (volatile int i = 0; i < DELAY; i++) ;
     }
 }
+
+void main() { life_main(); }
