@@ -4,6 +4,8 @@ ENTRY(_start)
 /* --- configurable system parameters --- */
 PAGE_SIZE        = 8192;
 FRAME_PAGES      = 32;
+BLOCK_SIZE       = 512;
+RAMDISK_BLOCKS   = 2048;
 
 MEMORY {
   ram (rwx) : ORIGIN = 0x80400000, LENGTH = 16M
