@@ -37,18 +37,11 @@ static inline char uart_getc(void) {
     return *(volatile char *)(UART0_BASE + UART_RBR);
 }
 
-void external_handler(struct trap_frame *tf) {
-    while (uart_read_ready()) {
-        char c = uart_getc();
-        io_received(c);
-    }
-}
-
 int main(void) {
-    frame_init(); intr_init();
+    frame_init(); intr_init(); plic_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
-    intr_set_handler(INTR_EXTERNAL, external_handler);
+    intr_set_handler(INTR_EXTERNAL, plic_handler);
     intr_set_handler(INTR_TIMER, timer_handler);
     uint64_t now = mtime_get();
     sbi_set_timer(now + QUANTUM);

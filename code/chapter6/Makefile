@@ -20,7 +20,7 @@ APP_LIB = apps/dir.c
 
 all: $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s hello.c die.c apps.c frame.c kprintf.c shared/string.c sched.c sched2.c screen.c process.c interrupt.c io.c io2.c $(APP_SRCS) $(APP_LIB) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s hello.c die.c apps.c frame.c kprintf.c shared/string.c sched.c sched2.c screen.c process.c interrupt.c io.c io2.c plic.c uart_16550 $(APP_SRCS) $(APP_LIB) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
