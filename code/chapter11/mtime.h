@@ -1,10 +1,11 @@
 #include <stdint.h>
 
-// Initialize the RISC-V machine timer
-void mtime_init();
-
-// Return the value of the current MTIME register, in microseconds
-uint64_t mtime_get();
-
-// Request a timer interrupt after the given number of microseconds
-void mtime_reset(uint64_t quantum);
+static inline uint64_t mtime_get(void) {
+    uint32_t lo, hi, hi2;
+    do {
+        asm volatile ("rdtimeh %0" : "=r"(hi));
+        asm volatile ("rdtime  %0" : "=r"(lo));
+        asm volatile ("rdtimeh %0" : "=r"(hi2));
+    } while (hi != hi2);
+    return ((uint64_t) hi << 32) | lo;
+}

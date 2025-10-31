@@ -4,7 +4,7 @@
 #include "sched.h"
 #include "string.h"
 #include "interrupt.h"
-#include "pmp.h"
+#include "vm.h"
 #include "flat.h"
 #include "die.h"
 
@@ -25,16 +25,20 @@ void exec_user(void) {
     uint32_t gp_offset;
     flat_read(&flat_fs, self->executable, 0, &gp_offset, sizeof(gp_offset));
     uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
-    if (size > PAGE_SIZE) die("executable too large");
+    if (size > FRAME_SIZE) die("executable too large");
 
     // Initialize code/data page
     flat_read(&flat_fs, self->executable, sizeof(gp_offset), self->base, size);
 
-    memset(&self->base[size], 0, PAGE_SIZE - size);
-    memset(self->stack, 0, PAGE_SIZE);
+    memset(&self->base[size], 0, FRAME_SIZE - size);
+    memset(self->stack, 0, FRAME_SIZE);
 
-    uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
-    pmp_load(self);  // Load PMP registers to isolate app
+    // Initialize the stack
+    uintptr_t sp = (uintptr_t) self->stack + FRAME_SIZE;
+    sp -= self->size;
+    sp &= ~0xF;   // align down to 16 bytes
+    memcpy((void *) sp, self->args, self->size);
+
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
-                            (uintptr_t) self + PAGE_SIZE);
+                            (uintptr_t) self + FRAME_SIZE);
 }
