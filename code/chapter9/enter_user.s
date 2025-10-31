@@ -1,24 +1,25 @@
     .section .text
     .globl enter_user
-    .type  enter_user,@function
+    .type  enter_user, @function
+
 # void enter_user(void *entry, uintptr_t gp_val,
 #                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp)
 # a0=entry, a1=gp_val, a2=user_sp, a3=arg_size, a4=ksp
 enter_user:
-    # Save incoming args into safe temps
-    mv   s2, a0           # entry
-    mv   s3, a1           # gp_val
-    mv   s4, a2           # user_sp (points to args)
-    mv   s5, a3           # arg_size
-    mv   s6, a4           # ksp
+    # --- Save incoming args into temps ---
+    mv   s2, a0           # user entry PC
+    mv   s3, a1           # user gp
+    mv   s4, a2           # user sp
+    mv   s5, a3           # arg size
+    mv   s6, a4           # kernel sp (for sscratch)
 
     # Program per-process kernel stack for future traps
-    csrw mscratch, s6
+    csrw sscratch, s6
 
-    # Disable M-mode interrupts during handoff
-    csrrc t0, mstatus, (1 << 3)
+    # Disable interrupts during handoff (SIE bit in sstatus)
+    csrrc t0, sstatus, (1 << 1)
 
-    # Zero all integer regs except gp/sp and the temps we still need
+    # --- Clear caller-saved regs (for a clean user context) ---
     li   t0, 0
     mv   ra, t0
     mv   tp, t0
@@ -41,15 +42,18 @@ enter_user:
     mv   sp, s4
 
     # Initialize user arguments
-    mv   a0, s4           # arg_buf pointer
+    mv   a0, s4           # arg_buf pointer (same convention)
     mv   a1, s5           # arg_buf size
 
-    # Switch privilege: MPP=U, mepc=entry
-    csrr t0, mstatus
-    li   t1, 0x1800                 # MSTATUS_MPP_MASK (bits 12..11)
-    not  t2, t1
-    and  t0, t0, t2                 # clear MPP -> U
-    csrw mstatus, t0
-    csrw mepc, s2
+    # --- Switch privilege to U-mode ---
+    csrr  t0, sstatus
+    li    t1, (1 << 8)    # SSTATUS_SPP bit
+    not   t2, t1
+    and   t0, t0, t2      # clear SPP -> next = U
+    csrw  sstatus, t0
 
-    mret
+    # Program user PC
+    csrw  sepc, s2
+
+    # --- Enter user mode ---
+    sret

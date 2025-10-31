@@ -15,11 +15,6 @@ void uart_init(void) {
     UART->ie = (1 << 1);  // enable RX interrupt (bit 1)
 }
 
-void uart_putchar(char c) {
-    while (UART->txdata & FULL) ;
-    UART->txdata = c;
-}
-
 void uart_isr(void) {
     for (;;) {
         uint32_t val = UART->rxdata;

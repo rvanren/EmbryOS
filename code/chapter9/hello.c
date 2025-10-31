@@ -1,42 +1,44 @@
 #include "sched.h"
 #include "kprintf.h"
 #include "syscall.h"
-#include "uart.h"
 #include "screen.h"
 #include "interrupt.h"
 #include "frame.h"
-#include "plic.h"
-#include "pmp.h"
-
+#include "io.h"
 #include "mtime.h"
+#include "sbi.h"
+#include "plic.h"
+#include "uart.h"
+#include "vm.h"
+#include "files.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
-    mtime_reset(QUANTUM); // add another quantum
+    sbi_set_timer(mtime_get() + QUANTUM);
 }
 
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-    kprintf("trap: cause=%d mepc=%x mtval=%x<",
-                        tf->mcause & 0xFFF, tf->mepc, tf->mtval);
+    kprintf("trap: cause=%d sepc=%x stval=%x<",
+                        tf->scause & 0xFFF, tf->sepc, tf->stval);
     sched_exit();
 }
 
-int main(void) {
-    frame_init(); intr_init(); uart_init();
+void main(uint32_t hartid, uint32_t dtb_pa) {
+    vm_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-    plic_init(); pmp_init();
+    frame_init(); intr_init(); uart_init(); plic_init(hartid);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
+    intr_set_handler(INTR_EXTERNAL, plic_handler);
 
     extern void syscall_handler(struct trap_frame *);
     intr_set_handler(INTR_SYSCALL, syscall_handler);
-    intr_set_handler(INTR_EXTERNAL, plic_handler);
-    mtime_init();
     intr_set_handler(INTR_TIMER, timer_handler);
-    mtime_reset(QUANTUM);
+    sbi_set_timer(mtime_get() + QUANTUM);
+    files_init();
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
