@@ -8,8 +8,8 @@
 #define PTE_W (1 << 2)
 #define PTE_X (1 << 3)
 #define PTE_U (1 << 4)
-#define PAGE_SIZE 4096
 #define PAGE_SHIFT 12
+#define PAGE_SIZE (1 << PAGE_SHIFT)
 
 extern char frames[];    // from linker
 
@@ -30,8 +30,7 @@ void vm_init(void) {
     for (int i = 0; i < 1024; i++) {
         uint32_t pa = 0x80400000 + i * PAGE_SIZE;
         uint32_t flags = PTE_V | PTE_R | PTE_W | PTE_X;
-        // if (pa >= user_start)
-    //     flags |= PTE_U;
+        // if (pa >= user_start) flags |= PTE_U;
         leaf_pt[i] = (pa >> 2) | flags;
     }
 
