@@ -8,12 +8,13 @@
 #include "plic.h"
 #include "pmp.h"
 #include "mtime.h"
+#include "sbi.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
 void timer_handler(struct trap_frame *tf) {
     sched_yield();
-    sbi_set_timer(mtime_get() + QUANTUM));
+    sbi_set_timer(mtime_get() + QUANTUM);
 }
 
 void exception_handler(struct trap_frame *tf) {
@@ -34,7 +35,7 @@ int main(void) {
     intr_set_handler(INTR_SYSCALL, syscall_handler);
     intr_set_handler(INTR_EXTERNAL, plic_handler);
     intr_set_handler(INTR_TIMER, timer_handler);
-    sbi_set_timer(mtime_get() + QUANTUM));
+    sbi_set_timer(mtime_get() + QUANTUM);
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
