@@ -1,9 +1,9 @@
-#include "uart.h"
+#include "sbi.h"
 #include "sched.h"
 #include "io.h"
 
 void io_putchar(char c) {
-    uart_putchar(c);
+    sbi_putchar(c);
 }
 
 void io_put(struct pcb *pcb, cell_t c) {

@@ -19,16 +19,9 @@ void uart_init(void) {
     UART[UART_IER] = 0x01;  // enable received data interrupt
 }
 
-void uart_putchar(char c) {
-    while ((UART[UART_LSR] & LSR_TX_EMPTY) == 0) ;
-    UART[UART_THR] = c;
-}
-
 void uart_isr(void) {
-    for (;;) {
-        if ((UART[UART_LSR] & LSR_DATA_READY) == 0) break;
+    while (UART[UART_LSR] & LSR_DATA_READY)
         io_received(UART[UART_RBR]);
-    }
 }
 
 #endif

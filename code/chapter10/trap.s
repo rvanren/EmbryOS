@@ -1,18 +1,19 @@
-    .equ TRAP_FRAME_SIZE, 144
+    .equ TRAP_FRAME_SIZE, 144   # 36 regs × 4 bytes
 
     .section .text
     .globl _trap_handler
     .align 2
 _trap_handler:
-    # If trap came from user mode (MPP==0), swap sp with mscratch
-    csrr   t0, mstatus
-    li     t1, (3 << 11)       # mask for MPP bits
-    and    t0, t0, t1
-    bnez   t0, 1f              # if MPP!=0 -> skip swap
-    csrrw  sp, mscratch, sp    # swap stacks
+    # If trap came from user mode (SPP==0), swap sp with sscratch
+    csrr   t0, sstatus
+    li     t1, (1 << 8)          # mask for SPP bit
+    and    t0, t1, t0
+    bnez   t0, 1f                # if SPP!=0 → kernel trap
+    csrrw  sp, sscratch, sp      # swap stacks (user↔kernel)
 
-1:  # save general registers
-    addi   sp, sp, -TRAP_FRAME_SIZE
+1:  addi   sp, sp, -TRAP_FRAME_SIZE
+
+    # --- save general registers ---
     sw     ra,   0(sp)
     sw     sp,   4(sp)
     sw     gp,   8(sp)
@@ -45,30 +46,35 @@ _trap_handler:
     sw     t5,   116(sp)
     sw     t6,   120(sp)
 
-    # save CSRs
-    csrr   t0, mepc
+    # --- save CSRs ---
+    csrr   t0, sepc
     sw     t0, 124(sp)
-    csrr   t0, mstatus
+    csrr   t0, sstatus
     sw     t0, 128(sp)
-    csrr   t0, mcause
+    csrr   t0, scause
     sw     t0, 132(sp)
-    csrr   t0, mtval
+    csrr   t0, stval
     sw     t0, 136(sp)
 
-    # If we trapped from user mode, mscratch currently holds the user sp.
-    # Save it.
-    csrr   t0, mstatus
-    li     t1, (3 << 11)
-    and    t0, t0, t1
-    bnez   t0, 2f                # if MPP != 0 -> skip saving usp
-    csrr   t2, mscratch
+    # If trap from user (SPP==0), sscratch currently holds user sp; save it.
+    csrr   t0, sstatus
+    li     t1, (1 << 8)
+    and    t0, t1, t0
+    bnez   t0, 2f
+    csrr   t2, sscratch
     sw     t2, 140(sp)           # tf->usp
 
-2:  # call C handler: a0 = &trap_frame
+2:  # Call C-level handler
     mv     a0, sp
     call   software_trap_handler
 
-    # restore registers
+    # --- restore CSRs ---
+    lw     t0, 124(sp)
+    csrw   sepc, t0
+    lw     t0, 128(sp)
+    csrw   sstatus, t0
+
+    # --- restore registers ---
     lw     ra,   0(sp)
     lw     sp,   4(sp)
     lw     gp,   8(sp)
@@ -101,23 +107,18 @@ _trap_handler:
     lw     t5,   116(sp)
     lw     t6,   120(sp)
 
-    # restore mepc, mstatus
-    lw     t0, 124(sp)
-    csrw   mepc, t0
-    lw     t0, 128(sp)
-    csrw   mstatus, t0
-
-    li     t1, (3 << 11)
+    # --- decide where to return ---
+    lw     t0, 128(sp)           # sstatus
+    li     t1, (1 << 8)          # SPP bit
     and    t0, t0, t1
-    bnez   t0, 3f                   # if MPP != 0 -> kernel return
+    bnez   t0, 3f                # if SPP!=0 -> kernel trap
 
     # returning to user
-    lw     t2, 140(sp)              # tf->usp
-    csrw   mscratch, t2
+    lw     t2, 140(sp)
+    csrw   sscratch, t2
     addi   sp, sp, TRAP_FRAME_SIZE
-    csrrw  sp, mscratch, sp         # swap user<->kernel stacks
-    mret
+    csrrw  sp, sscratch, sp
+    sret
 
-    3:  # returning to kernel
-    addi   sp, sp, TRAP_FRAME_SIZE
-    mret
+3:  addi   sp, sp, TRAP_FRAME_SIZE
+    sret
