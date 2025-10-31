@@ -4,7 +4,11 @@
 #include "sched.h"
 #include "string.h"
 #include "interrupt.h"
+#include "vm.h"
+#include "flat.h"
 #include "die.h"
+
+extern struct flat flat_fs;
 
 #include "app_info.h"
 __attribute__((noreturn))
@@ -19,13 +23,13 @@ void exec_user(void) {
     if (self->base == 0 || self->stack == 0) die("out of memory");
 
     uint32_t gp_offset;
-    struct app_info *ai = &app_table[self->executable - 2];
-    gp_offset = ai->gp;
-
-    uint32_t size = ai->end - ai->start;
+    flat_read(&flat_fs, self->executable, 0, &gp_offset, sizeof(gp_offset));
+    uint32_t size = flat_size(&flat_fs, self->executable) - sizeof(gp_offset);
     if (size > FRAME_SIZE) die("executable too large");
 
-    memcpy(self->base, ai->start, size);
+    // Initialize code/data page
+    flat_read(&flat_fs, self->executable, sizeof(gp_offset), self->base, size);
+
     memset(&self->base[size], 0, FRAME_SIZE - size);
     memset(self->stack, 0, FRAME_SIZE);
 
