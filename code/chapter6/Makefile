@@ -27,7 +27,6 @@ all: $(APP_OBJS)
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello-World on QEMU --------$(END)\n"
 	$(QEMU) -nographic -machine virt -smp 2 -bios default -kernel hello.bin
-	@printf "$(END)\n"
 	@printf "$(END)\033[?25h\n"
 
 clean:
