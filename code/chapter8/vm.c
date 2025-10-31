@@ -39,6 +39,7 @@ void vm_init(void) {
     root_pt[idx] = ((uint32_t)leaf_pt >> 2) | PTE_V;
 
     // ---- Activate ----
+    asm volatile("csrs sstatus, %0" :: "r"(1 << 18));  // allow S mode to access U pages
     uint32_t satp = (1u << 31) | (((uint32_t)root_pt) >> 12);
     asm volatile ("csrw satp, %0; sfence.vma" :: "r"(satp));
 }
