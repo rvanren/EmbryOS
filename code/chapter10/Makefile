@@ -20,7 +20,7 @@ APP_ELFS = $(addprefix $(APPS_DIR)/,$(addsuffix .elf,$(APPS)))
 
 all: apps_gen.c $(APP_OBJS)
 	@printf "$(YELLOW)-------- Compile Hello, World! --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c die.c apps.c frame.c kprintf.c shared/string.c sched.c sched2.c screen.c process.c interrupt.c plic.c syscall.c vm.c io.c io2.c uart_sifive.c uart_16550.c files.c bd_ramdisk.c bd_simple.c bd_simple_ops.c flat1.c flat2.c apps_gen.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s ctx.s trap.s enter_user.s hello.c die.c apps.c frame.c kprintf.c shared/string.c sched.c sched2.c screen.c process.c procsys.c interrupt.c plic.c syscall.c vm.c io.c io2.c uart_sifive.c uart_16550.c files.c bd_ramdisk.c bd_simple.c bd_simple_ops.c flat1.c flat2.c apps_gen.c $(APP_OBJS) -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
