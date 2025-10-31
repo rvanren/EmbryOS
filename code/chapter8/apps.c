@@ -4,9 +4,10 @@
 #include "sched.h"
 #include "string.h"
 #include "interrupt.h"
+#include "pmp.h"
+#include "app_info.h"
 #include "die.h"
 
-#include "app_info.h"
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
@@ -30,6 +31,7 @@ void exec_user(void) {
     memset(self->stack, 0, PAGE_SIZE);
 
     uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
+    pmp_load(self);  // Load PMP registers to isolate app
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
                             (uintptr_t) self + PAGE_SIZE);
 }

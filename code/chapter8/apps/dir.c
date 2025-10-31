@@ -6,5 +6,6 @@ int dir_lookup(const char *name) {
     if (strcmp(name, "splash") == 0) return 3;
     if (strcmp(name, "life")   == 0) return 4;
     if (strcmp(name, "snake")  == 0) return 5;
+    if (strcmp(name, "shell")  == 0) return 6;
     return -1;
 }
