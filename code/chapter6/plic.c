@@ -11,9 +11,6 @@
 #define PLIC_CLAIM(ctx)      (PLIC_BASE + 0x200004 + 0x1000 * (ctx))
 #define PLIC_ENABLE(ctx)     (PLIC_BASE + 0x002000 + 0x0080 * (ctx))
 
-// WARNING: not guaranteed to be portable
-#define PLIC_CTX(hart)       (2 * (hart) + 1)
-
 static uint32_t hart_ctx;
 
 void plic_handler(struct trap_frame *tf) {
