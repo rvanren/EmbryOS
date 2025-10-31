@@ -6,7 +6,7 @@
 #include "interrupt.h"
 #include "frame.h"
 #include "plic.h"
-#include "pmp.h"
+#include "vm.h"
 #include "mtime.h"
 #include "sbi.h"
 
@@ -26,9 +26,9 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 void main(uint32_t hartid, uint32_t dtb_pa) {
-    frame_init(); intr_init(); uart_init();
+    vm_init(); frame_init(); intr_init(); uart_init();
     intr_set_handler(INTR_EXCEPTION, exception_handler);
-    plic_init(hartid); pmp_init();
+    plic_init(hartid);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
 
     extern void syscall_handler(struct trap_frame *);
