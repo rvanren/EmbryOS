@@ -9,7 +9,7 @@ YELLOW      = \033[1;33m
 END         = \033[0m
 
 LDFLAGS     = -nostdlib
-CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin -DSIFIVE
+CFLAGS      = -march=rv32ima_zicsr -mabi=ilp32 -Wl,--gc-sections -ffunction-sections -fdata-sections -fdiagnostics-show-option -fno-builtin -DVIRT
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
 APPS_DIR   = apps
