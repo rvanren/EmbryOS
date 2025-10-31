@@ -21,14 +21,14 @@ static inline uint32_t read_hartid(void) {
 }
 
 void plic_handler(struct trap_frame *tf) {
-    uint32_t ctx = read_hartid;
+    uint32_t ctx = read_hartid();
     uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM(ctx);
     if (claim == UART_IRQ) uart_isr();
     *(volatile uint32_t *)PLIC_CLAIM(ctx) = claim;
 }
 
 void plic_init() {
-    uint32_t ctx = read_hartid;
+    uint32_t ctx = read_hartid();
     // Give UART a non-zero priority
     *(volatile uint32_t *)(PLIC_PRIORITY(UART_IRQ)) = 1;
     // Enable UART for this context
