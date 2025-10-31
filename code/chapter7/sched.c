@@ -37,7 +37,7 @@ void sched_run(int executable, struct rect area, void *args, int size) {
     struct pcb *pcb = proc_create(executable, area, args, size);
     proc_enqueue(&run_queue[0], pcb);
     current_priority = 0;
-    ctx_start(&current->sp, (char *) pcb + PAGE_SIZE);
+    ctx_start(&current->sp, (char *) pcb + FRAME_SIZE);
     reap_zombies();
 }
 

@@ -5,7 +5,7 @@
 // This is type of unallocated frames.  They point to the next unallocated frame.
 union free_frame {
     union free_frame *next;
-    char bytes[PAGE_SIZE];
+    char bytes[FRAME_SIZE];
 };
 
 extern union free_frame frames[], __frames_end[];
