@@ -11,17 +11,20 @@
 #define PLIC_CLAIM(ctx)      (PLIC_BASE + 0x200004 + 0x1000 * (ctx))
 #define PLIC_ENABLE(ctx)     (PLIC_BASE + 0x002000 + 0x0080 * (ctx))
 
+static uint32_t hart_ctx;
+
 void plic_handler(struct trap_frame *tf) {
-    uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM(HART_CTX);
+    uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM(hart_ctx);
     if (claim == UART_IRQ) uart_isr();
-    *(volatile uint32_t *)PLIC_CLAIM(HART_CTX) = claim;
+    *(volatile uint32_t *)PLIC_CLAIM(hart_ctx) = claim;
 }
 
-void plic_init() {
+void plic_init(uint32_t hartid) {
+    hart_ctx = PLIC_CTX(hartid);
     // Give UART a non-zero priority
     *(volatile uint32_t *)(PLIC_PRIORITY(UART_IRQ))  = 1;
     // Enable UART for this context
-    *(volatile uint32_t *)(PLIC_ENABLE(HART_CTX))    = (1 << UART_IRQ);
+    *(volatile uint32_t *)(PLIC_ENABLE(hart_ctx))    = (1 << UART_IRQ);
     // Accept all priorities > 0
-    *(volatile uint32_t *)(PLIC_THRESHOLD(HART_CTX)) = 0;
+    *(volatile uint32_t *)(PLIC_THRESHOLD(hart_ctx)) = 0;
 }
