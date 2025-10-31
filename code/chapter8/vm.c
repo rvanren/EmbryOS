@@ -30,7 +30,7 @@ void vm_init(void) {
     for (int i = 0; i < 1024; i++) {
         uint32_t pa = 0x80400000 + i * PAGE_SIZE;
         uint32_t flags = PTE_V | PTE_R | PTE_W | PTE_X;
-        // if (pa >= user_start) flags |= PTE_U;
+        if (pa >= user_start) flags |= PTE_U;
         leaf_pt[i] = (pa >> 2) | flags;
     }
 
