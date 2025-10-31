@@ -4,9 +4,9 @@
 #include "sched.h"
 #include "string.h"
 #include "interrupt.h"
-#include "app_info.h"
 #include "die.h"
 
+#include "app_info.h"
 __attribute__((noreturn))
 void enter_user(void *entry, uintptr_t gp_val,
                 uintptr_t user_sp, size_t arg_size, uintptr_t ksp);
@@ -23,13 +23,13 @@ void exec_user(void) {
     gp_offset = ai->gp;
 
     uint32_t size = ai->end - ai->start;
-    if (size > PAGE_SIZE) die("executable too large");
+    if (size > FRAME_SIZE) die("executable too large");
 
     memcpy(self->base, ai->start, size);
-    memset(&self->base[size], 0, PAGE_SIZE - size);
-    memset(self->stack, 0, PAGE_SIZE);
+    memset(&self->base[size], 0, FRAME_SIZE - size);
+    memset(self->stack, 0, FRAME_SIZE);
 
-    uintptr_t sp = (uintptr_t) self->stack + PAGE_SIZE;
+    uintptr_t sp = (uintptr_t) self->stack + FRAME_SIZE;
     enter_user(self->base, (uintptr_t) (self->base + gp_offset), sp, self->size,
-                            (uintptr_t) self + PAGE_SIZE);
+                            (uintptr_t) self + FRAME_SIZE);
 }

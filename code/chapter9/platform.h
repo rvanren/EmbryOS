@@ -2,8 +2,12 @@
 
 // Platform-dependent constants go here
 
-#define PAGE_SHIFT      13
-#define PAGE_SIZE       (1 << PAGE_SHIFT)
+#define MEM_END         0x80800000
+
+#define PAGE_SHIFT      12
+#define PAGE_SIZE       (1 << PAGE_SHIFT)       // 4 KB
+
+#define FRAME_SIZE      (2 * PAGE_SIZE)         // 8 KB
 
 #ifdef SIFIVE
 
