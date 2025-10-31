@@ -38,6 +38,12 @@ SECTIONS {
     *(COMMON)
   } >ram :data
 
+  .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
+    PROVIDE(ramdisk = .);
+    . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
+    PROVIDE(__ramdisk_end = .);
+  } >ram :data
+
   /* The heap */
   .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
     PROVIDE(frames = .);
