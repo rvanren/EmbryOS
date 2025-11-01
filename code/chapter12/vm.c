@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include "platform.h"
 #include "vm.h"
+#include "kprintf.h"
 
 #define PTE_V (1 << 0)
 #define PTE_R (1 << 1)
