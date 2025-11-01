@@ -22,24 +22,12 @@ static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
     void *frame = frame_alloc();
-    if (frame == 0) kprintf("Out of memory"); for (;;) ;
-
-#ifdef notdef
-    // Backing data
-    size_t offset = addr - 0x1000;
-    uint8_t *dst = FRAME(uint8_t, frame);
-    if (offset < p->image_size) {
-        size_t n = MIN(PAGE_SIZE, p->image_size - offset);
-        memcpy(dst, p->image->data + offset, n);
-        if (n < PAGE_SIZE)
-            memset(dst + n, 0, PAGE_SIZE - n);
-    } else {
-        memset(dst, 0, PAGE_SIZE);
-    }
-#endif
+    if (frame == 0) { kprintf("Out of memory"); for (;;) ; }
     memset(frame, 0, PAGE_SIZE);
 
     struct pcb *self = sched_self();
+    flat_read(&flat_fs, self->executable, sizeof(uint32_t) + tf->stval - FRAME_SIZE, frame, PAGE_SIZE);
+
     uint32_t *pt = (uint32_t *) self->base;
     int index = (tf->stval >> 12) & (PTE_COUNT - 1);
     uintptr_t pa = (uintptr_t) frame;
@@ -66,8 +54,8 @@ void vm_init_pt(void *base, void *stack) {
 void vm_init(void) {
     uint32_t user_start   = (uintptr_t) frames;
 
-    // 4 MB identity mappings for everything below 0x8040_0000
-    for (int i = 0; i < 1024; i++) {
+    // 4 MB identity mappings for everything below MEM_END
+    for (int i = 0; i < MEM_END / (1 << 22); i++) {
         uint32_t pa = i << 22;   // 4 MiB per PTE
         root_pt[i] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X;
     }
