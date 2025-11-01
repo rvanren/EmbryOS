@@ -1,42 +1,34 @@
 # ================================================================
-# S-mode Trap Handler for EmbryOS (RV32 / RV64, under OpenSBI)
+#  EmbryOS Trap Handler (RV32 / RV64 under OpenSBI)
 # ================================================================
-#   - Saves all integer registers (x1–x31)
-#   - Saves S-mode CSRs (sepc, sstatus, scause, stval)
-#   - Calls C: software_trap_handler(struct trap_frame *tf)
-#   - Restores and sret's
+#  Saves all general-purpose registers and supervisor CSRs in a
+#  struct trap_frame, calls software_trap_handler(tf), restores,
+#  and returns with sret.
 # ================================================================
 
-    .section .text
-    .globl _trap_handler
-
-# ----------------------------------------------------------------
-# Define width-dependent macros
-# ----------------------------------------------------------------
 #if __riscv_xlen == 64
-    # 8-byte words
-    # define store/load instructions
-    .set REG_S, sd
-    .set REG_L, ld
-    .set WORD_SIZE, 8
+    #define REG_S sd
+    #define REG_L ld
+    #define WORD_SIZE 8
 #else
-    # 4-byte words
-    .set REG_S, sw
-    .set REG_L, lw
-    .set WORD_SIZE, 4
+    #define REG_S sw
+    #define REG_L lw
+    #define WORD_SIZE 4
 #endif
 
     .equ TRAP_REGS, 36
     .equ TRAP_FRAME_SIZE, TRAP_REGS * WORD_SIZE
 
+    .section .text
+    .globl _trap_handler
 _trap_handler:
     # ------------------------------------------------------------
-    # Allocate trap frame (keep SP 16-byte aligned)
+    # Allocate trap frame and align stack
     # ------------------------------------------------------------
     addi sp, sp, -TRAP_FRAME_SIZE
     andi sp, sp, -16
 
-    # --- save all general registers ---
+    # --- Save general registers (x1–x31) ---
     REG_S ra,   0*WORD_SIZE(sp)
     REG_S sp,   1*WORD_SIZE(sp)
     REG_S gp,   2*WORD_SIZE(sp)
@@ -81,13 +73,13 @@ _trap_handler:
     csrr t0, stval
     REG_S t0, 34*WORD_SIZE(sp)
 
-    # usp (user stack pointer) placeholder
+    # usp (user stack pointer, unused yet)
     REG_S zero, 35*WORD_SIZE(sp)
 
     # ------------------------------------------------------------
-    # Call C-level trap handler
+    # Call C trap handler: software_trap_handler(struct trap_frame *tf)
     # ------------------------------------------------------------
-    mv a0, sp                   # a0 = &trap_frame
+    mv a0, sp
     call software_trap_handler
 
     # ------------------------------------------------------------
