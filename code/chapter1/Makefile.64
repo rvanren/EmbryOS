@@ -1,0 +1,12 @@
+XLEN        = 64
+RISCV_PREFIX = riscv64-unknown-elf
+
+CC          = $(RISCV_PREFIX)-gcc
+OBJDUMP     = $(RISCV_PREFIX)-objdump
+OBJCOPY     = $(RISCV_PREFIX)-objcopy
+NM          = $(RISCV_PREFIX)-nm
+
+QEMU        = qemu-system-riscv64
+CFLAGS_ARCH = -march=rv64ima_zicsr -mabi=lp64
+
+include Makefile.common
