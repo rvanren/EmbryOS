@@ -8,7 +8,7 @@
 #ifdef SIFIVE
 
 #define UART_SIFIVE
-#define UART_BASE       0x10010000UL
+#define UART_BASE       0x10010000ULL
 #define UART_IRQ        4
 
 #define PLIC_CTX(hart)       (2 * (hart))
@@ -18,7 +18,7 @@
 #ifdef VIRT
 
 #define UART_16550
-#define UART_BASE       0x10000000UL
+#define UART_BASE       0x10000000ULL
 #define UART_IRQ        10
 
 #define PLIC_CTX(hart)       (2 * (hart) + 1)
