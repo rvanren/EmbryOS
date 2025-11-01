@@ -45,10 +45,13 @@ void vm_pagefault(struct trap_frame *tf) {
     uintptr_t pa = (uintptr_t) frame;
     pt[index] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 
-    asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
+    // asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
 }
 
 void vm_flush(void) {
+    struct pcb *self = sched_self();
+    uintptr_t leaf_pt = (uintptr_t) self->base;
+    root_pt[0] = (leaf_pt >> 2) | PTE_V;
     asm volatile("sfence.vma" ::: "memory");
 }
 
