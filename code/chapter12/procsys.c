@@ -4,6 +4,7 @@
 #include "die.h"
 #include "vm.h"
 #include "flat.h"
+#include "string.h"
 
 void proc_check_legal(struct pcb *self, uintptr_t start, int size) {
     if (size == 0) return;
