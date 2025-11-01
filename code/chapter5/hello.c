@@ -17,7 +17,7 @@ void timer_handler(struct trap_frame *tf) {
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-    kprintf("trap: cause=%d sepc=%x stval=%x<",
+    kprintf("trap: cause=%D sepc=%X stval=%X<",
                         tf->scause & 0xFFF, tf->sepc, tf->stval);
     sched_exit();
 }
