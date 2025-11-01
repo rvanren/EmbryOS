@@ -43,7 +43,7 @@ void vm_pagefault(struct trap_frame *tf) {
     uint32_t *pt = (uint32_t *) self->base;
     int index = (tf->stval >> 12) & (PTE_COUNT - 1);
     uintptr_t pa = (uintptr_t) frame;
-    pt[index] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    pt[index] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 
     // asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
 }
@@ -51,7 +51,7 @@ void vm_pagefault(struct trap_frame *tf) {
 void vm_flush(void) {
     struct pcb *self = sched_self();
     uintptr_t leaf_pt = (uintptr_t) self->base;
-    root_pt[0] = (leaf_pt >> 2) | PTE_V;
+    root_pt[0] = (leaf_pt & ~0xFFF) >> 2 | PTE_V;
     asm volatile("sfence.vma" ::: "memory");
 }
 
@@ -59,7 +59,7 @@ void vm_init_pt(void *base, void *stack) {
     uint32_t *pt = base;
     memset(pt, 0, FRAME_SIZE - sizeof(*pt));
     uint32_t pa = (uintptr_t) stack;
-    pt[1023] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    pt[PTE_COUNT - 1] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
     vm_flush();
 }
 
