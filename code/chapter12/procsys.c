@@ -1,6 +1,6 @@
 #include <stddef.h>
 #include "frame.h"
-#include "process.h"
+#include "sched.h"
 #include "die.h"
 #include "vm.h"
 #include "flat.h"
