@@ -28,13 +28,12 @@ void exec_user(void) {
 
     // Initialize the stack
     memset(self->stack, 0, FRAME_SIZE);
-    uintptr_t sp = (uintptr_t) self->stack + FRAME_SIZE;
-    sp -= self->size;
-    sp &= ~0xF;   // align down to 16 bytes
+    int args_size = (self->size + 0xF) & ~0xF;    // round up to 16 bytes
+    uintptr_t sp = (uintptr_t) self->stack + FRAME_SIZE - args_size;
     memcpy((void *) sp, self->args, self->size);
 
     vm_init_pt(self->base, self->stack);
 
-    enter_user((void *) FRAME_SIZE, (uintptr_t) (FRAME_SIZE + gp_offset), 0x400000,
-                self->size, (uintptr_t) self + FRAME_SIZE);
+    enter_user((void *) FRAME_SIZE, (uintptr_t) (FRAME_SIZE + gp_offset),
+            0x400000 - args_size, self->size, (uintptr_t) self + FRAME_SIZE);
 }
