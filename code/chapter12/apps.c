@@ -24,6 +24,10 @@ void exec_user(void) {
     memset(self->base,  0, FRAME_SIZE);
     memset(self->stack, 0, FRAME_SIZE);
 
+    // Get the gp_offset
+    uint32_t gp_offset;
+    flat_read(&flat_fs, self->executable, 0, &gp_offset, sizeof(gp_offset));
+
     // Initialize the stack
     uintptr_t sp = (uintptr_t) self->stack + FRAME_SIZE;
     sp -= self->size;
