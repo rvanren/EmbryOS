@@ -15,11 +15,14 @@ static inline void sbi_putchar(int ch) {
 
 static inline void sbi_set_timer(uword_t next_time) {
 #if __riscv_xlen == 32
-    register uword_t a0 asm("a0") = (uword_t)next_time;
-    register uword_t a1 asm("a1") = (uword_t)(next_time >> 32);
-    asm volatile ("ecall" :: "r"(a0), "r"(a1), "r"(0), "r"(0x54494D45) : "memory");
+    uint64_t t = next_time;   // promote to 64 bits
+    register uword_t a0 asm("a0") = (uword_t)t;
+    register uword_t a1 asm("a1") = (uword_t)(t >> 32);
+    asm volatile ("ecall" :: "r"(a0), "r"(a1),
+                  "r"(0UL), "r"(0x54494D45UL) : "memory");
 #else
     register uword_t a0 asm("a0") = next_time;
-    asm volatile ("ecall" :: "r"(a0), "r"(0), "r"(0x54494D45) : "memory");
+    asm volatile ("ecall" :: "r"(a0),
+                  "r"(0UL), "r"(0x54494D45UL) : "memory");
 #endif
 }
