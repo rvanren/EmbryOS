@@ -5,7 +5,7 @@
 #include "frame.h"
 
 void exception_handler(struct trap_frame *tf) {
-    kprintf("trap: cause=%d sepc=%x stval=%x<",
+    kprintf("trap: cause=%D sepc=%X stval=%X<",
                         tf->scause & 0xFFF, tf->sepc, tf->stval);
     for (;;) ;
 }
