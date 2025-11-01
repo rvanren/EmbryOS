@@ -11,7 +11,6 @@
 #include "uart.h"
 #include "vm.h"
 #include "files.h"
-#include "flat.h"
 #include "die.h"
 #include "string.h"
 
@@ -22,24 +21,12 @@ void timer_handler(struct trap_frame *tf) {
     sbi_set_timer(mtime_get() + QUANTUM);
 }
 
-void pagefault(struct trap_frame *tf) {
-    extern struct flat flat_fs;
-    void *frame = frame_alloc();
-    if (frame == 0) die("out of memory");
-
-    struct pcb *self = sched_self();
-    uint32_t offset = tf->stval & ~(PAGE_SIZE - 1);
-    int n = flat_read(&flat_fs, self->executable, sizeof(uint32_t) + offset - VM_START, frame, PAGE_SIZE);
-    if (n > 0) memset((char *) frame + n, 0, PAGE_SIZE - n);
-    vm_map(self->base, tf->stval, frame);
-}
-
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     switch (tf->scause) {
     case 12: case 13: case 15:
         if (VM_START <= tf->stval && tf->stval < VM_END) {
-            pagefault(tf);
+            proc_pagefault(tf);
             break;
         }
     default:
@@ -51,21 +38,17 @@ void exception_handler(struct trap_frame *tf) {
 }
 
 void main(uint32_t hartid, uint32_t dtb_pa) {
-    vm_init();
-    intr_set_handler(INTR_EXCEPTION, exception_handler);
+    vm_init(); intr_set_handler(INTR_EXCEPTION, exception_handler);
     frame_init(); intr_init(); uart_init(); plic_init(hartid);
     sched_init(proc_init((struct rect){ 0, 0, 80, 24 }));
     intr_set_handler(INTR_EXTERNAL, plic_handler);
-
     extern void syscall_handler(struct trap_frame *);
     intr_set_handler(INTR_SYSCALL, syscall_handler);
     intr_set_handler(INTR_TIMER, timer_handler);
     sbi_set_timer(mtime_get() + QUANTUM);
     files_init();
-
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
                         CELL(' ', ANSI_WHITE, ANSI_BLACK));
-
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();
 }
