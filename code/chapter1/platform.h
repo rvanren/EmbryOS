@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdint.h>
+
 #if __riscv_xlen == 64
 typedef int64_t  sword_t;   // signed machine word
 typedef uint64_t uword_t;   // unsigned machine word
