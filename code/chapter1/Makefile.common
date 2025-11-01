@@ -24,7 +24,7 @@ all:
 
 qemu: all
 	@printf "$(YELLOW)-------- Run Hello, World! on QEMU (RV$(XLEN)) --------$(END)\n"
-	$(QEMU) -nographic -machine virt -smp 2 -bios default -kernel hello.bin
+	$(QEMU) -nographic -machine virt -smp 2 -bios default -kernel hello.elf
 	@printf "$(END)\033[?25h\n"
 
 clean:
