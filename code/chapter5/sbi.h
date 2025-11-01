@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdint.h>
+#include "platform.h"
 
 // ----------------------------------------------------------------------
 //  Minimal legacy SBI console interface for OpenSBI v1.3 and earlier.
