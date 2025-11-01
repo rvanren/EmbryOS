@@ -14,7 +14,7 @@ DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 # CFLAGS_ARCH and QEMU are defined by Makefile.32 / Makefile.64
 CFLAGS      = $(CFLAGS_ARCH) \
               -Wl,--gc-sections -ffunction-sections -fdata-sections \
-              -fdiagnostics-show-option -fno-builtin
+              -fdiagnostics-show-option -fno-builtin -DVIRT
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! (RV$(XLEN)) --------$(END)\n"
