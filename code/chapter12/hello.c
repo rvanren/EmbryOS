@@ -22,7 +22,11 @@ void timer_handler(struct trap_frame *tf) {
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     switch (tf->scause) {
-    case 12: case 13: case 15: vm_pagefault(tf); break;
+    case 12: case 13: case 15:
+        if (PAGE_SIZE <= tf->stval && tf->stval < 0x400000) {
+            vm_pagefault(tf);
+            break;
+        }
     default:
         proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
         kprintf("trap: cause=%d sepc=%x stval=%x<",
