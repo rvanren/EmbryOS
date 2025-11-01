@@ -17,7 +17,7 @@ void software_trap_handler(struct trap_frame *tf) {
         case  3: break;
         case  5: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: kprintf("Unknown interrupt cause %x\n", tf->scause);
+        default: kprintf("Unknown interrupt scause %x\n", tf->scause); for(;;);
         }
     }
     else {
