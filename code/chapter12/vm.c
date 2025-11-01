@@ -39,9 +39,10 @@ void vm_pagefault(struct trap_frame *tf) {
 #endif
     memset(frame, 0, PAGE_SIZE);
 
+    struct pcb *self = sched_self();
     uint32_t *pt = (uint32_t *) self->base;
     int index = (tf->stval >> 12) & (PTE_COUNT - 1);
-    uintptr_t pa = frame;
+    uintptr_t pa = (uintptr_t) frame;
     pt[index] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 
     asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
