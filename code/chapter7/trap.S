@@ -79,15 +79,10 @@ _trap_handler:
     li     t1, (1 << 8)
     and    t0, t1, t0
     bnez   t0, 2f
-    # trap was from kernel: write zero as usp
-    REG_S zero, 35*WORD_SIZE(sp)
-    j 3f
-
-2:  # trap was from user: sscratch currently holds user_sp (we swapped at entry)
     csrr   t2, sscratch
     REG_S t2, 35*WORD_SIZE(sp)
 
-3:  # Call C-level handler: software_trap_handler(struct trap_frame *tf)
+2:  # Call C-level handler: software_trap_handler(struct trap_frame *tf)
     mv     a0, sp
     call   software_trap_handler
 
@@ -134,7 +129,7 @@ _trap_handler:
     REG_L t0, 32*WORD_SIZE(sp)        # saved sstatus
     li     t1, (1 << 8)               # SPP bit mask
     and    t0, t0, t1
-    bnez   t0, 4f                     # if SPP!=0 -> kernel trap
+    bnez   t0, 3f                     # if SPP!=0 -> kernel trap
 
     # returning to user
     REG_L t2, 35*WORD_SIZE(sp)        # tf->usp (user sp)
@@ -143,5 +138,5 @@ _trap_handler:
     csrrw  sp, sscratch, sp           # swap back: sp=old sscratch (user sp), sscratch=old sp
     sret
 
-4:  addi   sp, sp, TRAP_FRAME_SIZE
+3:  addi   sp, sp, TRAP_FRAME_SIZE
     sret
