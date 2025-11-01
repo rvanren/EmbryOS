@@ -19,7 +19,7 @@ extern char frames[];    // from linker
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
-    int vpn = tf->st_val >> PAGE_SHIFT;
+    int vpn = tf->stval >> PAGE_SHIFT;
     void *frame = frame_alloc();
     if (frame == 0) kprintf("Out of memory"); for (;;) ;
 
@@ -39,10 +39,16 @@ void vm_pagefault(struct trap_frame *tf) {
     memset(frame, 0, PAGE_SIZE);
    
     struct process *self = sched_self();
-    uint32_t *pt = self->base;
+    uint32_t *pt = (uint32_t *) self->base;
     uint32_t pa = (uintptr_t) frame;
     pt[tf->stval & ~(PAGE_SIZE-1)] =
         (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+
+    asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
+}
+
+void vm_flush(void) {
+    asm volatile("sfence.vma" ::: "memory");
 }
 
 void vm_init_pt(void *base, void *stack) {
@@ -50,6 +56,7 @@ void vm_init_pt(void *base, void *stack) {
     memset(pt, 0, FRAME_SIZE - sizeof(*pt));
     uint32_t pa = (uintptr_t) stack;
     pt[1023] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    vm_flush();
 }
 
 void vm_init(void) {

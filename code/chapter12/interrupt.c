@@ -25,6 +25,7 @@ void software_trap_handler(struct trap_frame *tf) {
         default: (*handlers[INTR_EXCEPTION])(tf);
         }
     }
+    vm_flush();
 }
 
 void intr_set_handler(enum intr_class which, trap_entry_t handler) {
