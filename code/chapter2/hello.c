@@ -1,9 +1,9 @@
-#include "screen.h"
+#include "kprintf.h"
+#include "syscall.h"
 
 int main(void) {
-    screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
-                        CELL(' ', ANSI_WHITE, ANSI_BLACK));
-
-    extern void splash_main();
-    splash_main();
+    for (;;) {
+        kprintf("EmbryOS: Life Has Begun\n");
+        user_delay(1000);
+    }
 }

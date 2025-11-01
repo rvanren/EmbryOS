@@ -1,6 +1,5 @@
 #pragma once
 
-#include <stdint.h>
 #include "platform.h"
 
 enum syscall {
