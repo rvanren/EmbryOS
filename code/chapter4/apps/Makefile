@@ -7,37 +7,38 @@ NM        = riscv-none-elf-nm
 
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-CFLAGS = -g -I../shared -march=rv32im -mabi=ilp32 -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
+ARCH ?= rv32   # or rv64
+
+# ----------------------------------------------------------------------
+# Architecture-dependent flags
+# ----------------------------------------------------------------------
+ifeq ($(ARCH),rv64)
+    MARCH     = rv64im
+    MABI      = lp64
+    ELFCLASS  = elf64-littleriscv
+else
+    MARCH     = rv32im
+    MABI      = ilp32
+    ELFCLASS  = elf32-littleriscv
+endif
+
+# ----------------------------------------------------------------------
+# Compiler / Linker Flags
+# ----------------------------------------------------------------------
+CFLAGS  = -g -I../shared -march=$(MARCH) -mabi=$(MABI) \
+           -ffreestanding -nostdlib -nostartfiles -fpie -mno-relax -msmall-data-limit=0
 LDFLAGS = -Wl,--no-relax -T user.lds
 
-APP_ELFS  = $(addsuffix .elf,$(APPS))
-APP_BINS  = $(addsuffix .bin,$(APPS))
-APP_OBJS  = $(addsuffix .bin.o,$(APPS))   # <-- note .bin.o suffix
+APP_ELFS = $(addsuffix .elf,$(APPS))
+APP_BINS = $(addsuffix .bin,$(APPS))
+APP_OBJS = $(addsuffix .bin.o,$(APPS))
 
-# build both .elf and .o so that top-level can nm the .elf
+# ----------------------------------------------------------------------
+# Rules
+# ----------------------------------------------------------------------
 all: $(APP_ELFS) $(APP_OBJS)
 
-init.elf: init.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c init.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-help.elf: help.c window1.c window2.c window.h ../shared/string.c ../shared/string.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c help.c window1.c window2.c ../shared/string.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-shell.elf: shell.c window1.c window2.c window.h ../shared/string.c ../shared/string.h dir.c dir.h ../shared/stdio.h ../shared/printf.c putchar.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c shell.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-ls.elf: ls.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window1.c window2.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ls.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c ../shared/string.h dir.c dir.h window.h window1.c window2.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c cat.c window1.c window2.c ../shared/string.c dir.c ../shared/printf.c putchar.c
-	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
-
-%.elf: %.c crt0.s crt1.c user.lds ../shared/string.h ../shared/string.c
+%.elf: %.c crt0.s crt1.c user.lds ../shared/string.c
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ crt0.s crt1.c ../shared/string.c $<
 	$(OBJDUMP) $(DEBUG_FLAGS) $@ > $@.lst
 
@@ -45,7 +46,7 @@ cat.elf: cat.c ../shared/printf.c putchar.c ../shared/stdio.h ../shared/string.c
 	$(OBJCOPY) -O binary $< $@
 
 %.bin.o: %.bin
-	$(OBJCOPY) -I binary -O elf32-littleriscv -B riscv $< $@
+	$(OBJCOPY) -I binary -O $(ELFCLASS) -B riscv $< $@
 
 clean:
-	rm -f $(APP_ELFS) $(APP_BINS) $(APP_OBJS)
+	rm -f $(APP_ELFS) $(APP_BINS) $(APP_OBJS) *.lst
