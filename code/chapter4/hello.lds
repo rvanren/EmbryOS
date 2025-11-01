@@ -28,12 +28,12 @@ SECTIONS {
   } >ram AT>ram :text
 
   /* Writable data - RW segment */
-  .data : ALIGN(8) {
+  .data : ALIGN(16) {
     *(.data*)
     *(.sdata*)
   } >ram AT>ram :data
 
-  .bss (NOLOAD) : ALIGN(8) {
+  .bss (NOLOAD) : ALIGN(16) {
     *(.bss*)
     *(COMMON)
   } >ram :data
