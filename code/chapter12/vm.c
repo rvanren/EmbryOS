@@ -2,6 +2,9 @@
 #include <stdint.h>
 #include "platform.h"
 #include "string.h"
+#include "frame.h"
+#include "process.h"
+#include "sched.h"
 #include "vm.h"
 #include "kprintf.h"
 
@@ -16,15 +19,37 @@ extern char frames[];    // from linker
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
-    kprintf("page fault: cause=%d sepc=%x stval=%x",
-                    tf->scause & 0xFFF, tf->sepc, tf->stval);
-    for (;;) ;
+    int vpn = tf->st_val >> PAGE_SHIFT;
+    void *frame = frame_alloc();
+    if (frame == 0) kprintf("Out of memory"); for (;;) ;
+
+#ifdef notdef
+    // Backing data
+    size_t offset = addr - 0x1000;
+    uint8_t *dst = FRAME(uint8_t, frame);
+    if (offset < p->image_size) {
+        size_t n = MIN(PAGE_SIZE, p->image_size - offset);
+        memcpy(dst, p->image->data + offset, n);
+        if (n < PAGE_SIZE)
+            memset(dst + n, 0, PAGE_SIZE - n);
+    } else {
+        memset(dst, 0, PAGE_SIZE);
+    }
+#endif
+    memset(frame, 0, PAGE_SIZE);
+   
+    struct process *self = sched_self();
+    uint32_t *pt = self->base;
+    uint32_t pa = (uintptr_t) frame;
+    pt[tf->stval & ~(PAGE_SIZE-1)] =
+        (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 }
 
 void vm_init_pt(void *base, void *stack) {
     uint32_t *pt = base;
     memset(pt, 0, FRAME_SIZE - sizeof(*pt));
-    pt[1023] = (1023 << 20) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    uint32_t pa = (uintptr_t) stack;
+    pt[1023] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 }
 
 void vm_init(void) {
