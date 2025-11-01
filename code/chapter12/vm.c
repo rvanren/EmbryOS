@@ -14,6 +14,9 @@ extern char frames[];    // from linker
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 static uint32_t leaf_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
+void vm_pagefault(struct trap_frame *tf) {
+}
+
 void vm_init(void) {
     uint32_t user_start   = (uintptr_t) frames;
 

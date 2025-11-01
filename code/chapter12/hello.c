@@ -21,10 +21,14 @@ void timer_handler(struct trap_frame *tf) {
 
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
-    proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
-    kprintf("trap: cause=%d sepc=%x stval=%x<",
-                        tf->scause & 0xFFF, tf->sepc, tf->stval);
-    sched_exit();
+    switch (tf->scause) {
+    case 12: case 13: case 15: vm_pagefault(tf); break;
+    default:
+        proc_put(self, 0, 0, CELL('>', ANSI_BLACK, ANSI_RED));
+        kprintf("trap: cause=%d sepc=%x stval=%x<",
+                            tf->scause & 0xFFF, tf->sepc, tf->stval);
+        sched_exit();
+    }
 }
 
 void main(uint32_t hartid, uint32_t dtb_pa) {
