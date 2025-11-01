@@ -17,7 +17,7 @@
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_map(void *base, uintptr_t addr, void *frame) {
-    uint32_t *pt = (uint32_t *) self->base;
+    uint32_t *pt = (uint32_t *) base;
     int index = (addr >> 12) & (PTE_COUNT - 1);
     uintptr_t pa = (uintptr_t) frame;
     pt[index] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
