@@ -7,7 +7,7 @@
 #include "sched.h"
 #include "flat.h"
 #include "vm.h"
-#include "kprintf.h"
+#include "die.h"
 
 #define PTE_V (1 << 0)
 #define PTE_R (1 << 1)
