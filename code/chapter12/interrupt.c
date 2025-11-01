@@ -14,9 +14,8 @@ static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handle
 void software_trap_handler(struct trap_frame *tf) {
     if (tf->scause & (1 << 31)) {   // interrupt?
         switch (tf->scause & 0xFFF) {
-        case  3: break;
-        case  5: (*handlers[INTR_TIMER])(tf); break;
-        case 11: (*handlers[INTR_EXTERNAL])(tf); break;
+        case 5: (*handlers[INTR_TIMER])(tf); break;
+        case 9: (*handlers[INTR_EXTERNAL])(tf); break;
         default: no_handler(tf);
         }
     }
