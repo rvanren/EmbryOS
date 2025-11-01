@@ -35,5 +35,5 @@ void exec_user(void) {
     vm_init_pt(self->base, self->stack);
 
     enter_user((void *) FRAME_SIZE, (uintptr_t) (FRAME_SIZE + gp_offset),
-            0x400000 - args_size, self->size, (uintptr_t) self + FRAME_SIZE);
+            VM_END - args_size, self->size, (uintptr_t) self + FRAME_SIZE);
 }

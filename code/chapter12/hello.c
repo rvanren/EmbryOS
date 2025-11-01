@@ -11,6 +11,7 @@
 #include "uart.h"
 #include "vm.h"
 #include "files.h"
+#include "flat.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
@@ -20,11 +21,22 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 void exception_handler(struct trap_frame *tf) {
+    void *frame = frame_alloc();
+    if (frame == 0) die("out of memory");
+
+    struct pcb *self = sched_self();
+    uint32_t offset = tf->stval & ~(PAGE_SIZE - 1);
+    int n = flat_read(&flat_fs, self->executable, sizeof(uint32_t) + offset - VM_START, frame, PAGE_SIZE);
+    if (n > 0) memset((char *) frame + n, 0, PAGE_SIZE - n);
+    vm_map(self->base, tf->stval, frame);
+}
+
+void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     switch (tf->scause) {
     case 12: case 13: case 15:
-        if (PAGE_SIZE <= tf->stval && tf->stval < 0x400000) {
-            vm_pagefault(tf);
+        if (VM_START <= tf->stval && tf->stval < VM_END) {
+            pagefault(tf);
             break;
         }
     default:

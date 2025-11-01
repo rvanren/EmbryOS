@@ -21,21 +21,11 @@ extern struct flat flat_fs;
 
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
-void vm_pagefault(struct trap_frame *tf) {
-    void *frame = frame_alloc();
-    if (frame == 0) die("out of memory");
-    memset(frame, 0, PAGE_SIZE);
-
-    struct pcb *self = sched_self();
-    uint32_t offset = tf->stval & ~(PAGE_SIZE - 1);
-    int n = flat_read(&flat_fs, self->executable, sizeof(uint32_t) + offset - PAGE_SIZE, frame, PAGE_SIZE);
-
+void vm_map(void *base, uintptr_t addr, void *frame) {
     uint32_t *pt = (uint32_t *) self->base;
-    int index = (tf->stval >> 12) & (PTE_COUNT - 1);
+    int index = (addr >> 12) & (PTE_COUNT - 1);
     uintptr_t pa = (uintptr_t) frame;
     pt[index] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
-
-    // asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
 }
 
 void vm_flush(void) {
