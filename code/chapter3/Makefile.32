@@ -1,0 +1,6 @@
+XLEN        = 32
+
+CFLAGS_ARCH = -march=rv32ima_zicsr -mabi=ilp32
+QEMU        = qemu-system-riscv32
+
+include Makefile.common

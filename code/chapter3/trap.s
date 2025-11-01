@@ -1,19 +1,34 @@
 # ================================================================
-# S-mode Trap Handler for EmbryOS (under OpenSBI)
+# S-mode Trap Handler for EmbryOS (RV32 / RV64, under OpenSBI)
 # ================================================================
-# This handler:
 #   - Saves all integer registers (x1–x31)
 #   - Saves S-mode CSRs (sepc, sstatus, scause, stval)
-#   - Calls a C function: software_trap_handler(struct trap_frame *tf)
-#   - Restores registers and returns with sret
-#
-# Stack alignment follows RISC-V psABI (16-byte)
+#   - Calls C: software_trap_handler(struct trap_frame *tf)
+#   - Restores and sret's
 # ================================================================
-
-    .equ TRAP_FRAME_SIZE, 144   # 36 words × 4 bytes
 
     .section .text
     .globl _trap_handler
+
+# ----------------------------------------------------------------
+# Define width-dependent macros
+# ----------------------------------------------------------------
+#if __riscv_xlen == 64
+    # 8-byte words
+    # define store/load instructions
+    .set REG_S, sd
+    .set REG_L, ld
+    .set WORD_SIZE, 8
+#else
+    # 4-byte words
+    .set REG_S, sw
+    .set REG_L, lw
+    .set WORD_SIZE, 4
+#endif
+
+    .equ TRAP_REGS, 36
+    .equ TRAP_FRAME_SIZE, TRAP_REGS * WORD_SIZE
+
 _trap_handler:
     # ------------------------------------------------------------
     # Allocate trap frame (keep SP 16-byte aligned)
@@ -22,52 +37,52 @@ _trap_handler:
     andi sp, sp, -16
 
     # --- save all general registers ---
-    sw ra,   0(sp)
-    sw sp,   4(sp)
-    sw gp,   8(sp)
-    sw tp,  12(sp)
-    sw t0,  16(sp)
-    sw t1,  20(sp)
-    sw t2,  24(sp)
-    sw s0,  28(sp)
-    sw s1,  32(sp)
-    sw a0,  36(sp)
-    sw a1,  40(sp)
-    sw a2,  44(sp)
-    sw a3,  48(sp)
-    sw a4,  52(sp)
-    sw a5,  56(sp)
-    sw a6,  60(sp)
-    sw a7,  64(sp)
-    sw s2,  68(sp)
-    sw s3,  72(sp)
-    sw s4,  76(sp)
-    sw s5,  80(sp)
-    sw s6,  84(sp)
-    sw s7,  88(sp)
-    sw s8,  92(sp)
-    sw s9,  96(sp)
-    sw s10, 100(sp)
-    sw s11, 104(sp)
-    sw t3,  108(sp)
-    sw t4,  112(sp)
-    sw t5,  116(sp)
-    sw t6,  120(sp)
+    REG_S ra,   0*WORD_SIZE(sp)
+    REG_S sp,   1*WORD_SIZE(sp)
+    REG_S gp,   2*WORD_SIZE(sp)
+    REG_S tp,   3*WORD_SIZE(sp)
+    REG_S t0,   4*WORD_SIZE(sp)
+    REG_S t1,   5*WORD_SIZE(sp)
+    REG_S t2,   6*WORD_SIZE(sp)
+    REG_S s0,   7*WORD_SIZE(sp)
+    REG_S s1,   8*WORD_SIZE(sp)
+    REG_S a0,   9*WORD_SIZE(sp)
+    REG_S a1,  10*WORD_SIZE(sp)
+    REG_S a2,  11*WORD_SIZE(sp)
+    REG_S a3,  12*WORD_SIZE(sp)
+    REG_S a4,  13*WORD_SIZE(sp)
+    REG_S a5,  14*WORD_SIZE(sp)
+    REG_S a6,  15*WORD_SIZE(sp)
+    REG_S a7,  16*WORD_SIZE(sp)
+    REG_S s2,  17*WORD_SIZE(sp)
+    REG_S s3,  18*WORD_SIZE(sp)
+    REG_S s4,  19*WORD_SIZE(sp)
+    REG_S s5,  20*WORD_SIZE(sp)
+    REG_S s6,  21*WORD_SIZE(sp)
+    REG_S s7,  22*WORD_SIZE(sp)
+    REG_S s8,  23*WORD_SIZE(sp)
+    REG_S s9,  24*WORD_SIZE(sp)
+    REG_S s10, 25*WORD_SIZE(sp)
+    REG_S s11, 26*WORD_SIZE(sp)
+    REG_S t3,  27*WORD_SIZE(sp)
+    REG_S t4,  28*WORD_SIZE(sp)
+    REG_S t5,  29*WORD_SIZE(sp)
+    REG_S t6,  30*WORD_SIZE(sp)
 
     # ------------------------------------------------------------
     # Save supervisor CSRs
     # ------------------------------------------------------------
     csrr t0, sepc
-    sw   t0, 124(sp)
+    REG_S t0, 31*WORD_SIZE(sp)
     csrr t0, sstatus
-    sw   t0, 128(sp)
+    REG_S t0, 32*WORD_SIZE(sp)
     csrr t0, scause
-    sw   t0, 132(sp)
+    REG_S t0, 33*WORD_SIZE(sp)
     csrr t0, stval
-    sw   t0, 136(sp)
+    REG_S t0, 34*WORD_SIZE(sp)
 
-    # usp (user sp) unused for now
-    sw zero, 140(sp)
+    # usp (user stack pointer) placeholder
+    REG_S zero, 35*WORD_SIZE(sp)
 
     # ------------------------------------------------------------
     # Call C-level trap handler
@@ -78,45 +93,45 @@ _trap_handler:
     # ------------------------------------------------------------
     # Restore CSRs
     # ------------------------------------------------------------
-    lw t0, 124(sp)
+    REG_L t0, 31*WORD_SIZE(sp)
     csrw sepc, t0
-    lw t0, 128(sp)
+    REG_L t0, 32*WORD_SIZE(sp)
     csrw sstatus, t0
 
     # ------------------------------------------------------------
     # Restore general registers
     # ------------------------------------------------------------
-    lw ra,   0(sp)
-    lw sp,   4(sp)
-    lw gp,   8(sp)
-    lw tp,  12(sp)
-    lw t0,  16(sp)
-    lw t1,  20(sp)
-    lw t2,  24(sp)
-    lw s0,  28(sp)
-    lw s1,  32(sp)
-    lw a0,  36(sp)
-    lw a1,  40(sp)
-    lw a2,  44(sp)
-    lw a3,  48(sp)
-    lw a4,  52(sp)
-    lw a5,  56(sp)
-    lw a6,  60(sp)
-    lw a7,  64(sp)
-    lw s2,  68(sp)
-    lw s3,  72(sp)
-    lw s4,  76(sp)
-    lw s5,  80(sp)
-    lw s6,  84(sp)
-    lw s7,  88(sp)
-    lw s8,  92(sp)
-    lw s9,  96(sp)
-    lw s10, 100(sp)
-    lw s11, 104(sp)
-    lw t3,  108(sp)
-    lw t4,  112(sp)
-    lw t5,  116(sp)
-    lw t6,  120(sp)
+    REG_L ra,   0*WORD_SIZE(sp)
+    REG_L sp,   1*WORD_SIZE(sp)
+    REG_L gp,   2*WORD_SIZE(sp)
+    REG_L tp,   3*WORD_SIZE(sp)
+    REG_L t0,   4*WORD_SIZE(sp)
+    REG_L t1,   5*WORD_SIZE(sp)
+    REG_L t2,   6*WORD_SIZE(sp)
+    REG_L s0,   7*WORD_SIZE(sp)
+    REG_L s1,   8*WORD_SIZE(sp)
+    REG_L a0,   9*WORD_SIZE(sp)
+    REG_L a1,  10*WORD_SIZE(sp)
+    REG_L a2,  11*WORD_SIZE(sp)
+    REG_L a3,  12*WORD_SIZE(sp)
+    REG_L a4,  13*WORD_SIZE(sp)
+    REG_L a5,  14*WORD_SIZE(sp)
+    REG_L a6,  15*WORD_SIZE(sp)
+    REG_L a7,  16*WORD_SIZE(sp)
+    REG_L s2,  17*WORD_SIZE(sp)
+    REG_L s3,  18*WORD_SIZE(sp)
+    REG_L s4,  19*WORD_SIZE(sp)
+    REG_L s5,  20*WORD_SIZE(sp)
+    REG_L s6,  21*WORD_SIZE(sp)
+    REG_L s7,  22*WORD_SIZE(sp)
+    REG_L s8,  23*WORD_SIZE(sp)
+    REG_L s9,  24*WORD_SIZE(sp)
+    REG_L s10, 25*WORD_SIZE(sp)
+    REG_L s11, 26*WORD_SIZE(sp)
+    REG_L t3,  27*WORD_SIZE(sp)
+    REG_L t4,  28*WORD_SIZE(sp)
+    REG_L t5,  29*WORD_SIZE(sp)
+    REG_L t6,  30*WORD_SIZE(sp)
 
     # ------------------------------------------------------------
     # Free trap frame and return

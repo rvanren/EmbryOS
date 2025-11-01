@@ -1,10 +1,6 @@
 OUTPUT_ARCH("riscv")
 ENTRY(_start)
 
-/* --- configurable system parameters --- */
-PAGE_SIZE        = 8192;
-FRAME_PAGES      = 32;
-
 MEMORY {
   ram (rwx) : ORIGIN = 0x80400000, LENGTH = 16M
 }
@@ -28,21 +24,14 @@ SECTIONS {
   } >ram AT>ram :text
 
   /* Writable data - RW segment */
-  .data : ALIGN(8) {
+  .data : ALIGN(16) {
     *(.data*)
     *(.sdata*)
   } >ram AT>ram :data
 
-  .bss (NOLOAD) : ALIGN(8) {
+  .bss (NOLOAD) : ALIGN(16) {
     *(.bss*)
     *(COMMON)
-  } >ram :data
-
-  /* The heap */
-  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
-    PROVIDE(frames = .);
-    . = . + (PAGE_SIZE * FRAME_PAGES);
-    PROVIDE(__frames_end = .);
   } >ram :data
 
   . = ALIGN(16);

@@ -1,7 +1,9 @@
 #pragma once
 
+#include "platform.h"
+
 static inline void sbi_putchar(int ch) {
-    register long a0 asm("a0") = (unsigned char)ch;
-    register long a7 asm("a7") = 1;   // SBI_CONSOLE_PUTCHAR (legacy)
+    register sword_t a0 asm("a0") = (unsigned char) ch;
+    register sword_t a7 asm("a7") = 1;   // SBI_CONSOLE_PUTCHAR
     asm volatile ("ecall" : "+r"(a0) : "r"(a7) : "memory");
 }
