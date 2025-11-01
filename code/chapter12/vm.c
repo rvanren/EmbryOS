@@ -5,6 +5,7 @@
 #include "frame.h"
 #include "process.h"
 #include "sched.h"
+#include "flat.h"
 #include "vm.h"
 #include "kprintf.h"
 
@@ -16,7 +17,7 @@
 
 #define PTE_COUNT  (4*1024*1024 / PAGE_SIZE)  // 1024 entries
 
-extern char frames[];    // from linker
+extern struct flat flat_fs;
 
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
@@ -52,8 +53,6 @@ void vm_init_pt(void *base, void *stack) {
 }
 
 void vm_init(void) {
-    uint32_t user_start   = (uintptr_t) frames;
-
     // 4 MB identity mappings for everything below MEM_END
     for (int i = 0; i < MEM_END / (1 << 22); i++) {
         uint32_t pa = i << 22;   // 4 MiB per PTE
