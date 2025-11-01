@@ -18,7 +18,7 @@ CFLAGS      = $(CFLAGS_ARCH) \
 
 all:
 	@printf "$(YELLOW)-------- Compile Hello, World! (RV$(XLEN)) --------$(END)\n"
-	$(CC) $(CFLAGS) -Ishared -I. start.s trap.S ctx.S hello.c shared/string.c kprintf.c frame.c io.c interrupt.c process.c sched.c screen.c apps/dir.c apps/init.c apps/splash.c apps/life.c -Thello.lds $(LDFLAGS) -o hello.elf
+	$(CC) $(CFLAGS) -Ishared -I. start.s trap.S ctx.S hello.c shared/string.c kprintf.c frame.c io.c interrupt.c process.c sched.c screen.c apps.c apps/dir.c apps/init.c apps/splash.c apps/life.c -Thello.lds $(LDFLAGS) -o hello.elf
 	$(OBJDUMP) $(DEBUG_FLAGS) hello.elf > hello.lst
 	$(OBJCOPY) -O binary hello.elf hello.bin
 
