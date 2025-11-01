@@ -53,6 +53,16 @@ void vm_init_pt(void *base, void *stack) {
     vm_flush();
 }
 
+void vm_release(void *base) {
+    uint32_t *pt = (uint32_t *) base;
+
+    for (int i = 0; i < PTE_COUNT; i++) {
+        uint32_t pte = pt[i];
+        if (pte & PTE_V)
+            frame_release((void *) ((uintptr_t)(pte >> 10) << 12));
+    }
+}
+
 void vm_init(void) {
     // 4 MB identity mappings for everything below MEM_END
     for (int i = 0; i < MEM_END / (1 << 22); i++) {

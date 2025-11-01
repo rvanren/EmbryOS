@@ -3,6 +3,7 @@
 #include "frame.h"
 #include "process.h"
 #include "screen.h"
+#include "vm.h"
 
 struct pcb *proc_init(struct rect area){
     struct pcb *pcb = frame_alloc();
@@ -42,7 +43,6 @@ struct pcb *proc_dequeue(struct pcb **q) {
 }
 
 void proc_release(struct pcb *pcb) {
-    if (pcb->base != 0)  frame_release(pcb->base);
-    if (pcb->stack != 0) frame_release(pcb->stack);
+    if (pcb->base != 0) vm_release(pcb->base);
     frame_release(pcb);
 }
