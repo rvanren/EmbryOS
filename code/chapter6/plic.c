@@ -13,15 +13,17 @@
 static uint32_t hart_ctx;
 
 void plic_handler(struct trap_frame *tf) {
-    uint32_t claim = *(volatile uint32_t *)PLIC_CLAIM(hart_ctx);
+    volatile uint32_t *claim_reg =
+        (volatile uint32_t *)(uintptr_t)PLIC_CLAIM(hart_ctx);
+    uint32_t claim = *claim_reg;
     if (claim == UART_IRQ)
         uart_isr();
-    *(volatile uint32_t *)PLIC_CLAIM(hart_ctx) = claim;
+    *claim_reg = claim;
 }
 
 void plic_init(uint32_t hartid) {
     hart_ctx = PLIC_CTX(hartid);
-    *(volatile uint32_t *)PLIC_PRIORITY(UART_IRQ)  = 1;
-    *(volatile uint32_t *)PLIC_ENABLE(hart_ctx)    = (1u << UART_IRQ);
-    *(volatile uint32_t *)PLIC_THRESHOLD(hart_ctx) = 0;
+    *(volatile uint32_t *)(uintptr_t)PLIC_PRIORITY(UART_IRQ)  = 1;
+    *(volatile uint32_t *)(uintptr_t)PLIC_ENABLE(hart_ctx)    = (1u << UART_IRQ);
+    *(volatile uint32_t *)(uintptr_t)PLIC_THRESHOLD(hart_ctx) = 0;
 }
