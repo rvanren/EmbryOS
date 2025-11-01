@@ -15,7 +15,7 @@ _start:
 #  Simple 8 KiB stack
 # ----------------------------------------------------------------------
     .section .bss
-    .align 4
+    .align 16
     .space 8192
     .global stack_end
 stack_end:
