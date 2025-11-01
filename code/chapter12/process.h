@@ -2,6 +2,7 @@
 
 #include <stdint.h>
 #include "syscall.h"
+#include "trap.h"
 
 #define KBD_BUF_SIZE 64
 
@@ -46,6 +47,9 @@ struct pcb *proc_dequeue(struct pcb **q);
 
 // Check the legality of the given user memory region
 void proc_check_legal(struct pcb *self, uintptr_t start, int size);
+
+// Handle a page fault
+void proc_pagefault(struct trap_frame *tf);
 
 // Release the given PCB
 void proc_release(struct pcb *pcb);
