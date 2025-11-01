@@ -14,12 +14,13 @@
 #define PTE_X (1 << 3)
 #define PTE_U (1 << 4)
 
+#define PTE_COUNT  (4*1024*1024 / PAGE_SIZE)  // 1024 entries
+
 extern char frames[];    // from linker
 
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
-    int vpn = tf->stval >> PAGE_SHIFT;
     void *frame = frame_alloc();
     if (frame == 0) kprintf("Out of memory"); for (;;) ;
 
@@ -37,12 +38,11 @@ void vm_pagefault(struct trap_frame *tf) {
     }
 #endif
     memset(frame, 0, PAGE_SIZE);
-   
-    struct pcb *self = sched_self();
+
     uint32_t *pt = (uint32_t *) self->base;
-    uint32_t pa = (uintptr_t) frame;
-    pt[tf->stval & ~(PAGE_SIZE-1)] =
-        (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    int index = (tf->stval >> 12) & (PTE_COUNT - 1);
+    uintptr_t pa = frame;
+    pt[index] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 
     asm volatile("sfence.vma %0, x0" :: "r"(tf->stval) : "memory");
 }
