@@ -44,8 +44,8 @@ void main(uint32_t hartid, uint32_t dtb_pa) {
     sbi_set_timer(mtime_get() + QUANTUM);
     files_init();
 
-    // screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
-    //                     CELL(' ', ANSI_WHITE, ANSI_BLACK));
+    screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,
+                        CELL(' ', ANSI_WHITE, ANSI_BLACK));
 
     sched_run(2, (struct rect){ 0, 0, 39, 11 }, 0, 0);  // run init process
     sched_idle();

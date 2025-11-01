@@ -14,6 +14,9 @@ extern char frames[];    // from linker
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
+    kprintf("page fault: cause=%d sepc=%x stval=%x",
+                    tf->scause & 0xFFF, tf->sepc, tf->stval);
+    for (;;) ;
 }
 
 void vm_init(void) {
