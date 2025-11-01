@@ -3,13 +3,17 @@
 YELLOW      = \033[1;33m
 END         = \033[0m
 
+CC          = riscv-none-elf-gcc
+OBJDUMP     = riscv-none-elf-objdump
+OBJCOPY     = riscv-none-elf-objcopy
+NM          = riscv-none-elf-nm
+
 LDFLAGS     = -nostdlib
 DEBUG_FLAGS = --source --all-headers --demangle --line-numbers --wide
 
-# Architecture-specific variables (set by Makefile.32/64)
-#   XLEN, CC, QEMU, CFLAGS_ARCH, ABI, etc.
-
-CFLAGS      = $(CFLAGS_ARCH) -Wl,--gc-sections -ffunction-sections -fdata-sections \
+# CFLAGS_ARCH and QEMU are defined by Makefile.32 / Makefile.64
+CFLAGS      = $(CFLAGS_ARCH) \
+              -Wl,--gc-sections -ffunction-sections -fdata-sections \
               -fdiagnostics-show-option -fno-builtin
 
 all:
