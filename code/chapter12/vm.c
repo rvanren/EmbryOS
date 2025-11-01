@@ -3,9 +3,6 @@
 #include "platform.h"
 #include "string.h"
 #include "frame.h"
-#include "process.h"
-#include "sched.h"
-#include "flat.h"
 #include "vm.h"
 #include "die.h"
 
@@ -60,7 +57,6 @@ void vm_init(void) {
         root_pt[i] = (pa >> 2) | PTE_V | PTE_R | PTE_W | PTE_X;
     }
 
-    // ---- Activate ----
     asm volatile("csrs sstatus, %0" :: "r"(1 << 18));  // allow S mode to access U pages
     uint32_t satp = (1u << 31) | (((uint32_t)root_pt) >> 12);
     asm volatile ("csrw satp, %0; sfence.vma" :: "r"(satp));
