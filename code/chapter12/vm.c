@@ -20,6 +20,12 @@ void vm_pagefault(struct trap_frame *tf) {
     for (;;) ;
 }
 
+void vm_init_pt(void *base, void *stack) {
+    uint32_t *pt = base;
+    memset(pt, 0, FRAME_SIZE - sizeof(*pt));
+    pt[1023] = (1023 << 20) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+}
+
 void vm_init(void) {
     uint32_t user_start   = (uintptr_t) frames;
 
