@@ -13,6 +13,7 @@
 #include "files.h"
 #include "flat.h"
 #include "die.h"
+#include "string.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 

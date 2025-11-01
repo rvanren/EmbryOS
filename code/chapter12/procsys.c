@@ -2,6 +2,7 @@
 #include "frame.h"
 #include "process.h"
 #include "die.h"
+#include "vm.h"
 
 void proc_check_legal(struct pcb *self, uintptr_t start, int size) {
     if (size == 0) return;

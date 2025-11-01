@@ -23,9 +23,8 @@ void vm_map(void *base, uintptr_t addr, void *frame) {
     pt[index] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
 }
 
-void vm_flush(void) {
-    struct pcb *self = sched_self();
-    uintptr_t leaf_pt = (uintptr_t) self->base;
+void vm_flush(void *base) {
+    uintptr_t leaf_pt = (uintptr_t) base;
     root_pt[0] = (leaf_pt & ~0xFFF) >> 2 | PTE_V;
     asm volatile("sfence.vma" ::: "memory");
 }
@@ -35,7 +34,7 @@ void vm_init_pt(void *base, void *stack) {
     memset(pt, 0, PAGE_SIZE);
     uintptr_t pa = (uintptr_t) stack;
     pt[PTE_COUNT - 1] = ((pa >> 12) << 10) | (PTE_V | PTE_R | PTE_W | PTE_U);
-    vm_flush();
+    vm_flush(base);
 }
 
 void vm_release(void *base) {
