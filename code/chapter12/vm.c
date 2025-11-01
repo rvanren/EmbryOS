@@ -38,7 +38,7 @@ void vm_pagefault(struct trap_frame *tf) {
 #endif
     memset(frame, 0, PAGE_SIZE);
    
-    struct process *self = sched_self();
+    struct pcb *self = sched_self();
     uint32_t *pt = (uint32_t *) self->base;
     uint32_t pa = (uintptr_t) frame;
     pt[tf->stval & ~(PAGE_SIZE-1)] =
