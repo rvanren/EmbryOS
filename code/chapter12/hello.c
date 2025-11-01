@@ -12,6 +12,7 @@
 #include "vm.h"
 #include "files.h"
 #include "flat.h"
+#include "die.h"
 
 #define QUANTUM          50000        // 50 milliseconds
 
@@ -20,7 +21,8 @@ void timer_handler(struct trap_frame *tf) {
     sbi_set_timer(mtime_get() + QUANTUM);
 }
 
-void exception_handler(struct trap_frame *tf) {
+void pagefault(struct trap_frame *tf) {
+    extern struct flat flat_fs;
     void *frame = frame_alloc();
     if (frame == 0) die("out of memory");
 

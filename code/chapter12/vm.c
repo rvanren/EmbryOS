@@ -14,8 +14,6 @@
 
 #define PTE_COUNT  (4*1024*1024 / PAGE_SIZE)  // 1024 entries
 
-extern struct flat flat_fs;
-
 static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_map(void *base, uintptr_t addr, void *frame) {
