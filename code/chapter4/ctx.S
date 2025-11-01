@@ -24,9 +24,6 @@
 # void ctx_switch(void **old_sp, void *new_sp)
 # ------------------------------------------------------------
 ctx_switch:
-    addi sp, sp, -(13*WORD_SIZE)
-    andi sp, sp, -16
-
     REG_S s0,  1*WORD_SIZE(sp)
     REG_S s1,  2*WORD_SIZE(sp)
     REG_S s2,  3*WORD_SIZE(sp)
@@ -65,9 +62,6 @@ ctx_switch:
 # void ctx_start(void **save_sp, void *new_sp)
 # ------------------------------------------------------------
 ctx_start:
-    addi sp, sp, -(13*WORD_SIZE)
-    andi sp, sp, -16
-
     REG_S s0,  1*WORD_SIZE(sp)
     REG_S s1,  2*WORD_SIZE(sp)
     REG_S s2,  3*WORD_SIZE(sp)
