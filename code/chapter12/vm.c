@@ -27,7 +27,8 @@ void vm_pagefault(struct trap_frame *tf) {
     memset(frame, 0, PAGE_SIZE);
 
     struct pcb *self = sched_self();
-    flat_read(&flat_fs, self->executable, sizeof(uint32_t) + tf->stval - FRAME_SIZE, frame, PAGE_SIZE);
+    uint32_t offset = tf->stval & ~(PAGE_SIZE - 1);
+    int n = flat_read(&flat_fs, self->executable, sizeof(uint32_t) + offset - PAGE_SIZE, frame, PAGE_SIZE);
 
     uint32_t *pt = (uint32_t *) self->base;
     int index = (tf->stval >> 12) & (PTE_COUNT - 1);
@@ -46,9 +47,9 @@ void vm_flush(void) {
 
 void vm_init_pt(void *base, void *stack) {
     uint32_t *pt = base;
-    memset(pt, 0, FRAME_SIZE - sizeof(*pt));
-    uint32_t pa = (uintptr_t) stack;
-    pt[PTE_COUNT - 1] = ((pa & ~0xFFF) >> 2) | PTE_V | PTE_R | PTE_W | PTE_X | PTE_U;
+    memset(pt, 0, PAGE_SIZE);
+    uintptr_t pa = (uintptr_t) stack;
+    pt[PTE_COUNT - 1] = ((pa >> 12) << 10) | (PTE_V | PTE_R | PTE_W | PTE_U);
     vm_flush();
 }
 
