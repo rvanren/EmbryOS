@@ -1,0 +1,53 @@
+OUTPUT_ARCH("riscv")
+ENTRY(_start)
+
+/* --- configurable system parameters --- */
+PAGE_SIZE        = 8192;
+FRAME_PAGES      = 32;
+BLOCK_SIZE       = 512;
+RAMDISK_BLOCKS   = 2048;
+
+MEMORY {
+  ram (rwx) : ORIGIN = 0x80400000, LENGTH = 16M
+}
+
+/* ----------------------------------------------------------- */
+/*  Define two ELF program headers: one RX, one RW             */
+/* ----------------------------------------------------------- */
+PHDRS {
+  text PT_LOAD FLAGS(5);   /* PF_R | PF_X */
+  data PT_LOAD FLAGS(6);   /* PF_R | PF_W */
+}
+
+SECTIONS {
+  . = ORIGIN(ram);
+
+  /* Code and constants - RX segment */
+  .text : {
+    *(.text.start*)
+    *(.text*)
+    *(.rodata*)
+  } >ram AT>ram :text
+
+  /* Writable data - RW segment */
+  .data : ALIGN(8) {
+    *(.data*)
+    *(.sdata*)
+  } >ram AT>ram :data
+
+  .bss (NOLOAD) : ALIGN(8) {
+    *(.bss*)
+    *(COMMON)
+  } >ram :data
+
+  .ramdisk (NOLOAD) : ALIGN(BLOCK_SIZE) {
+    PROVIDE(ramdisk = .);
+    . = . + (BLOCK_SIZE * RAMDISK_BLOCKS);
+    PROVIDE(__ramdisk_end = .);
+  } >ram :data
+
+  /* The heap */
+  .frames (NOLOAD) : ALIGN(PAGE_SIZE) {
+    PROVIDE(frames = .);
+  } >ram :data
+}

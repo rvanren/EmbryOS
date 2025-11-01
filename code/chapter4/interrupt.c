@@ -12,19 +12,16 @@ static void no_handler(struct trap_frame *tf) {
 static trap_entry_t handlers[] = { no_handler, no_handler, no_handler, no_handler };
 
 void software_trap_handler(struct trap_frame *tf) {
-    int scause, sepc;
-    asm("csrr %0, scause":"=r"(scause));
-
-    if (scause & (1 << 31)) {   // interrupt?
-        switch (scause & 0xFFF) {
+    if (tf->scause & (1 << 31)) {   // interrupt?
+        switch (tf->scause & 0xFFF) {
         case  3: break;
         case  5: (*handlers[INTR_TIMER])(tf); break;
         case 11: (*handlers[INTR_EXTERNAL])(tf); break;
-        default: kprintf("Unknown interrupt cause %x\n", scause);
+        default: kprintf("Unknown interrupt cause %x\n", tf->scause);
         }
     }
     else {
-        switch (scause & 0xFFF) {
+        switch (tf->scause & 0xFFF) {
         case 8: case 11: (*handlers[INTR_SYSCALL])(tf); tf->sepc += 4; break;
         default:
             (*handlers[INTR_EXCEPTION])(tf);
