@@ -1,6 +1,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "platform.h"
+#include "string.h"
 #include "vm.h"
 #include "kprintf.h"
 
