@@ -2,6 +2,7 @@
 #include "trap.h"
 #include "interrupt.h"
 #include "sched.h"
+#include "vm.h"
 #include "kprintf.h"
 
 static void no_handler(struct trap_frame *tf) {
