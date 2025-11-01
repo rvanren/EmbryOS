@@ -23,7 +23,7 @@ static uint32_t root_pt[1024] __attribute__((aligned(PAGE_SIZE)));
 
 void vm_pagefault(struct trap_frame *tf) {
     void *frame = frame_alloc();
-    if (frame == 0) { kprintf("Out of memory"); for (;;) ; }
+    if (frame == 0) die("out of memory");
     memset(frame, 0, PAGE_SIZE);
 
     struct pcb *self = sched_self();
