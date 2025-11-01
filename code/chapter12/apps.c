@@ -34,6 +34,6 @@ void exec_user(void) {
     sp &= ~0xF;   // align down to 16 bytes
     memcpy((void *) sp, self->args, self->size);
 
-    enter_user(self->base, (uintptr_t) (FRAME_SIZE + gp_offset), 0x400000,
+    enter_user((void *) FRAME_SIZE, (uintptr_t) (FRAME_SIZE + gp_offset), 0x400000,
                 self->size, (uintptr_t) self + FRAME_SIZE);
 }
