@@ -1,0 +1,21 @@
+To boot EmbryOS on the Banana Pi F3, do the following:
+
+- first create a Linux image which you can download and flash onto an microSD card
+    bianbu-25.04-desktop-k1-v3.0-release-20250725125828.img.zip
+- now mount this on Linux and go to /media/$USER/bootfs
+- rename or remove the following files to interrupt the boot process:
+    - env_k1-x.txt
+    - initrd.img-6.6.63
+    - vmlinuz-6.6.63
+- in one of the chapters, run "make bananapi"
+- copy everything in platforms/bananapi to /media/$USER/bootfs
+- insert the microSD card into the Banana Pi and boot
+
+This will probably stop at the U-Boot prompt.
+
+Enter the following magic commands and reboot:
+
+    setenv bootcmd 'ext4load mmc 0:5 0x600000 /bananapi.uImage; ext4load mmc 0:5 0x31000000 /spacemit/6.6.63/k1-x_deb1.dtb; fdt addr 0x31000000; bootm 0x600000 - 0x31000000'
+    saveenv
+
+This should boot EmbryOS

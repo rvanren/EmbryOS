@@ -1,0 +1,6 @@
+echo ===== TRYING TO LOAD KERNEL =====
+
+ext4load mmc 0:5 0x600000 /bananapi.uImage
+ext4load mmc 0:5 0x31000000 /spacemit/6.6.63/k1-x_deb1.dtb
+fdt addr 0x31000000
+bootm 0x600000 - 0x31000000

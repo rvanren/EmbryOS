@@ -1,0 +1,7 @@
+NCORES      = 4
+XLEN        = 32
+CPREFIX     = riscv-none-elf-
+CFLAGS_ARCH = -march=rv32ima_zicsr_zifencei -mabi=ilp32 -mcmodel=medany
+QEMU        = qemu-system-riscv32
+
+include Makefile.common

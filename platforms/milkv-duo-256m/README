@@ -1,0 +1,14 @@
+Using https://github.com/rota1001/milkv-baremetal-toolkit.git it
+is easy to get the first 5 or so chapters of EmbryOS to work.
+However, it does not seem that SV39 virtual memory is working
+correcly on the processor.  I have looked around on the Internet
+and found other people also having trouble, and I have not seen any
+success stories (see, for example,
+https://community.milkv.io/t/sv39-virtual-memory-translation-on-milk-v-duo/3490).
+Some functionality is there, but for example I have not been able
+to get demand paging to work.  After mapping a page and clearing
+every cache I know about on the CPU, I still get a page fault after
+restarting the process even though the page is fully mapped.  The
+CPU supposedly has extended page attributes such as Strong Order
+(https://occ-intl-prod.oss-ap-southeast-1.aliyuncs.com/resource/XuanTie-OpenC906-UserManual.pdf,
+page 54) but I have had no luck with that either.

@@ -1,0 +1,59 @@
+.SUFFIXES:
+
+CC          = $(CPREFIX)gcc
+OBJDUMP     = $(CPREFIX)objdump
+OBJCOPY     = $(CPREFIX)objcopy
+NM          = $(CPREFIX)nm
+
+ELFARCH     = elf$(XLEN)-littleriscv
+LDFLAGS     = -nostdlib -lgcc
+DUMP_FLAGS  = --source --all-headers --demangle --line-numbers --wide
+CFLAGS      = $(CFLAGS_ARCH) -Ishared -I../libfdt -g \
+              -Wl,--gc-sections -ffunction-sections -fdata-sections \
+              -fdiagnostics-show-option -fno-builtin -Wall
+
+include kernel.mk   # $(KERNEL_SRCS)
+
+APPS_DIR   = apps
+include $(APPS_DIR)/apps.mk
+APP_ELFS = $(addprefix $(APPS_DIR)/,$(APPS))
+
+SELFIES_DIR   = selfies
+include $(SELFIES_DIR)/selfies.mk
+SELFIE_ELFS = $(addprefix $(SELFIES_DIR)/,$(SELFIES))
+
+FDT_SRCS = ../libfdt/fdt_embryos.c ../libfdt/fdt.c ../libfdt/fdt_ro.c ../libfdt/fdt_strerror.c ../libfdt/fdt_addresses.c
+
+include ../platforms/Makefile
+
+qemu: qemu.elf logdump
+	$(QEMU) -nographic -machine virt -smp $(NCORES) -bios default -kernel qemu.elf
+	@printf "\033[0m\033[?25h\n"
+
+qemu-bare: qemu-bare.elf logdump
+	$(QEMU) -nographic -machine virt -smp $(NCORES) -bios none -kernel qemu-bare.elf
+	@printf "\033[0m\033[?25h\n"
+
+list: qemu.elf
+	$(NM) -a qemu-bare.elf | grep ' [bBdD] '
+
+logdump: ../log/logdump.c ../log/log_defs.h ../log/log_events.def
+	cc ../log/logdump.c -o logdump
+
+$(APP_ELFS):
+	$(MAKE) -C $(APPS_DIR) XLEN=$(XLEN) CPREFIX=$(CPREFIX) CFLAGS_ARCH="$(CFLAGS_ARCH)"
+
+$(SELFIE_ELFS):
+	$(MAKE) -C $(SELFIES_DIR) XLEN=$(XLEN) CPREFIX=$(CPREFIX) CFLAGS_ARCH="$(CFLAGS_ARCH)"
+
+embedfiles: ../tools/embedfiles.c
+	cc -o embedfiles -I. ../tools/embedfiles.c
+
+# --- auto-generate apps_gen.c ---
+apps_gen.c: $(APP_ELFS) $(SELFIE_ELFS) files/* embedfiles
+	./embedfiles $(APP_ELFS) $(SELFIE_ELFS) files/* > $@
+
+clean:
+	rm -f *.lst *.elf *.bin *.Image *.uImage apps_gen.c embedfiles logdump
+	cd $(APPS_DIR); make clean
+	cd $(SELFIES_DIR); make clean

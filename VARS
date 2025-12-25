@@ -1,0 +1,30 @@
+Here are all the global variables, capturing much of the state of EmbryOS
+
+bkl                     - Big Kernel Lock
+
+Variables that are initialized but immutable after the first BKL release
+========================================================================
+flat_fs                 - flat file system interface
+mem_end                 - end of physical memory
+plic_base               - memory address of PLIC device
+ramdisk_iface           - RAM block disk interface
+simple_iface            - "simple" block device interface
+stack_end               - end of stack for the initial hart
+ticks_per_quantum       - to measure time based on ticks
+uart                    - information for the main UART device
+uart_info               - information for each UART device type
+
+Variables that are shared and protected by BKL
+==============================================
+free_list               - list of free frames
+hart/harts              - info per hart
+io_focus                - process that has the current keyboard focus
+io_wait                 - circular queue of other processes waiting for input
+ramdisk                 - storage for the RAM disk
+ramdisk_state           - meta-data of RAM disk device (immutable currently)
+run_queue               - circular queue of runnable processes
+simple_state            - "simple" block device state
+zombies                 - linked list of dead processes
+
+Note that the tp register on each hart points to the current process on that
+hart, which in turn points to the hart info.
