@@ -85,6 +85,13 @@ make qemu
 There is also a high fidelity logging system that captures most events
 that happen in the kernel.  See the log folder.
 
+## Acknowledgments
+
+I was strongly inspired by the EGOS-2000 operating system
+(https://github.com/yhzhang0128/egos-2000) as well as the recitations
+by the amazing Yunhao Zhang and by a recitation that my student Yacqub
+Mohamed gave on developing RISC-V software on bare metal.
+
 ## 📄 License
 
 Not yet
