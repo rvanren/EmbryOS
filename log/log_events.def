@@ -1,6 +1,7 @@
 LOG_EVENT(BOOT,         0)
 LOG_EVENT(DIE,          0,                   ARG_PTR)
 LOG_EVENT(HART_INIT,    "hart:idx",          ARG_UINT, ARG_UINT)
+LOG_EVENT(TIME_BASE,    "timebase",          ARG_UINT)
 LOG_EVENT(UART_INIT,    "idx:base",          ARG_INT, ARG_PTR)
 LOG_EVENT(FRAME_INIT,   "nframes",           ARG_UINT)
 LOG_EVENT(FRAME_ALLOC,  "f",                 ARG_PTR)

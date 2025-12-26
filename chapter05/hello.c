@@ -4,14 +4,14 @@
 #define QUANTUM          50        // milliseconds
 
 struct hart hart;
-uint64_t ticks_per_quantum;
+uint64_t time_base;                // #ticks per second
 
 void timer_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
     if (!self->hart->interrupts_work)
         L1(L_BASE, L_INTERRUPTS_WORK, self->hart->id);
     self->hart->interrupts_work = 1;
-    sbi_set_timer(mtime_get() + ticks_per_quantum);
+    sbi_set_timer(mtime_get() + time_base * QUANTUM / 1000);
 }
 
 void exception_handler(struct trap_frame *tf) {
@@ -55,10 +55,11 @@ void embryos_main(uword_t hartid, void *fdt) {
     // Initialize the timer
     if (fdt != 0) {
         intr_init();
-        uint64_t time_base = fdt_get_timebase(fdt);
-        ticks_per_quantum = time_base * QUANTUM / 1000;
+        time_base = fdt_get_timebase(fdt);
         sbi_set_timer(0);
     }
+    else time_base = config.time_base;
+    L1(L_BASE, L_TIME_BASE, time_base);
 
     // Create the initial process
     hart.id  = hartid;

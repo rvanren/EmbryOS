@@ -1,12 +1,10 @@
 #include "embryos.h"
 #include "fdt_embryos.h"
 
-#define QUANTUM          50        // milliseconds
-
 extern struct hart harts[];        // one entry for each hart
 extern void hart_init(uword_t hartid, struct pcb *self);
 extern void hart_start_others(void *fdt);
-uint64_t ticks_per_quantum;        // #ticks in a QUANTUM
+uint64_t time_base;                // #ticks per second
 
 void exception_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();
@@ -44,9 +42,11 @@ void embryos_main(uword_t hartid, void *fdt) {
         fdt_memory_range(fdt, &mem_base, &mem_end);
         kprintf("Memory: base=%X size=%X\n", mem_base, mem_end - mem_base);
         frame_init(fdt, mem_end);
-        uint64_t timebase = fdt_get_timebase(fdt);
-        ticks_per_quantum = timebase * QUANTUM / 1000;
     }
+
+    if (fdt != 0) time_base = fdt_get_timebase(fdt);
+    else time_base = config.time_base;
+    L1(L_BASE, L_TIME_BASE, time_base);
 
     struct pcb *self = proc_create(&harts[0], -1, (struct rect){ 0, 0, 80, 24 }, 0, 0);
     hart_init(hartid, self); files_init();

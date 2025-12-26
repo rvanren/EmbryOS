@@ -2,8 +2,9 @@
 #include "fdt_embryos.h"
 
 #define MAX_HARTS       64
+#define QUANTUM         50        // milliseconds
 
-extern uint64_t ticks_per_quantum;        // #ticks in a QUANTUM
+extern uint64_t time_base;                // #ticks per second
 extern void startS(uword_t hartid);
 
 struct hart harts[MAX_HARTS];             // one entry for each hart
@@ -15,7 +16,7 @@ void timer_handler(struct trap_frame *tf) {
     if (!self->hart->interrupts_work)
         L1(L_BASE, L_INTERRUPTS_WORK, self->hart->id);
     self->hart->interrupts_work = 1;
-    sbi_set_timer(mtime_get() + ticks_per_quantum);
+    sbi_set_timer(mtime_get() + time_base * QUANTUM / 1000);
 }
 
 void hart_init(uword_t hartid, struct pcb *self) {
@@ -30,7 +31,7 @@ void hart_init(uword_t hartid, struct pcb *self) {
                             (struct rect){ 0, 0, 80, 24 }, 0, 0);
 
     vm_init(self->hart); intr_init();
-    if (ticks_per_quantum != 0) sbi_set_timer(0);
+    if (time_base != 0) sbi_set_timer(0);
 }
 
 void hart_start_others(void *fdt) {

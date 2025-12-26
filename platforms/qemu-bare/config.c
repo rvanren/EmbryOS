@@ -9,5 +9,6 @@ struct config config = {
     .uart_type = "ns16550a",
     .uart_base = 0x10000000UL,
 
-    .mem_end   = 0x80100000
+    .mem_end   = 0x80100000,
+    .time_base = 10000000
 };
