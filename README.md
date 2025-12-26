@@ -5,6 +5,8 @@ EmbryOS is an educational operating system that grows from a machine that does n
 
 Every chapter in this repository is a **working OS snapshot**, and every step is small enough to understand. You don’t just read about operating systems — you *build* one.
 
+Every chapter has helpful hints to your LLM, so you can work with your LLM to ask as many questions as you want.
+
 ## Demo Screenshot
 
 <p align="center">
