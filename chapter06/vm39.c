@@ -38,7 +38,6 @@ void vm_release(void *base) {
 
 void vm_init(struct hart *hart) {
     uword_t *root_pt = frame_alloc();
-    memset(root_pt, 0, PAGE_SIZE);
     hart->parent_page_table = frame_alloc();
     memset(hart->parent_page_table, 0, PAGE_SIZE);
 
