@@ -23,7 +23,8 @@ int vm_is_mapped(void *base, uintptr_t va) {
 }
 
 void vm_flush(struct hart *hart, void *base) {
-    hart->parent_page_table[0] = PT_ENTRY((uintptr_t) base, PTE(V));
+    const int index = (VM_START >> 22) & (PTE_COUNT - 1);  // 12 + 10
+    hart->parent_page_table[index] = PT_ENTRY((uintptr_t) base, PTE(V));
     tlb_flush();
 }
 

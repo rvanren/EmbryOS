@@ -23,7 +23,8 @@ int vm_is_mapped(void *base, uintptr_t va) {
 }
 
 void vm_flush(struct hart *hart, void *base) {
-    hart->parent_page_table[0] = PT_ENTRY((uintptr_t) base, PTE(V));
+    const int index = (VM_START >> 21) & (PTE_COUNT - 1);  // 12 + 9
+    hart->parent_page_table[index] = PT_ENTRY((uintptr_t) base, PTE(V));
     tlb_flush();
 }
 
@@ -40,11 +41,15 @@ void vm_init(struct hart *hart) {
     memset(root_pt, 0, PAGE_SIZE);
     hart->parent_page_table = frame_alloc();
     memset(hart->parent_page_table, 0, PAGE_SIZE);
-    root_pt[0] = PT_ENTRY((uword_t) hart->parent_page_table, PTE(V));
-    for (int i = 1; i < PTE_COUNT; i++)
-        root_pt[i] = PT_ENTRY(i * 0x40000000ULL, RWX|PTE(G));
+
+    // First map everything 1-1
     for (int i = 0; i < PTE_COUNT; i++)
-        hart->parent_page_table[i] = PT_ENTRY((uword_t) i << 21, RWX | PTE(G));
+        root_pt[i] = PT_ENTRY(i * 0x40000000ULL, RWX|PTE(G));
+
+    // Update the entry of VM_START
+    root_pt[VM_START >> 30] =           // 12 + 9 + 9
+        PT_ENTRY((uword_t) hart->parent_page_table, PTE(V));
+
     if (hart->idx == 0) kprintf("Enabling virtual memory now\n");
     vm_enable(((uword_t) 1 << (BPW - 1)) | (((uword_t) root_pt) >> 12));
     tlb_flush();
