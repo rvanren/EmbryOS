@@ -13,7 +13,7 @@ SECTIONS {
   . = flat_file_off;
 
   /* Virtual address of program image */
-  flat_vaddr = 0x10000;
+  flat_vaddr = 0x70000000;
   . = flat_vaddr;
 
   /* TEXT AND RODATA (RX) */

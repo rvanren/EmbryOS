@@ -1127,7 +1127,7 @@ uint64_t MAX_BINARY_SIZE = 1048576; // 1MB
 uint64_t MAX_CODE_SIZE = 524288; // 512KB
 uint64_t MAX_DATA_SIZE = 65536;  // 64KB
 
-uint64_t PK_CODE_START = 65536; // start of code segment at 0x10000 (according to RISC-V pk)
+uint64_t PK_CODE_START = 1879048192; // start of code segment at 0x10000 (according to RISC-V pk)
 
 uint64_t PT_LOAD = 1; // loadable segment
 uint64_t PF_RX   = 5; // readable and executable segment
@@ -1154,7 +1154,7 @@ uint64_t e_type    = 2;   // object file type is 0x02 (ET_EXEC)
 uint64_t e_machine = 243; // target architecture is 0xF3 (RISC-V)
 uint64_t e_version = 1;   // version of the object file format
 
-uint64_t e_entry = 65536; // entry point address 0x10000 (according to RISC-V pk)
+uint64_t e_entry = 1879048192; // entry point address 0x10000 (according to RISC-V pk)
 
 uint64_t e_phoff = 64; // program header offset 0x40 (ELFCLASS64) or 0x34 (ELFCLASS32)
 uint64_t e_shoff = 0;  // section header offset
