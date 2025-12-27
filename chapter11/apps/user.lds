@@ -9,7 +9,7 @@ SECTIONS {
   /* File offset for the whole flat image */
   flat_file_off = 0x1000;
 
-  /* Set the linker’s file location counter to 0x1000 */
+  /* Set the linker's file location counter to 0x1000 */
   . = flat_file_off;
 
   /* Virtual address of program image */
