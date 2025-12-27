@@ -2,8 +2,10 @@ This is EmbryOS
 Type help in the shell for help
 These are the current apps:
 * cat [files] - output files
+* ed [file]   - file editor
 * life        - Game of Life
 * ls          - directory listing
 * pong        - pong game
+* selfie      - selfie compiler
 * shell       - command shell
 * snake       - snake game
