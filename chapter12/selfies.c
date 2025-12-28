@@ -135,7 +135,7 @@ static void selfie_scroll() {
 static uword_t selfie_write(uword_t fd, char *str, uword_t size) {
     struct pcb *self = sched_self();
     L3(L_NORM, L_SELFIE_WRITE, fd, (uintptr_t) str, size);
-    if (fd == 1) {
+    if (fd == 1 || fd == 2) {
         for (int i = 0; i < size; i++) {
             if (str[i] == 0) continue;
             if (str[i] == '\n') selfie_scroll();
