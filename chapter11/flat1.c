@@ -43,10 +43,6 @@ void flat_init(struct flat *fs, struct bd *lower, int format) {
     if (format) {
         fs->stat_inode = lower->alloc(lower->state);
         if (fs->stat_inode != 1) die("flat_init: bad stat inode");
-        int nblocks = lower->size(lower->state, fs->stat_inode);
-        static struct stat_entry zero[STAT_PER_BLOCK] = {0};
-        for (int b = 0; b < nblocks; b++)
-            lower->write(lower->state, fs->stat_inode, b, zero);
         struct stat_entry st0 = { .inode = fs->stat_inode, .size = 0 };
         stat_put(fs, 0, &st0);
     }
