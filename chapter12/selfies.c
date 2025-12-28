@@ -28,11 +28,11 @@ static int selfie_dir_lookup(const char *name) {
 
 static uword_t selfie_open(char *name, uword_t flags, uword_t mode) {
     struct pcb *self = sched_self();
-    if ((flags & 0x3) == 0) {
+    if ((flags & 0x3) == 0) {		// open for reading
         int file = selfie_dir_lookup(name);
         if (file < 0) return -1;
-        for (int fd = 3; fd < SELFIE_MAX_FILES; fd++) {
-            struct selfie_file *sf = &self->selfie.files[fd];
+        for (int fd = SELFIE_MIN_FILE; fd < SELFIE_MAX_FILE; fd++) {
+            struct selfie_file *sf = &self->selfie.files[fd - SELFIE_MIN_FILE];
             if (sf->file == 0) {
                 sf->file = file;
                 sf->pos = 0;
@@ -42,7 +42,7 @@ static uword_t selfie_open(char *name, uword_t flags, uword_t mode) {
         }
         L2(L_NORM, L_SELFIE_OPEN_READ, (uintptr_t) name, -1);
     }
-    if ((flags & 0x3) == 1) {
+    if ((flags & 0x3) == 1) {		// open for writing
         extern struct flat flat_fs;
         struct dirent e;
         int n = flat_size(&flat_fs, ROOT_DIR) / sizeof e;
@@ -60,8 +60,8 @@ static uword_t selfie_open(char *name, uword_t flags, uword_t mode) {
             else if (empty < 0) empty = i;
         }
         if (empty < 0) empty = n;
-        for (int fd = 3; fd < SELFIE_MAX_FILES; fd++) {
-            struct selfie_file *sf = &self->selfie.files[fd];
+        for (int fd = SELFIE_MIN_FILE; fd < SELFIE_MAX_FILE; fd++) {
+            struct selfie_file *sf = &self->selfie.files[fd - SELFIE_MIN_FILE];
             if (sf->file == 0) {
                 sf->file = flat_create(&flat_fs);
                 sf->pos = 0;
@@ -80,13 +80,40 @@ static uword_t selfie_open(char *name, uword_t flags, uword_t mode) {
 
 static uword_t selfie_read(uword_t fd, char *str, uword_t size) {
     struct pcb *self = sched_self();
-    if (fd < 0 || fd >= SELFIE_MAX_FILES) die("selfie_read: bad fd");
-    struct selfie_file *sf = &self->selfie.files[fd];
+    if (fd < SELFIE_MIN_FILE || fd >= SELFIE_MAX_FILE) die("selfie_read: bad fd");
+    struct selfie_file *sf = &self->selfie.files[fd - SELFIE_MIN_FILE];
     if (sf->file == 0) die("file not open");
+    int total = 0;
+
+    // First empty out the buffer
+    if (sf->buf_size > 0) {
+        int copy = sf->buf_size < size ? sf->buf_size : size;
+        memcpy(str, &sf->buf[sf->buf_pos], copy);
+        sf->pos += copy; sf->buf_size -= copy; sf->buf_pos += copy;
+        if (size == copy) {
+            L4(L_NORM, L_SELFIE_READ, fd, (uintptr_t) str, size, copy);
+            return copy;
+        }
+        total = copy;
+    }
+
+    // The user wants more.  If just a little bit first replenish the buffer
+    if (size - total < SELFIE_BUF) {
+        sf->buf_size = flat_read(&flat_fs, sf->file, sf->pos, sf->buf, SELFIE_BUF);
+	int copy = sf->buf_size < size - total ? sf->buf_size : size - total;
+        memcpy(str + total, sf->buf, copy);
+	sf->buf_pos = copy;
+	sf->buf_size -= copy;
+        sf->pos += copy;
+        L4(L_NORM, L_SELFIE_READ, fd, (uintptr_t) str, size, total + copy);
+        return total + copy;
+    }
+
+    // Otherwise don't use the buffer
     int n = flat_read(&flat_fs, sf->file, sf->pos, str, size);
     sf->pos += n;
     L4(L_NORM, L_SELFIE_READ, fd, (uintptr_t) str, size, n);
-    return n;
+    return total + n;
 }
 
 static void selfie_put(int row, int col, char c) {
@@ -121,8 +148,8 @@ static uword_t selfie_write(uword_t fd, char *str, uword_t size) {
         return size;
     }
     else {
-        if (fd < 0 || fd >= SELFIE_MAX_FILES) die("selfie_write: bad fd");
-        struct selfie_file *sf = &self->selfie.files[fd];
+        if (fd < SELFIE_MIN_FILE || fd >= SELFIE_MAX_FILE) die("selfie_write: bad fd");
+        struct selfie_file *sf = &self->selfie.files[fd - SELFIE_MIN_FILE];
         if (sf->file == 0) die("file not open");
         int n = flat_write(&flat_fs, sf->file, sf->pos, str, size);
         sf->pos += n;
