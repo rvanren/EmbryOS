@@ -333,7 +333,6 @@ int main(int argc, char **argv){
 				return 0;
 			}
 		case 'Q':
-			fclose(fp);
 			return 0;
 		case ':':
 			break;
