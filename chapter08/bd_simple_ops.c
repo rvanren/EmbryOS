@@ -45,8 +45,8 @@ void simple_free(void *st, int inode) {
     struct simple_state *s = st;
     struct simple_inode_block *ib = (struct simple_inode_block *) bd_alloc();
     s->lower->read(s->lower->state, s->inode_below, inode, ib);
-    for (int i = 0; i < SIMPLE_N_POINTERS; i++)
-        if (ib->blocks[i] != 0) simple_free_block(s, ib->blocks[i]);
+    // for (int i = 0; i < SIMPLE_N_POINTERS; i++)
+    //     if (ib->blocks[i] != 0) simple_free_block(s, ib->blocks[i]);
     bd_free((struct block *) ib);
     simple_free_block(s, inode);
 }
