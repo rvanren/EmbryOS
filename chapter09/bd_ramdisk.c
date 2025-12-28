@@ -11,14 +11,14 @@ static void ramdisk_free(void *st, int inode) { }
 static void ramdisk_read(void *st, int inode, int blk, void *dst) {
     L3(L_NORM, L_RAMDISK_READ, inode, blk, (uintptr_t) dst);
     struct ramdisk_state *d = st;
-    if ((unsigned) blk >= d->nblocks) die("ramdisk_read");
+    if ((unsigned) blk >= d->nblocks) die("ramdisk_read: bad offset");
     memcpy(dst, d->data + blk * BLOCK_SIZE, BLOCK_SIZE);
 }
 
 static void ramdisk_write(void *st, int inode, int blk, const void *src) {
     L3(L_FREQ, L_RAMDISK_WRITE, inode, blk, (uintptr_t) src);
     struct ramdisk_state *d = st;
-    if ((unsigned) blk >= d->nblocks) die("ramdisk_write");
+    if ((unsigned) blk >= d->nblocks) die("ramdisk_write: bad offset");
     memcpy(d->data + blk * BLOCK_SIZE, src, BLOCK_SIZE);
 }
 

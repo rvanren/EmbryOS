@@ -8,6 +8,8 @@ struct bd simple_iface;
 struct simple_state simple_state;
 
 void files_init(void) {
+    bd_init();  // initialize block device module
+
     // Initialize the RAM disk block device layer
     ramdisk_init(&ramdisk_iface, &ramdisk_state,
                  ramdisk, __ramdisk_end - ramdisk);

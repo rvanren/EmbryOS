@@ -16,3 +16,9 @@ struct bd {
     void (*write)(void *state, int inode, int blk, const void *src);
     void (*free)(void *state, int inode);       // free an inode
 };
+
+extern const struct block bd_null_block;
+
+struct block *bd_alloc(void);
+void bd_free(struct block *b);
+void bd_init(void);
