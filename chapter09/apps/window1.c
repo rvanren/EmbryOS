@@ -11,7 +11,7 @@ void window_init(struct window *window) {
 void window_sync(struct window *window) {
     for (int row = 0; row < NROWS; row++)
         for (int col = 0; col < NCOLS; col++)
-            user_put(row, col, window->cells[row][col]);
+            user_put(col, row, window->cells[row][col]);
 }
 
 void window_scroll(struct window *window) {
@@ -33,7 +33,7 @@ void window_putchar(struct window *window, char c) {
         window->cur_col = 0;
     }
     else {
-        user_put(NROWS - 1, window->cur_col,
+        user_put(window->cur_col, NROWS - 1,
                     CELL(c, window->cur_fg, window->cur_bg));
         window->cells[NROWS - 1][window->cur_col] =
                     CELL(c, window->cur_fg, window->cur_bg);
