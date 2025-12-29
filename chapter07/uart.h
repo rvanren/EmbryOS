@@ -8,7 +8,7 @@ struct uart_info {
     const char *type;                        // device type
     void (*init)(uintptr_t base);            // to initialize the device
     void (*putchar)(uintptr_t base, char c); // output a character
-    void (*isr)(uintptr_t base);             // interrupt service routine
+    void (*isr)(uintptr_t base);             // check for input
     uintptr_t base;                          // address of device registers
 };
 
