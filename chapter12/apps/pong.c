@@ -27,11 +27,11 @@ void pong_redraw(struct pong *pong) {
 
 void print_score(int x, int score) {
     if (score == 0) {
-        user_put(0, x, CELL('0', ANSI_WHITE, ANSI_BLACK));
+        user_put(x, 0, CELL('0', ANSI_WHITE, ANSI_BLACK));
         return;
     }
     while (score != 0) {
-        user_put(0, x, CELL('0' + score % 10, ANSI_WHITE, ANSI_BLACK));
+        user_put(x, 0, CELL('0' + score % 10, ANSI_WHITE, ANSI_BLACK));
         score /= 10;
         x--;
     }
@@ -50,7 +50,7 @@ void main(void) {
     bp_init(&pong.bp, 0, 1, WIDTH, HEIGHT, pong.bp_buffer);
     pong_redraw(&pong);
     for (int x = 0; x < WIDTH; x++)
-        user_put(0, x, CELL(' ', ANSI_WHITE, ANSI_BLACK));
+        user_put(x, 0, CELL(' ', ANSI_WHITE, ANSI_BLACK));
     for (;;) {
         print_score(WIDTH / 3, computer);
         print_score(WIDTH * 2 / 3, human);

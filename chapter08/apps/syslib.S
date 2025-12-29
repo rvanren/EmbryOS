@@ -17,14 +17,14 @@ user_yield:
     ecall
     ret
 
-    # void user_spawn(int app, int row, char col, int wd, int ht,
+    # void user_spawn(int app, int col, int row, int wd, int ht,
     #                 const void *args, int sz)
 user_spawn:
     li      a7, SYS_SPAWN
     ecall
     ret
 
-    # void user_put(int row, int col, cell_t cell)
+    # void user_put(int col, int row, cell_t cell)
 user_put:
     li      a7, SYS_PUT
     ecall
