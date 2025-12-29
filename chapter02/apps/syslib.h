@@ -5,9 +5,9 @@
 #include "screen.h"
 #include "log.h"
 
-static inline void user_put(int row, int col, cell_t cell) {
-    L3(L_FREQ, L_USER_PUT, row, col, cell);
-    screen_put(row, col, cell);
+static inline void user_put(int col, int row, cell_t cell) {
+    L3(L_FREQ, L_USER_PUT, col, row, cell);
+    screen_put(col, row, cell);
 }
 
 static inline void user_delay(int ms) {  // pseudo system call

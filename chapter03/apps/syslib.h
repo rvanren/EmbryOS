@@ -12,7 +12,7 @@ static inline void user_yield() {
     sched_yield();
 }
 
-static inline void user_spawn(int app, int col, char row, int wd, int ht, const void *args, int sz) {
+static inline void user_spawn(int app, int col, int row, int wd, int ht, const void *args, int sz) {
     L1(L_NORM, L_USER_SPAWN, app);
     sched_run(app, (struct rect){ col, row, wd, ht }, 0, 0);
 }
