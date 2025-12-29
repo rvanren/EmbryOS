@@ -27,17 +27,17 @@ static inline void user_yield() {
     intr_enable();
 }
 
-static inline void user_spawn(int app, int row, char col, int wd, int ht, const void *args, int sz) {
+static inline void user_spawn(int app, int col, int row, int wd, int ht, const void *args, int sz) {
     intr_disable();
     L1(L_NORM, L_USER_SPAWN, app);
-    sched_run(app, (struct rect){ row, col, wd, ht }, 0, 0);
+    sched_run(app, (struct rect){ col, row, wd, ht }, 0, 0);
     intr_enable();
 }
 
-static inline void user_put(int row, int col, cell_t cell) {
+static inline void user_put(int col, int row, cell_t cell) {
     intr_disable();
-    L3(L_FREQ, L_USER_PUT, row, col, cell);
-    proc_put(sched_self(), row, col, cell);
+    L3(L_FREQ, L_USER_PUT, col, row, cell);
+    proc_put(sched_self(), col, row, cell);
     intr_enable();
 }
 
