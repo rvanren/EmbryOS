@@ -6,7 +6,7 @@
 static void clear(void) {
     for (int r = 0; r < HEIGHT; r++)
         for (int c = 0; c < WIDTH; c++)
-            user_put(r, c, CELL(' ', ANSI_WHITE, ANSI_BLACK));
+            user_put(c, r, CELL(' ', ANSI_WHITE, ANSI_BLACK));
 }
 
 static void put_centered(const char *s, int row) {
@@ -15,7 +15,7 @@ static void put_centered(const char *s, int row) {
     int start = (WIDTH - len) / 2;
     if (start < 0) start = 0;
     for (int i = 0; i < len && start + i < WIDTH; i++)
-        user_put(row, start + i, CELL(s[i], ANSI_WHITE, ANSI_BLACK));
+        user_put(start + i, row, CELL(s[i], ANSI_WHITE, ANSI_BLACK));
 }
 
 void splash_main(void) {
@@ -38,7 +38,7 @@ void splash_main(void) {
                 int dist = dr*dr + dc*dc;
                 // crude ring: show '.' near the chosen radius^2
                 if (dist >= (radius*radius - 2) && dist <= (radius*radius + 2))
-                    user_put(r, c, CELL('.', ANSI_WHITE, ANSI_BLACK));
+                    user_put(c, r, CELL('.', ANSI_WHITE, ANSI_BLACK));
             }
         }
 

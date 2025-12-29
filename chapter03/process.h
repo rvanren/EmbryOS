@@ -8,8 +8,8 @@
 
 // Each process only gets to write in a particular rectangle of the screen
 struct rect {
-    int x, y;   // top-left corner on global screen
-    int w, h;   // width and height
+    int col, row;   // top-left corner on global screen
+    int wd, ht;     // width and height
 };
 
 // Process Control Block: contains information for a particular process
