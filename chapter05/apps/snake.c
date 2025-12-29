@@ -13,11 +13,11 @@ struct snake {
 };
 
 static void draw_cell(int r, int c, char ch) {
-    user_put(r, c, CELL(ch, ANSI_BLACK, ANSI_YELLOW));
+    user_put(c, r, CELL(ch, ANSI_BLACK, ANSI_YELLOW));
 }
 
 static void clear_cell(int r, int c) {
-    user_put(r, c, CELL(' ', ANSI_YELLOW, ANSI_YELLOW));
+    user_put(c, r, CELL(' ', ANSI_YELLOW, ANSI_YELLOW));
 }
 
 static void clear_screen(void) {
@@ -88,14 +88,14 @@ static int read_direction_or_quit(struct snake *snake, int *dr, int *dc, int *qu
     *quit = 0;
     point_t head = snake->pos[idx_head(snake)];
 
-    user_put(head.r, head.c, CELL('@', ANSI_BLUE,  ANSI_YELLOW));
+    user_put(head.c, head.r, CELL('@', ANSI_BLUE,  ANSI_YELLOW));
     int key;
     for (;;) {
         key = user_get(1);
         if (key == USER_GET_GOT_FOCUS)
-            user_put(head.r, head.c, CELL('@', ANSI_BLUE,  ANSI_YELLOW));
+            user_put(head.c, head.r, CELL('@', ANSI_BLUE,  ANSI_YELLOW));
         else if (key == USER_GET_LOST_FOCUS)
-            user_put(head.r, head.c, CELL('X', ANSI_BLACK, ANSI_YELLOW));
+            user_put(head.c, head.r, CELL('X', ANSI_BLACK, ANSI_YELLOW));
         else break;
     }
 
