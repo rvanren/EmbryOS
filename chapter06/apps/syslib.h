@@ -5,8 +5,8 @@
 
 extern void user_exit();
 extern void user_yield();
-extern void user_spawn(int app, int row, char col, int wd, int ht, const void *args, int sz);
-extern void user_put(int row, int col, cell_t cell);
+extern void user_spawn(int app, int col, int row, int wd, int ht, const void *args, int sz);
+extern void user_put(int col, int row, cell_t cell);
 extern int user_get(int block);
 
 static inline void user_delay(int ms) {  // pseudo system call

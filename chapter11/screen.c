@@ -1,10 +1,10 @@
 #include "embryos.h"
 
-void screen_put(int row, int col, cell_t cell) {
+void screen_put(int col, int row, cell_t cell) {
+    if (col < 0 || col >= SCREEN_COLS) die("screen_put: bad column");
+    if (row < 0 || row >= SCREEN_ROWS) die("screen_put: bad row");
     static int cur_row = -1, cur_col = -1;
     static int cur_fg = -1, cur_bg = -1;
-    if (row < 0 || row >= SCREEN_ROWS) die("screen_put: bad row");
-    if (col < 0 || col >= SCREEN_COLS) die("screen_put: bad column");
     if (row != cur_row || col != cur_col + 1)
         kprintf("\033[%d;%dH", row + 1, col + 1);
     int t = CELL_T(cell);
@@ -50,5 +50,5 @@ void screen_fill(int x, int y, int w, int h, cell_t cell) {
     if (w <= 0 || h <= 0) return;
 
     for (int r = y; r < y + h; r++)
-        for (int c = 0; c < w; c++) screen_put(r, c, cell);
+        for (int c = 0; c < w; c++) screen_put(c, r, cell);
 }

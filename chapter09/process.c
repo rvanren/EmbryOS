@@ -12,10 +12,10 @@ struct pcb *proc_create(struct hart *hart, int executable, struct rect area,
     return pcb;
 }
 
-void proc_put(struct pcb *pcb, int row, int col, cell_t cell) {
-    if (row < 0 || row >= pcb->area.h) die("proc_put: bad row");
-    if (col < 0 || col >= pcb->area.w) die("proc_put: bad_col");
-    screen_put(pcb->area.y + row, pcb->area.x + col, cell);
+void proc_put(struct pcb *pcb, int col, int row, cell_t cell) {
+    if (col < 0 || col >= pcb->area.wd) die("proc_put: bad_col");
+    if (row < 0 || row >= pcb->area.ht) die("proc_put: bad row");
+    screen_put(pcb->area.col + col, pcb->area.row + row, cell);
 }
 
 void proc_enqueue(struct pcb **q, struct pcb *pcb) {

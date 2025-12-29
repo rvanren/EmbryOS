@@ -44,7 +44,7 @@ void bp_put(struct bp *bp, int px, int py, uint8_t color, enum bp_mode mode) {
     uint8_t bottom_color = BP_GET_COLOR(bp->buf[bottom_index]);
     int code, fg, bg;
     bp_render_pair(top_color, bottom_color, &code, &fg, &bg);
-    user_put(bp->y + cell_y, bp->x + cell_x,
+    user_put(bp->x + cell_x, bp->y + cell_y,
              CELL_EXT(CELL_BLOCK, code, fg, bg));
     BP_CLEAR_DIRTY(bp->buf[top_index]);
     BP_CLEAR_DIRTY(bp->buf[bottom_index]);
@@ -61,7 +61,7 @@ void bp_flush(struct bp *bp) {
             uint8_t bottom_color = BP_GET_COLOR(bp->buf[bottom_index]);
             int code, fg, bg;
             bp_render_pair(top_color, bottom_color, &code, &fg, &bg);
-            user_put(bp->y + cell_y, bp->x + cell_x,
+            user_put(bp->x + cell_x, bp->y + cell_y,
                      CELL_EXT(CELL_BLOCK, code, fg, bg));
             BP_CLEAR_DIRTY(bp->buf[top_index]);
             BP_CLEAR_DIRTY(bp->buf[bottom_index]);
