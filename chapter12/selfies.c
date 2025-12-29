@@ -116,19 +116,19 @@ static uword_t selfie_read(uword_t fd, char *str, uword_t size) {
     return total + n;
 }
 
-static void selfie_put(int row, int col, char c) {
+static void selfie_put(int col, int row, char c) {
     struct pcb *self = sched_self();
     self->selfie.window[row][col] = c;
-    proc_put(self, row, col, CELL(c, ANSI_BLACK, ANSI_GREEN));
+    proc_put(self, col, row, CELL(c, ANSI_BLACK, ANSI_GREEN));
 }
 
 static void selfie_scroll() {
     struct pcb *self = sched_self();
     for (int row = 0; row < SELFIE_NROWS - 1; row++)
         for (int col = 0; col < SELFIE_NCOLS; col++)
-            selfie_put(row, col, self->selfie.window[row + 1][col]);
+            selfie_put(col, row, self->selfie.window[row + 1][col]);
     for (int col = 0; col < SELFIE_NCOLS; col++)
-        selfie_put(SELFIE_NROWS - 1, col, ' ');
+        selfie_put(col, SELFIE_NROWS - 1, ' ');
     self->selfie.col = 0;
 }
 
@@ -140,7 +140,7 @@ static uword_t selfie_write(uword_t fd, char *str, uword_t size) {
             if (str[i] == 0) continue;
             if (str[i] == '\n') selfie_scroll();
             else {
-                selfie_put(SELFIE_NROWS - 1, self->selfie.col, str[i]);
+                selfie_put(self->selfie.col, SELFIE_NROWS - 1, str[i]);
                 self->selfie.col++;
                 if (self->selfie.col == SELFIE_NCOLS) selfie_scroll();
             }
@@ -160,7 +160,7 @@ static uword_t selfie_write(uword_t fd, char *str, uword_t size) {
 void selfie_initialize() {
     struct pcb *self = sched_self();
     for (int row = 0; row < SELFIE_NROWS; row++)
-        for (int col = 0; col < SELFIE_NCOLS; col++) selfie_put(row, col, ' ');
+        for (int col = 0; col < SELFIE_NCOLS; col++) selfie_put(col, row, ' ');
     self->selfie.brk = (VM_START +
            flat_size(&flat_fs, self->executable) - PAGE_SIZE + 7) & ~7;
     self->selfie.initialized = 1;
