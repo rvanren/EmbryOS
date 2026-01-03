@@ -25,11 +25,11 @@ of multiple processes running at the same time.
 | `hello.c` | Initializes the free frame list and start the `init` process. |
 | `libfdt/fdt_embryos.c` | Discovers available resources |
 | `frame.c` / `frame.h` | Manages available physical memory frames |
-| `ctx.S` / `ctx.h` | Context switching |
 | `hart.h` | Info about the RISC-V `hart` (core) |
 | `process.c` / `process.h` | Process Control Block management |
 | `sched.c` / `sched.h` | Scheduling |
 | `die.c` | Exception handling for processes |
+| `shared/ctx.[Sh]` | Context switching |
 | `apps/syslib.c` | Updated system call interface |
 | `apps/init.c` | The executable of the first process to run |
 | `apps/life.c` | Game of Life application |

@@ -1,1 +1,1 @@
-KERNEL_SRCS = trap.S usertrap.S ctx.S hart.c shared/string2.c die.c frame.c io2.c interrupt.c process.c procsys.c sched.c sched2.c screen.c syscall.c apps.c apps_gen.c files.c bd.c bd_ramdisk.c bd_simple.c bd_simple_ops.c flat1.c flat2.c vm32.c vm39.c selfies.c
+KERNEL_SRCS = trap.S usertrap.S shared/ctx.S hart.c shared/string2.c die.c frame.c io2.c interrupt.c process.c procsys.c sched.c sched2.c screen.c syscall.c apps.c apps_gen.c files.c bd.c bd_ramdisk.c bd_simple.c bd_simple_ops.c flat1.c flat2.c vm32.c vm39.c selfies.c
