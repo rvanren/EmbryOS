@@ -1,7 +1,8 @@
 NCORES      = 5
 XLEN        = 64
-CPREFIX     = riscv64-unknown-elf-
-CFLAGS_ARCH = -march=rv64imac -mabi=lp64 -mcmodel=medany
+CPREFIX     = riscv-none-elf-
+CFLAGS_ARCH = -march=rv64imac_zicsr_zifencei -mabi=lp64 -mcmodel=medany
+XCFLAGS_ARCH = -march=rv64imac -mabi=lp64 -mcmodel=medany
 QEMU        = qemu-system-riscv64
 
 include Makefile.common
