@@ -219,7 +219,7 @@ uint64_t* zmalloc(uint64_t size); // use this to allocate zeroed memory
 char* SELFIE_URL = (char*) 0;
 
 uint64_t IS64BITSYSTEM = 1; // flag indicating 64-bit selfie
-uint64_t IS64BITTARGET = 1; // flag indicating 64-bit target
+uint64_t IS64BITTARGET = 0; // flag indicating 64-bit target
 
 uint64_t ISRISCU = 1; // flag indicating presence of starc-generated RISC-U binary
 
