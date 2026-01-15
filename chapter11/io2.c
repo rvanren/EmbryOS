@@ -1,7 +1,5 @@
 #include "embryos.h"
 
-#define IO_MAX     10
-
 // io_focus: the process that have the input focus, if any
 // io_wait:  circular queue of processes that do not have the focus but want input
 struct pcb *io_wait, *io_focus;
