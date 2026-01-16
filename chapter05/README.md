@@ -8,10 +8,8 @@ the UART.
 
 - Learn about UART types and how to discover them.
 - Learn about how to see if there is input available and how to retrieve it.
-subsystem.
-- See how to implement a `user_get()` interface to wait for input.
-minimal system-call interface.
-- See how we can have a *keyboard focus* to support multiple processes that
+- See how to implement a `user_get()` system-call interface to wait for input.
+- See how EmbryOS tracks *keyboard focus* to support multiple processes that
   require input.
 
 ## New or Modified Modules
@@ -52,14 +50,14 @@ focus, then it displays the `cu` cursor at the given position.
 
 Keyboard input is read on one of the UARTs.  Different platforms have different
 types and number of UARTs, and they are mapped at different base addresses in
-memory `uart_init()` determines the types of UARTs, selects the first
-active one if finds as the primary UART for input, and invokes its initialization
+memory. `uart_init()` determines the types of UARTs, selects the first
+active one it finds as the primary UART for input, and invokes its initialization
 function.
 
-The ``isr`` function of the primary UART is invoked to retrieve characters
+The `isr` function of the primary UART is invoked to retrieve characters
 from the UART.  It is non-blocking: it tries to retrieve as many characters
-as possible, invoking `io_received()` for each one.  Since external interrupts
-on RISC-V platforms are rather non-portable, we instead invoke the `isr` function
+as possible, invoking `io_received()` for each one.  Since not all RISC-V platforms
+support external interrupts, EmbryOS instead invokes the `isr` function
 on any interrupt and exception (including timer interrupts) and also in the
 idle loop of the scheduler.
 

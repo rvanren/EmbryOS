@@ -23,38 +23,38 @@ important abstraction is the *screen*.
 | `die.c` / `die.h` | Exception handling |
 | `apps/syslib.h` | Defines the application interface: inline `user_put()` and `user_delay()` |
 | `apps/blockpixel.[ch]` | Block pixel abstraction for graphics |
-| `apps/blockdemo.c` | A first user application that demonstrate block pixels |
+| `apps/blockdemo.c` | A first user application that demonstrates block pixels |
 
 ## Key Functions & Symbols
 
 | Name | Description |
 |------|-------------|
-| `void screen_put(int row, int col, cell_t cell)` | Draws a single cell on the screen at the given coordinates |
+| `void screen_put(int col, int row, cell_t cell)` | Draws a single cell on the screen at the given coordinates |
 | `void screen_fill(int x, int y, int w, int h, cell_t cell)` | Fills a rectangular region with the given cell value |
-| `void user_put(int row, int col, cell_t cell)` | Application-side wrapper that issues a system call to draw a cell |
+| `void user_put(int col, int row, cell_t cell)` | Application-side wrapper that issues a system call to draw a cell |
 | `void blockdemo_main(void)` | Application entry point |
 | `void die(void *msg)` | Prints `msg` and stops the kernel |
 | `bp_init(bp, x, y, width, height, buffer)` | Initializes a block pixel grid |
-| `bp_put(bp, x, y, color, enum bp_mode mode)` | Update a block pixel |
-| `bp_flush(bp)` | Flush all *lazy* block pixel updates to the screen |
+| `bp_put(bp, x, y, color, enum bp_mode mode)` | Updates a block pixel |
+| `bp_flush(bp)` | Flushes all *lazy* block pixel updates to the screen |
 
 ## Discussion
 
 The most familiar output device of an operating system is a `screen`, by which
 is meant a 2-dimensional matrix of pixels.  Unfortunately, today's hardware is
 extremely complicated and diverse, and so EmbryOS avoids it entirely.  EmbryOS
-relies instead of two commonly available features.  First is the UART
+relies instead on two commonly available features.  First is the UART
 (Universal Asynchronous Receiver/Transmitter), which is a hardware device
-which can send and receive 8-bit characters.  Second is the *ANSI escape code*,
+that can send and receive 8-bit characters.  Second is the *ANSI escape code*,
 a standard for in-band signaling to control cursor location and other options on
 video text terminals and terminal emulators.  Using these two features, an
-EmbryOS screen is a two-dimension matrix of *cells* instead of pixels.
+EmbryOS screen is a two-dimensional matrix of *cells* instead of pixels.
 
 EmbryOS defines three types of cells: ASCII, BLOCK, and BRAILLE.
 An ASCII cell is used for printable ASCII characters such as `a`, `0`, or `$`.
 A BLOCK cell splits a cell into two solid subblocks: the top block and the
 bottom block.  BLOCK cells are used for simple graphics.
-A BRAILLE block is a cell with a 2x4 dot matrix inside of it.
+A BRAILLE cell is a cell with a 2x4 dot matrix inside of it.
 Each cell has a foreground color and a background color.
 This chapter also introduces the user-level *block pixel* abstraction
 for graphics that uses the BLOCK cell to create a two-dimensional matrix
@@ -67,11 +67,11 @@ type of event is USER_PUT:
 
 ```
 % ./logdump qemu.elf mem.bin | grep USER_PUT | head -5
-[1,34,210665] USER_PUT row:9 col:34 cell:CELL(BLOCK,green,red,0x01)
-[1,34,210679] USER_PUT row:9 col:35 cell:CELL(BLOCK,yellow,green,0x01)
-[1,34,210693] USER_PUT row:9 col:36 cell:CELL(BLOCK,blue,yellow,0x01)
-[1,34,210707] USER_PUT row:9 col:37 cell:CELL(BLOCK,magenta,blue,0x01)
-[1,34,210721] USER_PUT row:9 col:38 cell:CELL(BLOCK,cyan,magenta,0x01)
+[1,34,210665] USER_PUT col:34 row:9 cell:CELL(BLOCK,green,red,0x01)
+[1,34,210679] USER_PUT col:35 row:9 cell:CELL(BLOCK,yellow,green,0x01)
+[1,34,210693] USER_PUT col:36 row:9 cell:CELL(BLOCK,blue,yellow,0x01)
+[1,34,210707] USER_PUT col:37 row:9 cell:CELL(BLOCK,magenta,blue,0x01)
+[1,34,210721] USER_PUT col:38 row:9 cell:CELL(BLOCK,cyan,magenta,0x01)
 ```
 
 This shows the system calls that the `blockdemo` app makes.

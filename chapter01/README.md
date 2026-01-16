@@ -38,7 +38,7 @@ By the end of this chapter, you will understand:
 | `void kprintf(const char *fmt, ...)` | Kernel printf with limited specifiers |
 | `int embryos_main(void)` | Prints a message and sleeps in a loop |
 | `void user_delay(int ms)` | Busy-wait delay calibrated by `DELAY_MS` |
-| `stack_end` | Symbol defined in `start.s` marking the top of the 8 KiB kernel stack |
+| `stack_end` | Symbol defined in `start.S` marking the top of the 8 KiB kernel stack |
 
 ## Discussion
 
@@ -53,17 +53,17 @@ will not be introduced until Chapter 6.
 
 When the machine boots, OpenSBI runs first in M-mode preparing the machine.  Then, it invokes 
 `_start` in `start.S` in S-mode.  This code first clears the BSS and then invokes `embryos_main()`
-in `hello.c`.  The only global variable at this time is the kernel stack defines in `start.S`.
+in `hello.c`.  The only global variable at this time is the kernel stack defined in `start.S`.
 Before moving on to Chapter 2, make sure you understand what's going on.  You can use your
 favorite LLM to ask as many questions as you like.
 
 ## Check the Log
 
-EmbryOS comes with fine-grained logging system built in.
+EmbryOS comes with a fine-grained logging system built in.
 The first line that EmbryOS prints is something like this:
 `pmemsave 0x80200000 0x312000 mem.bin`.  This is a QEMU command.
 When running EmbryOS under QEMU, you should copy this line and
-then do the following to extract the log (post-morten):
+then do the following to extract the log (post-mortem):
 
 - `<control>A c`: put QEMU in command mode
 - `stop`: stops EmbryOS

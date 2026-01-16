@@ -1,8 +1,8 @@
 # Chapter 06: User Space and Virtual Memory
 
 So far, the kernel and the applications have been running side-by-side
-with the kernel with no protection boundaries.  Here we are going to
-leverage RISC-V's U-mode and page tables.
+with no protection boundaries.  Here we are going to leverage RISC-V's 
+U-mode and page tables.
 
 ## Learning Objectives
 
@@ -47,9 +47,9 @@ leverage RISC-V's U-mode and page tables.
 | `void proc_pagefault(tf)` | Invoked on a page fault with the trap frame |
 | `void proc_miss(self, va)` | Handles a page fault at virtual address `va` |
 | `void vm_init(hart)` | Initializes the virtual memory for the given hart |
-| `void vm_flush(hart, base)` | Set the page table to base and flush the TLB |
+| `void vm_flush(hart, base)` | Sets the page table to base and flush the TLB |
 | `void vm_map(base, va, frame)` | In page table `base`, map virtual address `va` to `frame` |
-| `int vm_is_mapped(base, uintptr_t va)` | Check if `va` is currently mapped in `base` |
+| `int vm_is_mapped(base, uintptr_t va)` | Checks if `va` is currently mapped in `base` |
 | `void vm_release(base)` | Release all the frames in page table `base` |
 
 ## Discussion
@@ -64,24 +64,24 @@ which used to be just linked with the kernel as additional modules.
 We introduce a tool called `embedfiles` that generates a C file called
 `apps_gen.c` containing a list of files as byte arrays.  We compile this
 file into the kernel.  The first executable in this list is the `init`
-process, which in turns spawns other processes.  Executables are numbered
+process, which in turn spawns other processes.  Executables are numbered
 starting at 2.
 
-RISC-V only supports multi-level page tables.  EmbryOS only uses the *leftmost
+RISC-V only supports multi-level page tables.  EmbryOS only uses a *single
 leaf table* for user processes, effectively simulating a one-level page table.
 For 32-bit RISC-V, this page table has 1024 entries, while on 64-bit RISC-V
-this page has only 512 entries.  We map all user processes starting at virtual
-address 0x10000.  The rest of the virtual address space is mapped 1-1 to allow
-the kernel access to its own memory and the device registers.
+this page has only 512 entries.  The user virtual range can be found in `platform.h`.  
+The rest of the virtual address space is mapped 1-1 to allow the kernel access 
+to its own memory and the device registers.
 
 There are two different trap handlers: one for interrupts in kernel code,
-and one for interrupts in user code.  The latter has to save the kernel sp
-somewhere, which it does in the `sscratch` register (by convention).  Upon
-interrupt, it can restore the kernel stack pointer and also recompute what
-the pointer to the PCB of the current process is, which it must store in the
-`tp` register.  Note that device interrupts are only enabled when running
-user code or when running in the idle loop of `sched_idle()`.  In the rest
-of the kernel code, device interrupts are masked.
+and one for interrupts in user code.  The latter requires access to the interrupted
+process' kernel stack pointer, which is held in the `sscratch` register (look at 
+`usertrap.S`).  When an interrupt occurs, `_user_trap_handler` restores the kernel 
+stack pointer and also recomputes what the pointer to the PCB of the current process 
+is, which it then must store in the `tp` register.  Note that device interrupts are 
+only enabled when running user code or when running in the idle loop of `sched_idle()`.  
+In the rest of the kernel code, device interrupts are masked.
 
 ## Check the Log
 
@@ -89,31 +89,33 @@ Run EmbryOS and extract the log.
 
 ```
 % ./logdump qemu.elf mem.bin
-[0,0,0] BOOT
-[1,0,0] UART_INIT idx:0 base:0x10000000
-[2,0,31594] FRAME_INIT nframes:31450
-[3,0,31617] FRAME_ALLOC f:0x80522000
-[3,1,31617] HART_INIT hart:2 idx:0 self:0x80522000
-[4,1,31617] FRAME_ALLOC f:0x80523000
-[4,2,33811] FRAME_ALLOC f:0x80524000
-[4,3,33811] CTX_START old:0x80522000 new:0x80524000 hart:2 exec:2
-[4,4,33811] FRAME_ALLOC f:0x80525000
-[4,5,33812] INTERRUPTS_WORK hart:2
-[5,5,33813] SCHED_IDLE self:0x80522000 hart:2
-[6,5,33815] PAGEFAULT self:0x80524000 va:0x10000
-[6,6,33815] FRAME_ALLOC f:0x80526000
-[6,7,33815] VM_MAP self:0x80524000 base:0x80525000 va:0x10000 frame:0x80526000
-[6,8,33816] PAGEFAULT self:0x80524000 va:0x3ffffc
-[6,9,33816] FRAME_ALLOC f:0x80527000
-[6,10,33816] VM_MAP self:0x80524000 base:0x80525000 va:0x3ffffc frame:0x80527000
-[6,11,33817] USER_SPAWN self:0x80524000 app:5
+[0,0,0] BOOT self:0x0
+[1,0,0] UART_INIT self:0x0 idx:0 base:0x10000000
+[2,0,31594] FRAME_INIT self:0x0 nframes:31450
+[3,0,31617] TIME_BASE self:0x0 timebase:10000000
+[4,0,31617] FRAME_ALLOC self:0x0 f:0x80522000
+[4,1,31617] HART_INIT self:0x80522000 hart:4 idx:0
+[5,1,31617] FRAME_ALLOC self:0x80522000 f:0x80523000
+[5,2,31617] FRAME_ALLOC self:0x80522000 f:0x80524000
+[5,3,33811] FRAME_ALLOC self:0x80522000 f:0x80525000
+[5,4,33811] CTX_START self:0x80525000 old:0x80522000 new:0x80525000 hart:4 exec:2
+[5,5,33811] FRAME_ALLOC self:0x80525000 f:0x80526000
+[5,6,33812] INTERRUPTS_WORK self:0x80525000 hart:4
+[6,6,33813] SCHED_IDLE self:0x80522000 hart:4
+[7,6,33815] PAGEFAULT self:0x80525000 va:0x70000000
+[7,7,33815] FRAME_ALLOC self:0x80525000 f:0x80527000
+[7,8,33815] VM_MAP self:0x80525000 base:0x80526000 va:0x70000000 frame:0x80527000
+[7,9,33816] PAGEFAULT self:0x80525000 va:0x701ffff8
+[7,10,33816] FRAME_ALLOC self:0x80525000 f:0x80528000
+[7,11,33816] VM_MAP self:0x80525000 base:0x80526000 va:0x701ffff8 frame:0x80528000
+[7,12,33817] USER_SPAWN self:0x80525000 app:5
 ...
 ```
 
 You can see how a process was started (`CTX_START`). Executable 2 is always the
 `init` process.  It experiences two page faults right off the bat.
-Virtual address `0x10000` is the initial program counter.
-Virtual address `0x3ffffc` is the initial stack access.
+Virtual address `0x70000000` is the initial program counter.
+Virtual address `0x701ffff8` is the initial stack access.
 The `init` process then spawns another process (in executable 5) using the first
 actual system call.
 
@@ -122,7 +124,7 @@ actual system call.
 - How does setting the U bit in a page table entry restrict access to user mode?
 - Why must `sret` be used instead of a normal jump to enter user mode?
 - Why does `usertrap.S` need to restore the tp register on user traps?
-- How does the user runtime (crt0.s, crt1.c, user.lds) simplify process startup?
+- How does the user runtime (crt0.S, crt1.c, user.lds) simplify process startup?
 - How does the hardware determine when to trigger a page-fault trap?
 - Why does each process need its own page table, rather than sharing one global mapping?
 - How does the kernel safely access user memory when handling a system call?

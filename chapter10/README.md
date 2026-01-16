@@ -1,8 +1,8 @@
 # Chapter 10: User Space Files and Directories
 
 Human users like to name files by character strings rather than by
-number.  A directory maps string names to file numbers.  This chapter
-also makes the flat file interface interface available to applications.
+numbers.  A directory maps string names to file numbers.  This chapter
+also makes the flat file interface available to applications.
 This ability completes a fully functioning operating system.
 
 ## Learning Objectives
@@ -28,7 +28,7 @@ This ability completes a fully functioning operating system.
 | Name | Description |
 |------|-------------|
 | `files_init()` | Initializes the root directory |
-| `int user_create(void)` | Creates a new file and return its file number |
+| `int user_create(void)` | Creates a new file and returns its file number |
 | `int user_read(file, offset, dst, n)` | Reads a part of a file |
 | `int user_write(file, offset, src, int n)` | Writes a part of a file |
 | `int user_size(file)` | Returns the size of a file |
@@ -48,10 +48,10 @@ entries. Each entry contains a fixed-length name and the numeric
 identifier of a file managed by the flat layer.
 
 At system initialization, `files_init()` initializes this directory
-with the files embedded with the kernel. The current implementation
+with the files embedded in the kernel. The current implementation
 supports only a single directory.  Its contents can be listed using
 the `ls` application.  Files can be printed to output using the
-`cat application`.  The only printable file, at this time, is a
+`cat` application.  The only printable file, at this time, is a
 file called `README`.
 
 ## Check the Log
@@ -60,28 +60,28 @@ User processes are now able to read files.  Here are the system calls that
 are in the log after running `cat README`:
 
 ```
-[8,2710,112189] USER_SPAWN self:0x8053d000 app:10
-[8,2751,112212] USER_SIZE file:1
-[8,2756,112228] USER_READ file:1 offset:0 addr:0x3fff38 n:16
-[8,2764,112230] USER_GET block:1
-[8,2766,112232] USER_READ file:1 offset:16 addr:0x3fff38 n:16
-[8,2774,112233] USER_READ file:1 offset:32 addr:0x3fff38 n:16
-[8,2782,112234] USER_READ file:1 offset:48 addr:0x3fff38 n:16
-[8,2790,112235] USER_READ file:1 offset:64 addr:0x3fff38 n:16
-[8,2798,112236] USER_READ file:1 offset:80 addr:0x3fff38 n:16
-[8,2806,112237] USER_READ file:1 offset:96 addr:0x3fff38 n:16
-[8,2814,112238] USER_READ file:1 offset:112 addr:0x3fff38 n:16
-[8,2822,112239] USER_READ file:1 offset:128 addr:0x3fff38 n:16
-[8,2830,112240] USER_READ file:1 offset:144 addr:0x3fff38 n:16
-[8,2838,112241] USER_READ file:11 offset:0 addr:0x3fff77 n:1
-[8,2846,113629] USER_READ file:11 offset:1 addr:0x3fff77 n:1
-[8,2854,113633] USER_READ file:11 offset:2 addr:0x3fff77 n:1
+[10,1099,111555] USER_SPAWN self:0x80544000 app:10
+[10,1130,111572] USER_SIZE file:1
+[10,1135,111578] USER_READ file:1 offset:0 addr:0x701fff28 n:16
+[10,1143,111594] USER_READ file:1 offset:16 addr:0x701fff28 n:16
+[10,1151,111596] USER_GET block:1
+[10,1153,111598] USER_READ file:1 offset:32 addr:0x701fff28 n:16
+[10,1161,111599] USER_READ file:1 offset:48 addr:0x701fff28 n:16
+[10,1169,111600] USER_READ file:1 offset:64 addr:0x701fff28 n:16
+[10,1177,111601] USER_READ file:1 offset:80 addr:0x701fff28 n:16
+[10,1185,111602] USER_READ file:1 offset:96 addr:0x701fff28 n:16
+[10,1193,111603] USER_READ file:1 offset:112 addr:0x701fff28 n:16
+[10,1201,111604] USER_READ file:1 offset:128 addr:0x701fff28 n:16
+[10,1209,111605] USER_READ file:1 offset:144 addr:0x701fff28 n:16
+[10,1217,111606] USER_READ file:11 offset:0 addr:0x701fff67 n:1
+[10,1225,112994] USER_READ file:11 offset:1 addr:0x701fff67 n:1
+[10,1233,112998] USER_READ file:11 offset:2 addr:0x701fff67 n:1
 ...
 ```
 
 First, the function `dir_lookup("README")` requests the size of the
 directory and then reads the 16-byte entries one by one until it finds
-"README".  "README" is file 11 in this case.  Then, ``cat`` proceeds to
+"README".  "README" is file 11 in this case.  Then, `cat` proceeds to
 read the characters of "README" one at a time.
 (The `USER_PUT` system calls that happened after every `USER_READ` in file 11 are
 in the level 3 log and are no longer available.)
@@ -90,7 +90,7 @@ in the level 3 log and are no longer available.)
 
 - Why is the directory implemented as a user-space library instead of a kernel module?
 - How does the directory file relate to the flat layer introduced earlier?
-- Why is it safe for the kernel to rely on numeric file identifiers while applications use names?”
+- Why is it safe for the kernel to rely on numeric file identifiers while applications use names?
 - What would be required to support nested directories or pathnames?
 
 ## Exercise
