@@ -27,7 +27,7 @@ increasing the number of CPUs.
 | Name | Description |
 |------|-------------|
 | `hart_start_others(fdt)` | Used by boot hart to start remaining harts |
-| `sbi_hart_start(hartid, hart_entry, pcb)` | start a hart |
+| `sbi_hart_start(hartid, hart_entry, pcb)` | Starts a hart |
 | `hart_entry(hartid, self)` | Assembly entry point of new harts |
 | `hart_main(hartid, self)` | C entry point of new harts |
 | `hart_init(void)` | Initializes a hart |

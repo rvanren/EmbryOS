@@ -17,15 +17,15 @@ a text editor, and a 64-bit RISC-V compiler for a subset of C.
 | `apps/stdio.[ch]` | File interface |
 | `apps/ed.c` | A rudimentary text editor |
 | `selfies/selfie.c` | A compiler for C*, a subset of C |
-| `selfies/echo.c` | A C* programs that prints its arguments |
+| `selfies/echo.c` | A C* program that prints its arguments |
 | `selfie.h`, `selfies.c` | Kernel support for selfie |
 
 ## Key Functions & Symbols
 
 | Name | Description |
 |------|-------------|
-| `void *malloc(size)` | Allocate a chunk of memory |
-| `free(void *ptr)` | Release an allocated chunk of memory |
+| `void *malloc(size)` | Allocates a chunk of memory |
+| `free(void *ptr)` | Releases an allocated chunk of memory |
 
 ## Discussion
 
@@ -36,7 +36,7 @@ drivers.  There are many more, and then there are disk drivers, USB drivers,
 network drivers, screen drivers, clock drivers, etc.  Also, most operating systems
 are portable to other hardware platforms than RISC-V.
 
-An important part of operating system lives in user space.  Libraries for heap
+An important part of an operating system lives in user space.  Libraries for heap
 management (`malloc`) and input/output (`stdio`) not only make programming
 applications easier, but they can also help with portability and efficiency.
 The `init` process can also be considered part of the operating system, and

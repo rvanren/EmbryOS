@@ -19,8 +19,7 @@ text-based interface to start new applications.
 | `apps/window.h` | Defines the window abstraction: a 2-D array of cells with current cursor and scrolling behavior.|
 | `apps/window1.c` | Window output |
 | `apps/window2.c` | Window input |
-| `apps/putchar.c` | Defines `putchar()` and `readline()`. Each process owns a single
-window. |
+| `apps/putchar.c` | Defines `putchar()` and `readline()`. Each process owns a single window. |
 | `apps/stdio.h`, `apps/printf.c` | Formatted output through `putchar()` |
 | `apps/shell.c` | Implements the shell |
 | `apps/help.c` | Provides help to users |
@@ -31,14 +30,14 @@ window. |
 | Name | Description |
 |------|-------------|
 | `struct window window` | Current state of a terminal window |
-| `putchar(c)` | Send a character to the terminal window |
-| `readline(line, size)` | Read a line of input with basic editing |
-| `window_init()` | Initialize a terminal window |
-| `window_sync()` | Copy window state to the screen |
-| `window_scroll()` | Scroll the window abstraction |
-| `window_putchar()` | Add a character to the window abstraction |
-| `window_readline()` | Read a line |
-| 'exec_user()' | Prepares arguments on the stack of a new process |
+| `putchar(c)` | Sends a character to the terminal window |
+| `readline(line, size)` | Reads a line of input with basic editing |
+| `window_init()` | Initializes a terminal window |
+| `window_sync()` | Copies window state to the screen |
+| `window_scroll()` | Scrolls the window abstraction |
+| `window_putchar()` | Adds a character to the window abstraction |
+| `window_readline()` | Reads a line |
+| `exec_user()` | Prepares arguments on the stack of a new process |
 
 ## Discussion
 
@@ -47,10 +46,9 @@ space.  Each application manages a window: a rectangular region
 that scrolls automatically as text is printed. The window layer
 wraps system calls such as `user_put()` and `user_get()` into
 convenient functions that implement scrolling, cursor motion, and
-line editing.  Runction `readline()` reads one line of text
+line editing.  Function `readline()` reads one line of text
 from the keyboard. It echoes each character as it is typed, supports
-backspace and delete, and terminates on newline, ensuring consistent
-behavior across applications.
+backspace and delete, and terminates on newline.
 
 The shell program uses these capabilities to form an interactive
 command interpreter.  The shell supports multiple display regions,
@@ -61,7 +59,7 @@ and calls `user_spawn()` to run the selected application.
 Inside the kernel, the `exec_user()` prepares the argument vector
 that is passed to applications, which is done in a way that is
 compatible with UNIX systems such as Linux.  In particular, when a
-process start executing, its stack pointer points to the argument
+process starts executing, its stack pointer points to the argument
 count followed by a vector of pointers to each argument.
 
 ## Check the Log

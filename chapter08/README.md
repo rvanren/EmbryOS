@@ -1,7 +1,7 @@
 # Chapter 08: Block Storage
 
 Some state of operating systems should survive reboots.  Block-based storage
-prepares the ground for representing files as arrays of bytes.
+prepares the groundwork for representing files as arrays of bytes.
 
 ## Learning Objectives
 
@@ -30,13 +30,13 @@ prepares the ground for representing files as arrays of bytes.
 | `struct ramdisk_state ramdisk_state` | RAM disk meta state |
 | `struct bd simple_iface` | SIMPLE disk interface |
 | `struct simple_state simple_state` | SIMPLE disk meta state |
-| `int (*alloc)(state)` | allocate an inode |
-| `int (*size)(state, inode)` | maximum size in blocks |
-| `void (*read)(state, inode, int blk, dst)` | read a block |
-| `void (*write)(state, inode, int blk, src)` | write a block
-| `void (*free)(state, inode)` | free an inode |
-| `ramdisk_init(iface, state, mem, nblocks)` | initialize a RAM disk |
-| `simple_init(iface, state, bd_below, inode_below, format)` | initialize a SIMPLE disk |
+| `int (*alloc)(state)` | Allocates an inode |
+| `int (*size)(state, inode)` | Maximum size in blocks |
+| `void (*read)(state, inode, int blk, dst)` | Reads a block |
+| `void (*write)(state, inode, int blk, src)` | Writes a block |
+| `void (*free)(state, inode)` | Frees an inode |
+| `ramdisk_init(iface, state, mem, nblocks)` | Initializes a RAM disk |
+| `simple_init(iface, state, bd_below, inode_below, format)` | Initializes a SIMPLE disk |
 | `void files_init(void)` | initialize the file system stack |
 
 ## Discussion
@@ -92,7 +92,7 @@ In the first phase, the free list of the SIMPLE block layer is initialized:
 [4,2047,1241] SIMPLE_FORMAT_END
 ```
 
-Next, the unit test start with the first run:
+Next, the unit test starts with the first run:
 ```
 [4,2048,1241] UT_SIMPLE_RUN run:0
 [4,2049,1241] SIMPLE_ALLOC_BLOCK b:1

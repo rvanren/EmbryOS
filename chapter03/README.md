@@ -22,7 +22,7 @@ of multiple processes running at the same time.
 
 | File | Purpose |
 |------|---------|
-| `hello.c` | Initializes the free frame list and start the `init` process. |
+| `hello.c` | Initializes the free frame list and starts the `init` process. |
 | `libfdt/fdt_embryos.c` | Discovers available resources |
 | `frame.c` / `frame.h` | Manages available physical memory frames |
 | `hart.h` | Info about the RISC-V `hart` (core) |
@@ -53,7 +53,7 @@ of multiple processes running at the same time.
 | `proc_release(pcb)` | Releases the resources of the given process |
 | `sched_self()` | Returns the pointer to the current process, stored in tp |
 | `sched_set_self(pcb)` | Sets tp to pcb, updating the current process |
-| `void sched_run(executable, area, args, size)` | start a new process |
+| `void sched_run(executable, area, args, size)` | Starts a new process |
 | `sched_block()` | Switches to the next process on the run queue |
 | `sched_yield()` | Moves the current process to the back of the run queue and switches to the next |
 | `sched_exit()` | Marks the current process as a zombie and yields to another process |
@@ -61,7 +61,7 @@ of multiple processes running at the same time.
 | `exec_user()` | Entry point of a new process |
 | `ctx_switch()` / `ctx_start()` | Assembly routines that save and restore registers and switch stacks |
 | `void die(void *msg)` | Prints `msg` and stops the process |
-| `user_yield()` | System call to yields to another process |
+| `user_yield()` | System call to yield to another process |
 | `user_spawn(app, row, col, wd, ht, args, size)` | System call to spawn a new process |
 
 ## Discussion
@@ -77,7 +77,7 @@ have terminated and must be cleaned up.
 
 Physical memory starts right after the kernel at `frames`
 (defined in file `platforms/qemu/kernel.ld`).
-To find the end of available memory, OpenSBI given the kernel access to a
+To find the end of available memory, OpenSBI gives the kernel access to a
 *Flat Device Tree* describing the hardware in great detail.
 Function `fdt_memory_range(fdt, &base, &end)` returns the start and end of physical
 memory. `frame_init(fdt, end)` then sets up the free list, taking care not to put
@@ -90,8 +90,8 @@ hart in case it is running.
 
 Processes are time-multiplexed on a single hart.  To do so, the registers of
 the current process must be saved on its own stack, then the stack pointer
-must be saved in its PCB, then the stack pointer of the new PCB must be
-restored followed by its register that are saved on its stack.  To start
+must be saved in its PCB, then the stack pointer of the new process must be
+restored, followed by its registers that are saved on its stack.  To start
 a new process is similar, but instead of restoring the registers of the
 new process (which cannot be done), the function `exec_user()` is invoked.
 This function invokes the application code.
@@ -99,7 +99,7 @@ This function invokes the application code.
 In `embryos_main`, the code turns itself into a process by calling
 `sched_set_self`.  This code eventually invokes `sched_idle` which runs
 an idle loop in case no other process is running.  Before that, it
-spawns the `init` process, which in turns spawns the `splash` process
+spawns the `init` process, which in turn spawns the `splash` process
 and two copies of `life` (Conway's Game of Life).
 
 ## Check the Log
@@ -125,7 +125,7 @@ system.  Look for these events in the code to help you
 understand what the operating system does and how it works.
 You may be surprised that the vector timestamp jumps from
 [1,0,0] to [2,0,96].  This is because each log level, including
-the last one is bounded and circular.  Because UART_INIT and
+the last one is bounded and circular.  Between UART_INIT and
 FRAME_INIT, 96 IO_PUTCHAR events happened because of stuff that
 got printed.  However, those last-level events are no longer
 in the log because they got overwritten by later events.
