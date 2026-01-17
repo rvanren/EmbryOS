@@ -4,12 +4,8 @@
 #define MAX_HARTS       64
 #define QUANTUM         50        // milliseconds
 
-extern uint64_t time_base;                // #ticks per second
-extern void startS(uword_t hartid);
-
 struct hart harts[MAX_HARTS];             // one entry for each hart
 unsigned int hart_idx;                    // index into harts
-extern struct pcb *hart_next;
 
 void timer_handler(struct trap_frame *tf) {
     struct pcb *self = sched_self();

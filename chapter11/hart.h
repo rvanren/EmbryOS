@@ -1,6 +1,7 @@
 #pragma once
 
 #include "types.h"
+#include "process.h"
 
 // A "hart" is a RISC-V core.  Per hart, we maintain various info.
 struct hart {
@@ -10,3 +11,7 @@ struct hart {
     int needs_tlb_flush;             // non-zero if TLB flush needed
     int interrupts_work;             // non-zero if supports (timer) interrupts
 };
+
+extern uint64_t time_base;                // #ticks per second
+extern void startS(uword_t hartid);
+extern struct pcb *hart_next;
