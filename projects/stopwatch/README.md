@@ -69,10 +69,12 @@ The initial state is:
 All input is received via:
 
 ```c
-int user_get(user_event_t *ev);
+int user_get(int block);
 ```
 
-Your program must handle the following events:
+If `block` is non-zero, then the process will block until an input
+event is available.
+Your program must handle the following input events:
 
 #### Keyboard Events
 
@@ -86,14 +88,20 @@ Your program must handle the following events:
   Reset elapsed time to **0**
   (running/stopped state must remain unchanged)
 
-#### Focus Events
+#### Input Focus Events
 
 * `USER_GET_GOT_FOCUS`
 * `USER_GET_LOST_FOCUS`
 
 These events indicate whether the application currently has user focus.
-
+Users can change the input focus using `TAB`.
 Your UI must make the current focus state **visually clear**.
+
+#### Other Events
+
+* `USER_GET_NO_INPUT`
+
+Returned if `block = 0` and no input event is available.
 
 ---
 
