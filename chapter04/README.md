@@ -28,6 +28,7 @@ control back periodically even if an application is fully CPU-bound.
 | Name | Description |
 |------|-------------|
 | `struct pcb *run_queue[3]` | run queue for each of 3 priority levels |
+| `uint64_t time_base` | contains the number of clock ticks per second |
 | `void intr_init(void)` | Initialization of CPU interrupt state |
 | `fdt_get_timebase(void)` | Retrieves how fast the CPU clock runs |
 | `sbi_set_time(when)` | Schedules the next timer interrupt |
