@@ -73,7 +73,7 @@ If you do not have the GNU RISC-V toolchain and QEMU already installed in your
 environment, you may want to use `docker` to set up your environment:
 ```
 docker build --no-cache -t embryos .
-docker run -it -v `pwd`:/embryos --rm embryos
+docker run -it -v ${PWD}:/embryos --rm embryos
 ```
 (You may have to update `Dockerfile` to match your environment.)
 
