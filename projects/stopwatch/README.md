@@ -88,6 +88,9 @@ Your program must handle the following input events:
   Reset elapsed time to **0**
   (running/stopped state must remain unchanged)
 
+* **`'q'`**
+  Terminate process
+
 #### Input Focus Events
 
 * `USER_GET_GOT_FOCUS`
