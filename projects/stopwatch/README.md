@@ -177,16 +177,11 @@ At all times, the user must be able to clearly see:
 
 ## Deliverables
 
-Your project directory must include:
-
-```
-stopwatch/
-├── README.md        # Your own description of the design
-├── stopwatch.c     # User-level application
-└── (optional files)
-```
-
-If you add helper files or assets, document them clearly.
+Implement your code within `chapter12`.  Submit a tar file of this
+directory, which you can create by running the following command in
+the `chapter12` directory: `make clean; tar cf ../stopwatch.tar .`
+Also submit `log/log_events.def` (we encourage you to add new log
+events).
 
 ---
 
