@@ -172,6 +172,8 @@ At all times, the user must be able to clearly see:
   * Input handling
   * Rendering
 * Code must be readable and well-commented
+* Use of AI should be clearly documented.  Note that it is allowed to use
+  these tools, but we would like to understand how you use it.
 
 ---
 
