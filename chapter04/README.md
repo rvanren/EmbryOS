@@ -32,7 +32,7 @@ control back periodically even if an application is fully CPU-bound.
 | `void intr_init(void)` | Initialization of CPU interrupt state |
 | `fdt_get_timebase(void)` | Retrieves how fast the CPU clock runs |
 | `sbi_set_time(when)` | Schedules the next timer interrupt |
-| `uint64_t mtime_get()' | return the number of clock ticks since boot |
+| `uint64_t mtime_get()` | return the number of clock ticks since boot |
 | `enter_user(app)` | Invokes application `app` with interrupts enabled |
 | `trap_wfi(block)` | Waits for the next interrupt and invokes `software_trap_handler()` with a pointer to the trap frame |
 
