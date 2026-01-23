@@ -30,11 +30,11 @@ control back periodically even if an application is fully CPU-bound.
 | `struct pcb *run_queue[3]` | run queue for each of 3 priority levels |
 | `uint64_t time_base` | contains the number of clock ticks per second |
 | `void intr_init(void)` | Initialization of CPU interrupt state |
-| `fdt_get_timebase(void)` | Retrieves how fast the CPU clock runs |
-| `sbi_set_time(when)` | Schedules the next timer interrupt |
+| `uint32_t fdt_get_timebase(void)` | Retrieves how fast the CPU clock runs |
+| `void sbi_set_time(when)` | Schedules the next timer interrupt |
 | `uint64_t mtime_get()` | return the number of clock ticks since boot |
-| `enter_user(app)` | Invokes application `app` with interrupts enabled |
-| `trap_wfi(block)` | Waits for the next interrupt and invokes `software_trap_handler()` with a pointer to the trap frame |
+| `void enter_user(app)` | Invokes application `app` with interrupts enabled |
+| `void trap_wfi(block)` | Waits for the next interrupt and invokes `software_trap_handler()` with a pointer to the trap frame |
 
 ## Discussion
 
