@@ -11,31 +11,41 @@ void screen_put(int col, int row, cell_t cell) {
     int fg = CELL_FG(cell) % 8, bg = CELL_BG(cell) % 8;
     char ch = CELL_CH(cell);
     if (fg == bg) { t = CELL_ASCII; ch = ' '; fg = (bg + 1) % 8; }
-    if (fg != cur_fg) { kprintf("\033[3%dm", fg); cur_fg = fg; }
-    if (bg != cur_bg) { kprintf("\033[4%dm", bg); cur_bg = bg; }
-    switch (t) {
-    case CELL_ASCII:
-        if (ch < 32 || ch > 126) ch = '?';
-        io_putchar(CELL_CH(ch));
-        break;
-    case CELL_BLOCK:
-        switch (CELL_CH(ch) & 0x3) {
-            case 0: io_putchar(' '); break;
-            case 1: kprintf("\xE2\x96\x80"); break;
-            case 2: kprintf("\xE2\x96\x84"); break;
-            case 3: kprintf("\xE2\x96\x88"); break;
+    // Workaround for MacOSX Terminal which doesn't draw the upper
+    // block all the way to the top.  We switch the blocks and the
+    // foreground and background colors.
+    if (t == CELL_BLOCK && (CELL_CH(ch) & 0x3) == 1) {
+        if (bg != cur_fg) { kprintf("\033[3%dm", bg); cur_fg = bg; }
+        if (fg != cur_bg) { kprintf("\033[4%dm", fg); cur_bg = fg; }
+        kprintf("\xE2\x96\x84");
+    }
+    else {
+        if (fg != cur_fg) { kprintf("\033[3%dm", fg); cur_fg = fg; }
+        if (bg != cur_bg) { kprintf("\033[4%dm", bg); cur_bg = bg; }
+        switch (t) {
+        case CELL_ASCII:
+            if (ch < 32 || ch > 126) ch = '?';
+            io_putchar(CELL_CH(ch));
+            break;
+        case CELL_BLOCK:
+            switch (CELL_CH(ch) & 0x3) {
+                case 0: io_putchar(' '); break;
+                case 1: kprintf("\xE2\x96\x80"); break; // unused
+                case 2: kprintf("\xE2\x96\x84"); break;
+                case 3: kprintf("\xE2\x96\x88"); break;
+            }
+            break;
+        case CELL_BRAILLE:
+            {
+                unsigned char mask = CELL_CH(ch);
+                unsigned char b2 = 0xA0 | (mask >> 6);     // top 2 bits
+                unsigned char b3 = 0x80 | (mask & 0x3F);   // lower 6 bits
+                io_putchar(0xE2); io_putchar(b2); io_putchar(b3);
+            }
+            break;
+        default:
+            io_putchar(CELL_CH('?'));
         }
-        break;
-    case CELL_BRAILLE:
-        {
-            unsigned char mask = CELL_CH(ch);
-            unsigned char b2 = 0xA0 | (mask >> 6);     // top 2 bits
-            unsigned char b3 = 0x80 | (mask & 0x3F);   // lower 6 bits
-            io_putchar(0xE2); io_putchar(b2); io_putchar(b3);
-        }
-        break;
-    default:
-        io_putchar(CELL_CH('?'));
     }
     cur_row = row; cur_col = col;
 }
