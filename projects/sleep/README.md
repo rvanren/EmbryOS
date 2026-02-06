@@ -46,7 +46,7 @@ Where:
 ### Requirements
 
 * The calling process must **not consume CPU time** while sleeping
-* The process must resume execution **as soon as possible** after the deadline expires
+* The process must resume execution soon after the deadline expires
 * The system call must be safe to invoke repeatedly and from any user process
 * A deadline in the past should return immediately
 
@@ -146,20 +146,18 @@ You should test your implementation by:
 
 ## Deliverables
 
-Your project directory must include:
+Implement your code within `chapter12`.  Submit a tar file of this
+directory, which you can create by running the following command in
+the `chapter12` directory: `make clean; tar cf ../sleep.tar .`
+Also submit `log/log_events.def` (we encourage you to add new log
+events).
 
-```
-sleep/
-├── README.md        # Description of your design and approach
-├── (kernel changes)
-└── (user-level updates)
-```
-
-Your README should briefly explain:
+In `chapter12`, include a file called "explanation.md" which explains:
 
 * How sleeping processes are represented
 * How wake-ups are triggered
 * Any scheduler design decisions you made
+* How you used AI, if at all
 
 ---
 
