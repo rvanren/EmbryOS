@@ -1,0 +1,10 @@
+void thread_init();
+void thread_create(void (*f)(void *), void *arg, unsigned int stack_size);
+void thread_yield();
+void thread_sleep(uint64_t ns);
+int thread_get();
+void thread_exit();
+struct sema *sema_create(unsigned int count);
+void sema_inc(struct sema *sema);
+void sema_dec(struct sema *sema);
+void sema_release(struct sema *sema);
