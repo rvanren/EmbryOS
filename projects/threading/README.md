@@ -289,4 +289,4 @@ This project implements a **complete user-level runtime system**:
 * Blocking I/O
 * Synchronization primitives
 
-Correctness depends on careful scheduling, clean separation of concerns, and precise handling of blocking conditions. This is one of the most conceptually important projects in EmbryOS—design it carefully before you code.
+Correctness depends on careful scheduling, clean separation of concerns, and precise handling of blocking conditions. This is one of the most conceptually important projects in EmbryOS.  Design it carefully before you code.
