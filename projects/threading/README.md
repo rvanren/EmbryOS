@@ -99,6 +99,7 @@ extern void ctx_start(void **save_sp, void *new_sp);
 thread_create(f, arg, stack_size);
 ```
 
+* Calls `f(arg)` as a thread
 * Allocates a stack of at least `stack_size` bytes, aligned at 16 bytes)
     (using `malloc`, which already aligns at 16 bytes)
 
@@ -114,6 +115,7 @@ void thread_exit();
 * Eventually frees associated resources (stack, control block)
 * Switches to another runnable thread
 * Recall that a thread cannot clean itself up (with no stack, the code would not be able to call `ctx_switch`)
+* A thread that returns from its main function should call this function implicitly
 
 ---
 
@@ -165,19 +167,6 @@ There is **no non-blocking variant**.
   * Deliver the input event to that thread
 * Input events must **not be lost**
 
-## Scheduler Requirements
-
-Your scheduler must support blocking for **four distinct reasons**:
-
-1. Runnable
-2. Sleeping (`thread_sleep`)
-3. Waiting for input (`thread_get`)
-4. Waiting on a semaphore (`sema_dec`)
-
-Blocked threads must never appear in the runnable queue until their blocking condition is resolved.
-
----
-
 ## Semaphores
 
 You must implement **counting semaphores**.
@@ -213,6 +202,19 @@ void sema_release(struct sema *sema);
 * `sema_release()`:
 
   * Frees the semaphore
+
+---
+
+## Scheduler Requirements
+
+Your scheduler must support blocking for **four distinct reasons**:
+
+1. Runnable
+2. Sleeping (`thread_sleep`)
+3. Waiting for input (`thread_get`)
+4. Waiting on a semaphore (`sema_dec`)
+
+Blocked threads must never appear in the runnable queue until their blocking condition is resolved.
 
 ---
 
