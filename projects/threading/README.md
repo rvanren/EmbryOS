@@ -25,7 +25,7 @@ In addition to the library itself, you will build an **animated application** th
   * calls `thread_sleep()`
   * blocks in `thread_get()`
   * blocks in `sema_dec()`
-  * exits
+  * exits (i.e., calls `thread_exit()` or returns from its main function)
 * Context switches are explicit and use provided assembly helpers
 
 ---
