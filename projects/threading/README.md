@@ -240,22 +240,34 @@ The demo must clearly show that:
 
 ---
 
+## Files
+
+This project directory contains the following two files:
+
+* `thread.h`: thread interface
+* `t_pong.c`: multi-threaded version of the `pong` game
+
 ## Deliverables
 
-```
-threads/
-├── README.md        # Design explanation
-├── thread.c         # Threading implementation
-├── thread.h         # Interface
-└── (optional files)
-```
+Implement your code within `chapter12/apps`.
+There should be at least the following three files:
 
-Your README must briefly explain:
+* `thread.h`: thread interface (which you can just copy from this directory)
+* `thread.c`: thread interface implementation
+* `game.c`: your game
+
+Submit a tar file of this
+directory, which you can create by running the following command in
+the `chapter12/apps` directory: `make clean; tar cf ../threading.tar .`
+
+In `chapter12/apps`, include a file called "explanation.md" which explains:
 
 * Thread control block design
 * Run-queue organization
 * Input multiplexing approach
 * Semaphore blocking and wake-up logic
+* Instructions on how to play the game
+* How you used AI, if at all
 
 ---
 
