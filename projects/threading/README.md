@@ -247,7 +247,7 @@ The demo must clearly show that:
 This project directory contains the following two files:
 
 * `thread.h`: thread interface
-* `t_pong.c`: multi-threaded version of the `pong` game
+* `t_pong.c`: multi-threaded version of the `pong` game as an example
 
 ## Deliverables
 
