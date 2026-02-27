@@ -34,7 +34,7 @@ the UART.
 | `io_received(c)` | Invoked when somebody types `c` |
 | `io_get(self, row, col, cf, cu)` | Shows cursor and waits for the next input character |
 | `io_exit(self)` | Removes focus from a dead process |
-| `user_get(row, col, cf, cu)` | User process system call to invoke `io_get()` |
+| `user_get(block)` | User process system call to invoke `io_get()` (blocking or non-blocking) |
 
 ## Discussion
 
@@ -94,12 +94,12 @@ which uses non-blocking I/O to read input. The focus switched from the
 
 ## 💬 Ask Your LLM
 
-- How does `io_get()` block a process without consuming CPU time?
+- How does `io_get(1)` block a process without consuming CPU time?
 - What ensures that characters are delivered to exactly one process?
 - How might this design be generalized to support multiple input devices?
 
 ## Exercises
 
-- Add a `user_timed_get(row, col, fc, fu, time)` system call, which is like
-  `user_get` but stops waiting at the given time.
-- Write an interactive game using `user_timed_get()`.
+- Change the `user_get(x)` system call, so that `x` represents a deadline
+  (in nanoseconds since boot time).
+- Write an interactive game using `user_get()`.
