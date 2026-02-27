@@ -1,7 +1,7 @@
 #include "embryos.h"
 
 // io_focus: the process that has the input focus, if any
-// io_wait:  circular queue of processes that do not have the focus but want input
+// io_wait:  circular queue of processes that want input
 struct pcb *io_wait, *io_focus;
 
 // Process 'self' wants input
