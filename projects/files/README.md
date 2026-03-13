@@ -185,22 +185,19 @@ Your implementation must handle:
 
 ## Deliverables
 
-Your project directory must include:
+Implement your code within `chapter12`.  Submit a tar file of this
+directory, which you can create by running the following command in
+the `chapter12` directory: `make clean; tar cf ../files.tar .`
+Also submit `log/log_events.def`, `log/log_defs.h`, and `log/logdump.h` if you added log events (we encourage you to do so).
 
-```
-ufs/
-├── README.md        # Design explanation
-├── bd_ufs.c         # File system implementation
-├── bd_ufs.h
-```
-
-Your README must describe:
+In `chapter12`, include a file called "explanation.md" which describes:
 
 * Superblock layout
 * i-Node structure
 * Block allocation strategy
 * Free-list organization
 * How holes are represented and handled
+* How you used AI, if at all
 
 ---
 
