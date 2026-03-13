@@ -188,7 +188,7 @@ Your implementation must handle:
 Implement your code within `chapter12`.  Submit a tar file of this
 directory, which you can create by running the following command in
 the `chapter12` directory: `make clean; tar cf ../files.tar .`
-Also submit `log/log_events.def`, `log/log_defs.h`, and `log/logdump.h` if you added log events (we encourage you to do so).
+Also submit `log/log_events.def`, `log/log_defs.h`, and `log/logdump.c` if you added log events (we encourage you to do so).
 
 In `chapter12`, include a file called "explanation.md" which describes:
 
