@@ -12,17 +12,17 @@ bits, but only 9 bits in the 64-bit architecture.  However,
 the 64-bit architecture has more levels and can support larger
 address spaces.  Out of the box, EmbryOS only supports 1 page
 table level.  In this project, you will extend it to 2 or more.
-The new virtual address space should be at least a Gigabyte.
+The new virtual address space should be at least 256 MB.
 Thus, since `VM_START` is defined to be 0x70000000, `VM_END`
 should be at least 0x80000000.
 
-When successful, you will be able to compile the 64-bit version
+When successful, you should be able to compile the 64-bit version
 of the selfie compiler with itself.  The 32-bit version already
 can, but 2 MB is not enough for the 64-bit version to compile itself.
 For example, selfie can compile `echo.c` (`selfie -c echo.c -o echo`),
 but when you try to compile the selfie compiler with itself
 (`selfie -c selfie64.c -o selfie64`) the compiler will run out of
-memory.
+memory with only 2 MB of virtual memory.
 
 ---
 
