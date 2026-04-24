@@ -43,11 +43,16 @@ void vm_init(struct hart *hart) {
 
     // First map everything 1-1
     for (int i = 0; i < PTE_COUNT; i++)
-        root_pt[i] = PT_ENTRY(i * 0x40000000ULL, RWX|PTE(G));
+        root_pt[i] = PT_ENTRY(i * (0x1ULL << 30), RWX|PTE(G));
 
     // Update the entry of VM_START
     root_pt[VM_START >> 30] =           // 12 + 9 + 9
         PT_ENTRY((uword_t) hart->parent_page_table, PTE(V));
+
+    // Map VM_START "huge page" 1-1 as well for now
+    uword_t base = (VM_START >> 30) << 30;
+    for (int i = 0; i < PTE_COUNT; i++)
+        hart->parent_page_table[i] = PT_ENTRY(base + i * (0x1ULL << 21), RWX|PTE(G));
 
     if (hart->idx == 0) kprintf("Enabling virtual memory now\n");
     vm_enable(((uword_t) 1 << (BPW - 1)) | (((uword_t) root_pt) >> 12));
