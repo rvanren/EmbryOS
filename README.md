@@ -25,6 +25,7 @@ The repository is organized into incremental **chapters**, each representing a r
 - Each chapter adds a small number of source files and modifies existing ones.
 - Every chapter is self-contained and boots on its own.
 - Scripts such as `ediff.py` let you view differences between chapters.
+- The `projects` folder contains a variety of student projects.
 
 ## The EmbryOS Philosophy
 
