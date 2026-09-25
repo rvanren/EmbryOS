@@ -17,7 +17,7 @@ enum proc_state { RUNNABLE, RUNNING, KBD_WAIT, ZOMBIE };
 
 // Process Control Block: contains information for a particular process
 struct pcb {
-    struct pcb *next, *io_next;     // queue management
+    struct pcb *next;               // queue management
     int executable;                 // file containing executable
     struct rect area;               // allowed screen region
     int16_t kbd_buf[KBD_BUF_SIZE];  // circular keyboard buffer
@@ -27,7 +27,7 @@ struct pcb {
     char *args; int size;           // arguments buffer
     void *sp;             // kernel sp saved on context switch
     enum proc_state state;
-    uint64_t wait_start;
+    uint64_t wait_start, last_focus;
     struct hart *hart;    // the hart the process is running on
 };
 

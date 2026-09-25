@@ -8,6 +8,9 @@ void sched_init(struct pcb *pcb);
 // Put the given process back on the run queue
 void sched_resume(struct pcb *pcb);
 
+// See if "next" is better than "best_so_far"
+struct pcb *sched_find(int (*cmp)(struct pcb *best_so_far, struct pcb *next));
+
 // Find a new process to run.
 void sched_block(struct pcb *old, enum proc_state state);
 
