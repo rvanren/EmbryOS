@@ -2,14 +2,14 @@
 
 #include "process.h"
 
-// Function for a live process to clean up dead ones.
-void reap_zombies(void);
+// Add an idle thread.
+void sched_init(struct pcb *pcb);
 
 // Put the given process back on the run queue
 void sched_resume(struct pcb *pcb);
 
 // Find a new process to run.
-void sched_block(struct pcb *old);
+void sched_block(struct pcb *old, enum proc_state state);
 
 // The current process voluntarily yields to another. If its priority was 0,
 // it is moved to run_queue[1].

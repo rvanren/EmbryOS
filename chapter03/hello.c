@@ -28,7 +28,7 @@ void embryos_main(uword_t hartid, void *fdt) {
     // Create the initial process
     hart.id  = hartid;
     struct pcb *self = proc_create(&hart, -1, (struct rect){ 0, 0, 80, 24 }, 0, 0);
-    sched_set_self(self);
+    sched_init(self);
     L2(L_BASE, L_HART_INIT, hartid, 0);
 
     screen_fill(0, 0, SCREEN_COLS, SCREEN_ROWS,

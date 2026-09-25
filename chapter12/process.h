@@ -14,6 +14,8 @@ struct rect {
     int wd, ht;     // width and height
 };
 
+enum proc_state { RUNNABLE, RUNNING, KBD_WAIT, ZOMBIE };
+
 // Process Control Block: contains information for a particular process
 struct pcb {
     struct pcb *next, *io_next;     // queue management
@@ -27,6 +29,8 @@ struct pcb {
     void *sp;             // kernel sp saved on context switch
     char *base;           // page table
     struct selfie selfie; // selfie process state
+    enum proc_state state;
+    uint64_t wait_start;
     struct hart *hart;    // the hart the process is running on
 };
 
@@ -36,13 +40,6 @@ struct pcb *proc_create(struct hart *hart, int file, struct rect area, void *arg
 // Allows a process to write to its rectangle.  (row, col): position.
 //  cell: the character to write (incl. fg/bg color)
 void proc_put(struct pcb *pcb, int row, int col, cell_t cell);
-
-// Put process pcb on the circular queue pointed to by q.  It make pcb the
-// 'current' process on q, moving the current process to the next slot.
-void proc_enqueue(struct pcb **q, struct pcb *pcb);
-
-// Remove and return the current process from the given circular queue q.
-struct pcb *proc_dequeue(struct pcb **q);
 
 // Check the legality of the given user memory region
 void proc_check_legal(struct pcb *self, uintptr_t start, int size);

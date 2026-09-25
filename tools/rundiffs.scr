@@ -7,7 +7,7 @@ do
 
     echo
     echo '==============='
-    cat "$cur/README"
+    head -1 "$cur/README.md"
     tools/ediff.py "$prev" "$cur"
 done
 

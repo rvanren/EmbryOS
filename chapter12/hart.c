@@ -20,7 +20,7 @@ void timer_handler(struct trap_frame *tf) {
 }
 
 void hart_init(uword_t hartid, struct pcb *self) {
-    sched_set_self(self);
+    sched_init(self);
     L2(L_BASE, L_HART_INIT, hartid, hart_idx);
     harts[hart_idx].idx = hart_idx;
     harts[hart_idx].id  = hartid;

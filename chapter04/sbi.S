@@ -49,22 +49,3 @@ mtime_get:
     csrr    a0, time         # returns full 64-bit time
     ret
 #endif
-
-
-# sword_t sbi_hart_start(uword_t hartid,
-#                        uword_t start_addr,
-#                        uword_t opaque)
-#   a0 = hartid
-#   a1 = start address
-#   a2 = opaque
-#   a3 = 0
-#   a6 = 0 (function ID)
-#   a7 = "HSM"
-# Returns value in a0.
-.globl sbi_hart_start
-sbi_hart_start:
-    mv      a3, zero
-    li      a6, 0
-    li      a7, 0x48534D         # "HSM"
-    ecall
-    ret

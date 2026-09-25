@@ -7,3 +7,7 @@
 
 // Output character ch to the primary UART
 extern void sbi_putchar(int ch);
+
+// Not technically part of the SBI, this function returns the current
+// "machine time" in ticks.
+extern uint64_t mtime_get(void);

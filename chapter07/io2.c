@@ -18,7 +18,7 @@ int io_get(struct pcb *self, int block) {
         }
         if (!block) return USER_GET_NO_INPUT;
         self->kbd_waiting = 1;
-        sched_block(self);
+        sched_block(self, KBD_WAIT);
     }
 
     // Take character from the circular buffer.
