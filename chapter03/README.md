@@ -12,10 +12,9 @@ of multiple processes running at the same time.
 - Use the Flattened Device Tree (FDT) to discover the top of physical memory at boot time.
 - Introduce a simple kernel memory allocator based on fixed-size frames.
 - Understand how the kernel represents, creates, and switches between multiple processes.
-- Learn how cooperative multitasking is implemented through context switching and a run queue.
+- Learn how cooperative multitasking is implemented through context switching.
 - Introduce the process control block (pcb) as the unit of execution and scheduling.
 - See how the RISC–V tp register always points to the pcb of the currently running process, allowing constant–time access to per–process data.
-- Study how the scheduler maintains two linked structures: a circular run_queue of runnable processes and a zombies list of terminated ones.
 - Learn why a process cannot clean itself up and how the scheduler reclaims its resources.
 
 ## New or Modified Modules
@@ -41,21 +40,20 @@ of multiple processes running at the same time.
 | `struct hart hart` | Info about the RISC-V core |
 | `union free_frame frames[]` | Start of the frame region, defined by the linker script |
 | `union free_frame *free_list` | Free list of memory frames |
-| `struct pcb *run_queue` | A circular queue of all runnable processes except the one currently executing |
+| `struct pcb *proc_table` | A linked list of all processes.
 | `struct pcb *zombies` | A linked list of processes that have exited but whose memory has not yet been reclaimed |
 | `void (*apps[])()` | An array of applications |
 | `void frame_init(void)` | Sets up the free frame list |
 | `void *frame_alloc(void)` | Allocates a frame and returns its address |
 | `void frame_release(void *frame)` | Returns a frame to the free list |
 | `proc_create(hart, executable, area, args, size)` | Allocates a Process Control Block for a new process |
-| `proc_enqueue()` / `proc_dequeue()` | Manages circular queues of processes |
 | `proc_put(pcb, row, col, cell)` | Puts cell in (row, col) in the area of pcb |
 | `proc_release(pcb)` | Releases the resources of the given process |
 | `sched_self()` | Returns the pointer to the current process, stored in tp |
 | `sched_set_self(pcb)` | Sets tp to pcb, updating the current process |
 | `void sched_run(executable, area, args, size)` | Starts a new process |
-| `sched_block()` | Switches to the next process on the run queue |
-| `sched_yield()` | Moves the current process to the back of the run queue and switches to the next |
+| `sched_block()` | Switches to the next runnable process |
+| `sched_yield()` | Like sched_block, but keeps process runnable |
 | `sched_exit()` | Marks the current process as a zombie and yields to another process |
 | `sched_idle()` | Idle loop of a hart |
 | `exec_user()` | Entry point of a new process |
@@ -71,9 +69,7 @@ First is the *frame*, a unit
 of memory (4096 bytes) for allocation and deallocation.  Second is the *process*.
 The kernel maintains a *Process Control Block* (PCB) for each process.
 The register state of a running process is called its *context*.  Third is
-the *scheduler*, managing the currently running process, a *run queue* of
-processes that are waiting to run, and a *zombie queue* of processes that
-have terminated and must be cleaned up.
+the *scheduler*, managing the currently running process.
 
 Physical memory starts right after the kernel at `frames`
 (defined in file `platforms/qemu/kernel.ld`).
@@ -135,7 +131,6 @@ in the log because they got overwritten by later events.
 - What information does the Flattened Device Tree provide to the kernel?
 - How does the RISC–V tp register let kernel code find the current process?
 - What would happen if a process tried to free its own stack before calling sched_exit()?
-- How does the circular run queue ensure fairness among runnable processes?
 
 ## Exercises
 
