@@ -2,7 +2,7 @@
 
 #include "process.h"
 
-// Add an idle thread.
+// Add a thread to the process table and make it current.
 void sched_init(struct pcb *pcb);
 
 // Put the given process back on the run queue

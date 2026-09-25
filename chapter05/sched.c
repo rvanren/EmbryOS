@@ -52,10 +52,7 @@ void sched_run(int executable, struct rect area, void *args, int size) {
     old->state = RUNNABLE;
     old->wait_start = mtime_get();
     struct pcb *new = proc_create(old->hart, executable, area, args, size);
-    new->next = proc_table;
-    proc_table = new;
-    new->state = RUNNING;
-    sched_set_self(new);
+    sched_init(new);
     L4(L_NORM, L_CTX_START, (uintptr_t) old, (uintptr_t) new, new->hart->id, executable);
     ctx_start(&old->sp, (char *) new + PAGE_SIZE);
     reap_zombies();
@@ -87,6 +84,7 @@ void sched_idle() {
 
 void sched_init(struct pcb *pcb) {
     sched_set_self(pcb);
+    pcb->state = RUNNING;
     pcb->next = proc_table;
     proc_table = pcb;
 }
