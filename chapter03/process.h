@@ -16,14 +16,14 @@ enum proc_state { RUNNABLE, RUNNING, ZOMBIE };
 
 // Process Control Block: contains information for a particular process
 struct pcb {
-    struct pcb *next;     // queue management
-    int executable;       // file containing executable
-    struct rect area;     // allowed screen region
-    char *args; int size; // arguments buffer
-    void *sp;             // kernel sp saved on context switch
-    enum proc_state state;
-    uint64_t wait_start;
-    struct hart *hart;    // the hart the process is running on
+    struct pcb *next;       // process table management
+    int executable;         // file containing executable
+    struct rect area;       // allowed screen region
+    char *args; int size;   // arguments buffer
+    void *sp;               // kernel sp saved on context switch
+    enum proc_state state;  // scheduling state
+    uint64_t wait_start;    // scheduling priority
+    struct hart *hart;      // the hart the process is running on
 };
 
 // Allocate a new PCB

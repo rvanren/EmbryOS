@@ -1,20 +1,19 @@
 #include "embryos.h"
 
-// io_focus: the process that has the input focus, if any
-// io_wait:  circular queue of processes that want input
-struct pcb *io_wait, *io_focus;
+static struct pcb *io_focus;   // the process that has the input focus, if any
 
 // Process 'self' wants input
 int io_get(struct pcb *self, int block) {
     L3(block ? L_NORM : L_FREQ, L_IO_GET, block, self->kbd_size, (uintptr_t) io_focus);
     while (self->kbd_size == 0) {       // block until there's input
         if (!self->kbd_warm) {  // first time: always gets the focus
-            if (io_wait == 0) self->io_next = self;
-            else { self->io_next = io_wait->io_next; io_wait->io_next = self; }
-            io_wait = self;
-            if (io_focus != 0) io_add(io_focus, USER_GET_LOST_FOCUS);
+            if (io_focus != 0) {
+                io_add(io_focus, USER_GET_LOST_FOCUS);
+                io_focus->last_focus = mtime_get();
+            }
             io_focus = self;
             self->kbd_warm = 1;
+            self->last_focus = mtime_get() + 1;
         }
         if (!block) return USER_GET_NO_INPUT;
         self->kbd_waiting = 1;
@@ -42,14 +41,25 @@ void io_add(struct pcb *pcb, int c) {
     }
 }
 
+static int io_cmp(struct pcb *best, struct pcb *pcb) {
+    if (!pcb->kbd_warm) return -1;
+    if (best == 0) return 1;
+    return best->last_focus < pcb->last_focus ? -1 : 1;
+}
+
 static void io_tab(void) {  // somebody typed TAB: switch focus
-    if (io_wait == 0) {
+    struct pcb *pcb = sched_find(io_cmp);
+    if (pcb == 0) {
         io_putchar(7 /* beep */);  // no one can get focus
         return;
     }
-    if (io_focus != 0) io_add(io_focus, USER_GET_LOST_FOCUS);
-    io_focus = io_focus == 0 ? io_wait : io_focus->io_next;
-    io_add(io_focus, USER_GET_GOT_FOCUS);
+    if (io_focus != 0) {
+        io_add(io_focus, USER_GET_LOST_FOCUS);
+        io_focus->last_focus = mtime_get();
+    }
+    io_focus = pcb;
+    io_focus->last_focus = mtime_get() + 1;
+    io_add(pcb, USER_GET_GOT_FOCUS);
     return;
 }
 
@@ -69,11 +79,4 @@ void io_received(char c) {
 void io_exit(struct pcb *self) {
     if (!self->kbd_warm) return;
     if (self == io_focus) io_focus = 0;
-    if (self->io_next == self) io_wait = NULL;
-    else {
-        if (self == io_wait) io_wait = self->io_next;
-        struct pcb *prev = io_wait;
-        while (prev->io_next != self) prev = prev->io_next;
-        prev->io_next = self->io_next;
-    }
 }
