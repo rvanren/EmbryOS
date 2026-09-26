@@ -8,7 +8,8 @@ The goal of this chapter is to set up the toolchain, understand how the system b
 
 By the end of this chapter, you will understand:
 
-- How to build EmbryOS using `riscv-none-elf-gcc` or `qemu-system-riscv32`
+- How to run software on `bare metal'
+- How to use a cross-compiler to build EmbryOS for RISC-V
 - How a linker script defines memory layout on a bare-metal system
 - How assembly startup code initializes memory and sets up the stack
 - How to print characters
